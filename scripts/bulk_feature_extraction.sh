@@ -27,7 +27,7 @@ do
   echo "Processing $f file..."
   echo "Storing output in $OUTPUT_TARGET$filename"
   mkdir "$OUTPUT_TARGET$filename"
-  echo "$f  0" > /home/dariog/repos/tiramisu/tmp/file_list.txt 
+  echo "$f  0" > /home/dariog/repos/tiramisu/file_list.txt 
   ( cd /home/dariog/repos/caffe ; /home/dariog/repos/caffe/build/tools/extract_features.bin models/bvlc_reference_caffenet/bvlc_reference_caffenet.caffemodel /home/dariog/repos/caffe/examples/feature_extraction/imagenet_val.prototxt pool2,conv3,conv4 $OUTPUT_TARGET/$filename/pool2,$OUTPUT_TARGET/$filename/conv3,$OUTPUT_TARGET/$filename/conv4 1 lmdb lmdb lmdb )
   mv $OUTPUT_TARGET$filename/pool2/output_0_0 $OUTPUT_TARGET$filename/${filename}_pool2
   mv $OUTPUT_TARGET$filename/conv3/output_0_1 $OUTPUT_TARGET$filename/${filename}_conv3
@@ -36,4 +36,5 @@ do
   rm -fr $OUTPUT_TARGET$filename/pool2
   rm -fr $OUTPUT_TARGET$filename/conv3
   rm -fr $OUTPUT_TARGET/$filename/conv4
+  rm -fr /home/dariog/repos/tiramisu/file_list.txt
 done
