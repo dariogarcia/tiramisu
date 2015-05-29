@@ -28,6 +28,7 @@ void Image::addActivations(string path, string layerName){
       featActivation.setValue(value);
       featActivation.setLayerId(layerName);
       featActivation.setFeatureId(key);
+      layerActivations[key] = featActivation;
     }
     infile.close();
     activations[layerName] = layerActivations;

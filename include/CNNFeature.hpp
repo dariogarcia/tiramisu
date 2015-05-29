@@ -16,6 +16,8 @@ class CNNFeature {
     inline float getDev() {return deviation; }
     inline vector<float> getValues() {return values; }
     inline void setId(int i) { id = i;}
+    inline void setMean(float m) {mean = m; }
+    inline void setDev(float d) {deviation = d; }
     inline void addValue(float val) {values.push_back(val);} 
     void computeStatistics(vector<Image> im);
 

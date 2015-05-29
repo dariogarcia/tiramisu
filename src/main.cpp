@@ -10,6 +10,64 @@ using std::map;
 using std::strcmp;
 using std::pair;
 
+
+//Method to explore and print contents of a set of images
+//Intended for validation of loading process
+void exploreImages(map<string,Image> images){
+  int imageCounter = 0;
+  for(map<string,Image>::iterator it = images.begin() ; it != images.end(); it++){
+    Image currentImage = it->second;
+    printf("-Image num: '%u', name '%s', path '%s', has '%lu' activations \n",
+      imageCounter, currentImage.getName().c_str(),currentImage.getPath().c_str(), 
+      currentImage.getActivations().size());
+    int activationCounter = 0;
+    for(map<string,map<int,Activation> >::iterator it2 = currentImage.getActivations().begin(); 
+      it2!=currentImage.getActivations().end() ; it2++){
+      map<int,Activation> currentActivation = it2->second;
+      printf("--Activation num: '%u', name '%s', has '%lu' values \n",
+        activationCounter, it2->first.c_str(), currentActivation.size());
+      int valueCounter = 0;
+      for(map<int,Activation>::iterator it3 = currentActivation.begin(); it3!=currentActivation.end();
+        it3++){ 
+        printf("---Value num: '%u', is '%f' for layer '%s' and feature '%u'\n",
+          valueCounter,it3->second.getValue(),it3->second.getCNNLayerId().c_str(),it3->second.getFeatureId());
+        valueCounter++;
+      }
+      activationCounter++;
+    }
+    imageCounter++;
+  }
+
+}
+
+//Method to explore and print contents of a set of CNNLayers
+//Intended for validation of loading process
+void exploreCNNLayers(map<string,CNNLayer> layers){
+  int layerCounter = 0;
+  for(map<string,CNNLayer>::iterator it = layers.begin(); it!=layers.end(); it++){
+    CNNLayer currentLayer = it->second;
+    map<int,CNNFeature> currentFeatures = currentLayer.getFeatures();
+    printf("-Layer num: '%u', name '%s', has '%lu' activations \n",
+      layerCounter, currentLayer.getName().c_str(), currentFeatures.size());
+    int featureCounter = 0;
+    for(map<int,CNNFeature>::iterator it2 = currentFeatures.begin(); 
+      it2!=currentFeatures.end(); it2++){
+      CNNFeature currentFeature = it2->second;
+      printf("--Feature num: '%u', with Id '%u':'%u', has mean '%f', dev '%f' and '%lu' values\n",
+        featureCounter,currentFeature.getId(),it2->first,currentFeature.getMean(),
+        currentFeature.getDev(),currentFeature.getValues().size());
+      featureCounter++;
+      vector<float> values = currentFeature.getValues();
+      int valueCounter = 0;
+      for(vector<float>::iterator it3 = values.begin(); it3!=values.end(); it3++){
+        printf("---Value num: '%u' is '%f'\n",valueCounter,*it3);
+        valueCounter++;
+      }
+    }
+    layerCounter++;
+  }  
+}
+
 int main(int argc, char* argv[]){
   struct dirent *pDirent;
   DIR *pDir;
@@ -46,8 +104,6 @@ int main(int argc, char* argv[]){
           .substr(string(pDirent2->d_name).find_last_of("_")+1);
         string imageName = string(pDirent2->d_name)
           .substr(0,string(pDirent2->d_name).find_last_of("_"));
-        printf("layer name: '%s' image name: '%s'\n", 
-          layerName.c_str(),imageName.c_str());
         //If new layer, set name and store
         CNNLayer currentLayer;
         if(layers.find(layerName)==layers.end()){
@@ -56,23 +112,23 @@ int main(int argc, char* argv[]){
         }
         currentLayer = layers[layerName];
         currentLayer.addFeatures(fullpath);
+        layers[layerName] = currentLayer;
         //If new image, set name and path and store
         Image currentImage;
         if(images.find(imageName)==images.end()) {
           currentImage.setName(imageName);
-          currentImage.setPath(fullpath);
+          currentImage.setPath(argv[i]+string(pDirent->d_name));
           images.insert(pair<string,Image>(imageName,currentImage));
         }
         currentImage = images[imageName];
         currentImage.addActivations(fullpath,layerName); 
-        //ImageLayersData current = images.find(name)->second;
-        //current.loadLayersFromFile(fullpath,type);
-        //images[name] = current;
+        images[imageName] = currentImage;
       }
       closedir(pDir2);
     }
     closedir (pDir);
     printf ("Total loaded images: '%lu'\n", images.size());
   }
-
 }
+
+

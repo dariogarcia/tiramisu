@@ -21,6 +21,10 @@ void CNNLayer::addFeatures(string path){
       float value = stof(strs[0]);
       CNNFeature feat = features[key];
       feat.setId(key);
+      if(feat.getValues().size()==0){
+        feat.setMean(-1);
+        feat.setDev(-1);
+      }
       feat.addValue(value);
       features[key]=feat;
     }
