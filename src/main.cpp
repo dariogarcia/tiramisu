@@ -13,9 +13,9 @@ using std::pair;
 
 //Method to explore and print contents of a set of images
 //Intended for validation of loading process
-void exploreImages(map<string,Image> images){
+void exploreImages(const map<string,Image> &images){
   int imageCounter = 0;
-  for(map<string,Image>::iterator it = images.begin() ; it != images.end(); it++){
+  for(map<string,Image>::const_iterator it = images.begin() ; it != images.end(); it++){
     Image currentImage = it->second;
     printf("-Image num: '%u', name '%s', path '%s', has '%lu' activations \n",
       imageCounter, currentImage.getName().c_str(),currentImage.getPath().c_str(), 
@@ -37,14 +37,13 @@ void exploreImages(map<string,Image> images){
     }
     imageCounter++;
   }
-
 }
 
 //Method to explore and print contents of a set of CNNLayers
 //Intended for validation of loading process
-void exploreCNNLayers(map<string,CNNLayer> layers){
+void exploreCNNLayers(const map<string,CNNLayer> &layers){
   int layerCounter = 0;
-  for(map<string,CNNLayer>::iterator it = layers.begin(); it!=layers.end(); it++){
+  for(map<string,CNNLayer>::const_iterator it = layers.begin(); it!=layers.end(); it++){
     CNNLayer currentLayer = it->second;
     map<int,CNNFeature> currentFeatures = currentLayer.getFeatures();
     printf("-Layer num: '%u', name '%s', has '%lu' activations \n",
@@ -53,9 +52,9 @@ void exploreCNNLayers(map<string,CNNLayer> layers){
     for(map<int,CNNFeature>::iterator it2 = currentFeatures.begin(); 
       it2!=currentFeatures.end(); it2++){
       CNNFeature currentFeature = it2->second;
-      printf("--Feature num: '%u', with Id '%u':'%u', has mean '%f', dev '%f' and '%lu' values\n",
+      printf("--Feature num: '%u', with Id '%u':'%u', has mean '%f', stdDev '%f', absDev '%f' and '%lu' values\n",
         featureCounter,currentFeature.getId(),it2->first,currentFeature.getMean(),
-        currentFeature.getDev(),currentFeature.getValues().size());
+        currentFeature.getStdDev(),currentFeature.getAbsDev(),currentFeature.getValues().size());
       featureCounter++;
       vector<float> values = currentFeature.getValues();
       int valueCounter = 0;
@@ -66,6 +65,13 @@ void exploreCNNLayers(map<string,CNNLayer> layers){
     }
     layerCounter++;
   }  
+}
+
+
+void computeLayersStatistics(map<string,CNNLayer> &layers){
+  for(map<string,CNNLayer>::iterator it = layers.begin();it!=layers.end();it++){
+    it->second.computeFeatureStatistics();
+  }
 }
 
 int main(int argc, char* argv[]){
@@ -129,6 +135,10 @@ int main(int argc, char* argv[]){
     closedir (pDir);
     printf ("Total loaded images: '%lu'\n", images.size());
   }
+
+  exploreCNNLayers(layers);
+  computeLayersStatistics(layers);
+  exploreCNNLayers(layers);
 }
 
 

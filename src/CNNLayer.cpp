@@ -23,7 +23,8 @@ void CNNLayer::addFeatures(string path){
       feat.setId(key);
       if(feat.getValues().size()==0){
         feat.setMean(-1);
-        feat.setDev(-1);
+        feat.setStdDev(-1);
+        feat.setAbsDev(-1);
       }
       feat.addValue(value);
       features[key]=feat;
@@ -31,5 +32,12 @@ void CNNLayer::addFeatures(string path){
     infile.close();
   }
   else printf("CNNLayer::addFeatures:: Unable to open file\n");
+}
 
+void CNNLayer::computeFeatureStatistics(){
+  for(map<int,CNNFeature>::iterator it=features.begin();it!=features.end(); it++){
+    CNNFeature updatedFeat = it->second;
+    updatedFeat.computeStatistics();
+    features[updatedFeat.getId()] = updatedFeat;
+  }
 }

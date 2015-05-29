@@ -13,18 +13,24 @@ class CNNFeature {
   public:
     inline int getId() {return id;}
     inline float getMean() {return mean; }
-    inline float getDev() {return deviation; }
+    inline float getStdDev() {return standardDev; }
+    inline float getAbsDev() {return absoluteDev; }
     inline vector<float> getValues() {return values; }
     inline void setId(int i) { id = i;}
     inline void setMean(float m) {mean = m; }
-    inline void setDev(float d) {deviation = d; }
+    inline void setStdDev(float d) {standardDev = d; }
+    inline void setAbsDev(float d) {absoluteDev = d; }
     inline void addValue(float val) {values.push_back(val);} 
-    void computeStatistics(vector<Image> im);
+    void computeMean();
+    void computeAbsDev();
+    void computeStdDev();
+    void computeStatistics();
 
   protected:
     int id;
     float mean;
-    float deviation;
+    float standardDev;
+    float absoluteDev;
     vector<float> values;
 }; //  CNNFeature
 
