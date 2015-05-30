@@ -3,11 +3,14 @@
 CXX = g++
 CFLAGS = -std=c++0x -O2 -c
 LFLAGS = -std=c++0x -O2 
-OBJS = CNNLayer.o CNNFeature.o Image.o Activation.o
-OBJS_PATH = build/CNNLayer.o build/CNNFeature.o build/Image.o build/Activation.o
+OBJS = CNNLayer.o CNNFeature.o Image.o Activation.o IO.o
+OBJS_PATH = build/CNNLayer.o build/CNNFeature.o build/Image.o build/Activation.o build/IO.o
 
 
 ALL: main
+
+IO.o: src/IO.cpp include/IO.hpp
+	$(CXX) $(CFLAGS) $< -o build/$@
 
 CNNLayer.o: src/CNNLayer.cpp include/CNNLayer.hpp
 	$(CXX) $(CFLAGS) $< -o build/$@
