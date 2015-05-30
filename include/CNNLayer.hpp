@@ -15,8 +15,9 @@ class CNNLayer {
     inline map<int,CNNFeature> getFeatures() {return features; }
     inline void setName(string n) { name = n;}
     inline void setFeatures(map<int,CNNFeature> fs) { features = fs;}
-    void computeFeatureStatistics();
     void addFeatures(const string path);
+    void exploreCNNLayer();
+    void computeLayerStatistics();
 
   protected:
     string name;

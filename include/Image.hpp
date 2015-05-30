@@ -18,6 +18,7 @@ class Image {
     inline void setPath(string p) {path=p;}
     inline void setActivations(map<string,map<int,Activation> > a) {activations=a;}
     void addActivations(const string path, const string layerName);
+    void exploreImage();
 
   protected:
     string name;
