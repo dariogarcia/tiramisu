@@ -8,7 +8,8 @@
 
 using std::map;
 
-//Loads a directory containing directories of one or more images
+//Loads a directory containing directories of one or more images.
+//Also computes its statistics
 pair<map<string,Image>,map<string,CNNLayer> > IO::loadDirectoryOfImages(string path){
   struct dirent *pDirent;
   DIR *pDir;
@@ -36,7 +37,7 @@ pair<map<string,Image>,map<string,CNNLayer> > IO::loadDirectoryOfImages(string p
       if(string(pDirent2->d_name).find(".")!= string::npos) continue;
       string fullpath = (path+string(pDirent->d_name)+
         string("/")+string(pDirent2->d_name)).c_str();
-      printf ("Processing feature file '%s'\n", fullpath.c_str());
+      //printf ("IO::loadDirectoryOfImages::Processing feature file '%s'\n", fullpath.c_str());
       string layerName = string(pDirent2->d_name)
         .substr(string(pDirent2->d_name).find_last_of("_")+1);
       string imageName = string(pDirent2->d_name)
@@ -64,7 +65,7 @@ pair<map<string,Image>,map<string,CNNLayer> > IO::loadDirectoryOfImages(string p
     closedir(pDir2);
   }
   closedir (pDir);
-  printf ("Total loaded images: '%lu'\n", images.size());
+  //printf ("IO::loadDirectoryOfImages::Total loaded images: '%lu'\n", images.size());
   //Once all images have been loaded, compute their statistics
   for(map<string,CNNLayer>::iterator it=layers.begin();it!=layers.end();it++){
     it->second.computeLayerStatistics();

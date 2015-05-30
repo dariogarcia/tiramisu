@@ -24,6 +24,7 @@ class CNNFeature {
     void computeMean();
     void computeAbsDev();
     void computeStdDev();
+    void computeActivationThreshold();
     void computeStatistics();
 
   protected:
@@ -31,6 +32,7 @@ class CNNFeature {
     float mean;
     float standardDev;
     float absoluteDev;
+    float activationThreshold;
     vector<float> values;
 }; //  CNNFeature
 
