@@ -4,8 +4,6 @@
 #include <string>
 #include <vector>
 
-#include "Image.hpp"
-
 using std::string;
 using std::vector;
 

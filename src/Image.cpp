@@ -55,3 +55,7 @@ void Image::exploreImage(){
     activationCounter++;
   }
 }
+
+void Image::computeRelevantFeatures(map<string,CNNLayer> cnn){
+
+}
