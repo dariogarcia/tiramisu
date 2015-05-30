@@ -6,6 +6,7 @@
 #include "../include/Image.hpp"
 
 using std::vector;
+using std::pair;
 using std::stof;
 using std::ifstream;
 using std::istringstream;
@@ -57,5 +58,20 @@ void Image::exploreImage(){
 }
 
 void Image::computeRelevantFeatures(map<string,CNNLayer> cnn){
-
+  map<int,float> emptyMap;
+  //For each layer
+  for(map<string,CNNLayer>::iterator it = cnn.begin();it!=cnn.end();it++){
+    map<int,CNNFeature> features = it->second.getFeatures();
+    map<int,Activation> imageActivations = activations[it->first];
+    //If its the first time we read a layer, add it
+    if(relevantFeatures.find(it->first)==relevantFeatures.end())
+      relevantFeatures.insert(pair<string,map<int,float> >(it->first,emptyMap));
+    //For each feature in the layer
+    for(map<int,CNNFeature>::iterator it2=features.begin(); it2!=features.end();it2++){
+      //If the feature is strongly activated, store it
+      if(imageActivations[it2->first].getValue() > it2->second.getActivationThreshold()){
+        relevantFeatures[it->first].insert(pair<int,float> (it2->first,imageActivations[it2->first].getValue()));
+      } 
+    }
+  }
 }

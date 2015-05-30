@@ -13,6 +13,7 @@ class CNNFeature {
     inline float getMean() {return mean; }
     inline float getStdDev() {return standardDev; }
     inline float getAbsDev() {return absoluteDev; }
+    inline float getActivationThreshold() {return activationThreshold; }
     inline vector<float> getValues() {return values; }
     inline void setId(int i) { id = i;}
     inline void setMean(float m) {mean = m; }
