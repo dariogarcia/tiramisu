@@ -8,6 +8,7 @@
 
 using std::string;
 using std::map;
+using std::pair;
 
 class CNNLayer {
   public:
@@ -18,6 +19,7 @@ class CNNLayer {
     void addFeatures(const string path);
     void exploreCNNLayer();
     void computeLayerStatistics();
+    pair<float,float> getFeatMeanAbsDev(int fId) {return pair<float,float> (features[fId].getMean(),features[fId].getStdDev());}
 
   protected:
     string name;
