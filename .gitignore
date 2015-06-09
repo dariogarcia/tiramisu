@@ -1,4 +1,4 @@
-build/*o
+build/*
 build/main
 deprecated
 images/*
