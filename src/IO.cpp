@@ -10,15 +10,13 @@ using std::map;
 
 //Loads a directory containing directories of one or more images.
 //Also computes its statistics
-pair<map<string,Image>,map<string,CNNLayer> > IO::loadDirectoryOfImages(string path){
+void IO::loadDirectoryOfImages(string path, map<string,Image> &images, map<string,CNNLayer> &layers){
   struct dirent *pDirent;
   DIR *pDir;
-  map<string,Image> images;
-  map<string,CNNLayer> layers;
   pDir = opendir(path.c_str());
   if (pDir == NULL) {
-      printf ("IO::loadDirectoryOfImages::Cannot open directory '%s'\n", path.c_str());
-      return pair<map<string,Image>,map<string,CNNLayer> >();
+    printf ("IO::loadDirectoryOfImages::Cannot open directory '%s'\n", path.c_str());
+    return;
   }
   //For each directory in the input path
   while ((pDirent = readdir(pDir)) != NULL) {
@@ -45,6 +43,7 @@ pair<map<string,Image>,map<string,CNNLayer> > IO::loadDirectoryOfImages(string p
       //If new layer, set name and store
       CNNLayer currentLayer;
       if(layers.find(layerName)==layers.end()){
+        printf ("IO::loadDirectoryOfImages::Adding new layer '%s'\n", layerName.c_str());
         currentLayer.setName(layerName);
         layers.insert(pair<string,CNNLayer>(layerName,currentLayer));
       }
@@ -54,6 +53,7 @@ pair<map<string,Image>,map<string,CNNLayer> > IO::loadDirectoryOfImages(string p
       //If new image, set name and path and store
       Image currentImage;
       if(images.find(imageName)==images.end()) {
+        printf ("IO::loadDirectoryOfImages::Adding new image '%s'\n", imageName.c_str());
         currentImage.setName(imageName);
         currentImage.setPath(path+string(pDirent->d_name));
         images.insert(pair<string,Image>(imageName,currentImage));
@@ -65,13 +65,13 @@ pair<map<string,Image>,map<string,CNNLayer> > IO::loadDirectoryOfImages(string p
     closedir(pDir2);
   }
   closedir (pDir);
-  //printf ("IO::loadDirectoryOfImages::Total loaded images: '%lu'\n", images.size());
+  printf ("IO::loadDirectoryOfImages::Total loaded images: '%lu'\n", images.size());
   //Once all images have been loaded, compute their statistics
   for(map<string,CNNLayer>::iterator it=layers.begin();it!=layers.end();it++){
     it->second.computeLayerStatistics();
+    printf ("IO::loadDirectoryOfImages::Done computing statistics of layer %s\n",it->second.getName().c_str());
   }
-  
-  return pair<map<string,Image>,map<string,CNNLayer> > (images,layers);
+  printf ("IO::loadDirectoryOfImages::Done computing all layer statistics\n");
 }
 
 

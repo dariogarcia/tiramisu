@@ -11,7 +11,8 @@ using std::pair;
 
 int main(int argc, char* argv[]){
   pair<map<string,Image>,map<string,CNNLayer> > data;
-  data = IO::loadDirectoryOfImages(argv[1]);
+  IO::loadDirectoryOfImages(argv[1],data.first, data.second);
+  printf("MAIN::Done loading images\n");
 
   
 //  //Print feature values
@@ -29,12 +30,11 @@ int main(int argc, char* argv[]){
 //  }
 
   //Print images relevant features and why
-  map<string,Image> images  = data.first;
-  for(map<string,Image>::iterator it = images.begin(); it!=images.end(); it++){
-    Image im = it->second;
+  for(map<string,Image>::iterator it = data.first.begin(); it!=data.first.end(); it++){
     printf("Image %s\n",it->first.c_str());
-    im.computeRelevantFeatures(data.second);
-    map<string,map<int,float> > rels = im.getRelevantFeatures();
+    it->second.computeRelevantFeatures(data.second);
+    map<string,map<int,float> > rels = it->second.getRelevantFeatures();
+    int total_counter = 0;
     for(map<string,map<int,float> >::iterator it2 = rels.begin(); it2!=rels.end(); it2++){
       printf(" Layer %s\n",it2->first.c_str());
       map<int,float> vals = it2->second;
@@ -45,8 +45,10 @@ int main(int argc, char* argv[]){
         //stats.first,stats.second);
         counter++;
       }
+      total_counter += counter;
       printf(" Num rel feats %u\n",counter);
     }
+    printf(" Total rel feats %u\n",total_counter);
   }
 
 }  

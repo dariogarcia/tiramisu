@@ -57,7 +57,7 @@ void Image::exploreImage(){
   }
 }
 
-void Image::computeRelevantFeatures(map<string,CNNLayer> cnn){
+void Image::computeRelevantFeatures(map<string,CNNLayer> &cnn){
   map<int,float> emptyMap;
   //For each layer
   for(map<string,CNNLayer>::iterator it = cnn.begin();it!=cnn.end();it++){
