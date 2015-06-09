@@ -13,7 +13,7 @@ using std::pair;
 
 class IO {
   public:
-    static pair<map<string,Image>,map<string,CNNLayer> > loadDirectoryOfImages(string path);
+    static void loadDirectoryOfImages(string path, map<string,Image> &images, map<string,CNNLayer> &layers);
 
   protected:
 

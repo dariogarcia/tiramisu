@@ -21,7 +21,7 @@ class Image {
     inline void setActivations(map<string,map<int,Activation> > a) {activations=a;}
     void addActivations(const string path, const string layerName);
     void exploreImage();
-    void computeRelevantFeatures(map<string,CNNLayer> CNN);
+    void computeRelevantFeatures(map<string,CNNLayer> &CNN);
 
   protected:
     string name;
