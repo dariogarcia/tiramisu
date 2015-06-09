@@ -1,8 +1,8 @@
 #!bin/bash
 
 CXX = g++
-CFLAGS = -std=c++0x -O2 -c
-LFLAGS = -std=c++0x -O2 
+CFLAGS = -std=c++0x -O2 -c -fopenmp
+LFLAGS = -std=c++0x -O2 -fopenmp
 OBJS = CNNLayer.o CNNFeature.o Image.o Activation.o IO.o
 OBJS_PATH = build/CNNLayer.o build/CNNFeature.o build/Image.o build/Activation.o build/IO.o
 
