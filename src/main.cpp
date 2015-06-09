@@ -11,7 +11,7 @@ using std::pair;
 
 int main(int argc, char* argv[]){
   pair<map<string,Image>,map<string,CNNLayer> > data;
-  IO::loadDirectoryOfImages(argv[1],data.first, data.second);
+  IO::loadImagesAndLayers(argv[1],data.first, data.second);
   printf("MAIN::Done loading images\n");
 
   
