@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#This script loads all images found in the directory specified in the first parameter. Runs them through a pre-trained CNN and extracts the features of layers pool2, conv3 and conv4. Features are stored as 3 files, named as the image without extension, ending with _pool2, _conv3 and _conv4.
+#This script loads all images found in the directory specified in the first parameter. Runs them through a pre-trained CNN and extracts the features of certain pre-defined layers. Features are stored as 3 files, named as the image without extension, ending with the names of the layers, in the same directory.
 #WARNING: First parameter needs to be full path. Ending with slash!
 #WARNING: underscores in image names and layers name are problematic. beware
 
