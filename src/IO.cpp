@@ -1,12 +1,15 @@
 #include <dirent.h>
 #include <cstring>
 #include <map>
+#include <fstream>
 
 #include "../include/IO.hpp"
 #include "../include/Image.hpp"
 #include "../include/CNNLayer.hpp"
+#include "../include/Util.hpp"
 
 using std::map;
+using std::ofstream;
 
 //Loads a directory containing directories of one or more images.
 //It builds the images, features and layers data structures and statistics
@@ -24,7 +27,6 @@ void IO::loadImagesAndLayers(string path, map<string,Image> &images, map<string,
     struct dirent *pDirent2;
     DIR *pDir2;
     pDir2 = opendir((path+string("/")+string(pDirent->d_name)).c_str());
-    //pDir2 = opendir(path.c_str());
     if (pDir2 == NULL) {
         printf ("IO::loadImagesAndLayers::Cannot open sub-directory '%s'\n", 
           (path+string("/")+string(pDirent->d_name)).c_str());
@@ -35,7 +37,7 @@ void IO::loadImagesAndLayers(string path, map<string,Image> &images, map<string,
       if(string(pDirent2->d_name).find(".")!= string::npos) continue;
       string fullpath = (path+string(pDirent->d_name)+
         string("/")+string(pDirent2->d_name)).c_str();
-      //printf ("IO::loadDirectoryOfImages::Processing feature file '%s'\n", fullpath.c_str());
+      //printf ("IO::loadImagesAndLayers::Processing feature file '%s'\n", fullpath.c_str());
       string layerName = string(pDirent2->d_name)
         .substr(string(pDirent2->d_name).find_last_of("_")+1);
       string imageName = string(pDirent2->d_name)
@@ -91,7 +93,6 @@ void IO::loadImages(string path, map<string,Image> &images){
     struct dirent *pDirent2;
     DIR *pDir2;
     pDir2 = opendir((path+string("/")+string(pDirent->d_name)).c_str());
-    //pDir2 = opendir(path.c_str());
     if (pDir2 == NULL) {
         printf ("IO::loadImages::Cannot open sub-directory '%s'\n", 
           (path+string("/")+string(pDirent->d_name)).c_str());
@@ -102,7 +103,7 @@ void IO::loadImages(string path, map<string,Image> &images){
       if(string(pDirent2->d_name).find(".")!= string::npos) continue;
       string fullpath = (path+string(pDirent->d_name)+
         string("/")+string(pDirent2->d_name)).c_str();
-      //printf ("IO::loadDirectoryOfImages::Processing feature file '%s'\n", fullpath.c_str());
+      //printf ("IO::loadImages::Processing feature file '%s'\n", fullpath.c_str());
       string layerName = string(pDirent2->d_name)
         .substr(string(pDirent2->d_name).find_last_of("_")+1);
       string imageName = string(pDirent2->d_name)
@@ -142,7 +143,6 @@ void IO::loadLayers(string path, map<string,CNNLayer> &layers){
     struct dirent *pDirent2;
     DIR *pDir2;
     pDir2 = opendir((path+string("/")+string(pDirent->d_name)).c_str());
-    //pDir2 = opendir(path.c_str());
     if (pDir2 == NULL) {
         printf ("IO::loadLayers::Cannot open sub-directory '%s'\n", 
           (path+string("/")+string(pDirent->d_name)).c_str());
@@ -153,7 +153,7 @@ void IO::loadLayers(string path, map<string,CNNLayer> &layers){
       if(string(pDirent2->d_name).find(".")!= string::npos) continue;
       string fullpath = (path+string(pDirent->d_name)+
         string("/")+string(pDirent2->d_name)).c_str();
-      //printf ("IO::loadDirectoryOfImages::Processing feature file '%s'\n", fullpath.c_str());
+      //printf ("IO::loadLayers::Processing feature file '%s'\n", fullpath.c_str());
       string layerName = string(pDirent2->d_name)
         .substr(string(pDirent2->d_name).find_last_of("_")+1);
       string imageName = string(pDirent2->d_name)
@@ -179,4 +179,89 @@ void IO::loadLayers(string path, map<string,CNNLayer> &layers){
     printf ("IO::loadLayers::Done computing statistics of layer %s\n",it->second.getName().c_str());
   }
   printf ("IO::loadLayers::Done computing all layer statistics\n");
+}
+
+//Store in an output file the list of vertices defined by images
+string IO::writeImagesVertices(const map<string,Image> &images){
+  //Generate a random string to build a unique filename
+  char rand_name[5];
+  Util::generate_random_string(rand_name,5);
+  string filename = "./output/imagesVertices_"+string(rand_name)+".tir";
+  ofstream output_file;
+  output_file.open(filename);
+  //Each image is a vertex
+  for(map<string,Image>::const_iterator it = images.begin(); it!=images.end(); it++){
+    output_file<<it->second.getName()<<"\n";  
+  }
+  output_file.close();
+  return filename;
+}
+
+//Store in an output file the list of vertices defined by layers
+string IO::writeLayersVertices(const map<string,CNNLayer> &layers){
+  //Generate a random string to build a unique filename
+  char rand_name[5];
+  Util::generate_random_string(rand_name,5);
+  string filename = "./output/layersVertices_"+string(rand_name)+".tir";
+  ofstream output_file;
+  output_file.open(filename);
+  //For each layer
+  for(map<string,CNNLayer>::const_iterator it = layers.begin(); it!=layers.end(); it++){
+    map<int,CNNFeature> lay = it->second.getFeatures();
+    //Each feature is a vertex
+    for(map<int,CNNFeature>::iterator it2 = lay.begin(); it2!=lay.end(); it2++){
+      output_file<<it->second.getName()<<"_"<<it2->second.getId()<<"\n";  
+    }
+  }
+  output_file.close();
+  return filename;
+}
+
+//Store in the same output file the list of vertices defined by layers and images
+string IO::writeImagesAndLayersVertices(const map<string,Image> &images, const map<string,CNNLayer> &layers){
+  //Generate a random string to build a unique filename
+  char rand_name[5];
+  Util::generate_random_string(rand_name,5);
+  string filename = "./output/images-layersVertices_"+string(rand_name)+".tir";
+  ofstream output_file;
+  output_file.open(filename);
+  //Each image is a vertex
+  for(map<string,Image>::const_iterator it = images.begin(); it!=images.end(); it++){
+    output_file<<it->second.getName()<<"\n";  
+  }
+  //For each layer
+  for(map<string,CNNLayer>::const_iterator it = layers.begin(); it!=layers.end(); it++){
+    map<int,CNNFeature> lay = it->second.getFeatures();
+    //Each feature is a vertex
+    for(map<int,CNNFeature>::iterator it2 = lay.begin(); it2!=lay.end(); it2++){
+      output_file<<it->second.getName()<<"_"<<it2->second.getId()<<"\n";  
+    }
+  }
+  output_file.close();
+  return filename;
+}
+
+//Store in an output file the list of edges defined by layers and images
+string IO::writeImagesAndLayersEdges(const map<string,Image> &images, const map<string,CNNLayer> &layers){
+  //Generate a random string to build a unique filename
+  char rand_name[5];
+  Util::generate_random_string(rand_name,5);
+  string filename = "./output/imagesEdges_"+string(rand_name)+".tir";
+  ofstream output_file;
+  output_file.open(filename);
+  //For each image
+  for(map<string,Image>::const_iterator it = images.begin(); it!=images.end(); it++){
+    map<string,map<int,float> > lays = it->second.getRelevantFeatures();
+    string imageVertexName = it->second.getName();
+    //For each layer
+    for(map<string,map<int,float> >::const_iterator it2 = lays.begin();it2!=lays.end();it2++){
+      map<int,float> feat = it2->second;
+      //For each relevant feature
+      for(map<int,float>::const_iterator it3 = feat.begin(); it3!=feat.end(); it3++){
+        output_file<<imageVertexName<<" "<<it2->first<<"_"<<it3->first <<"\n";  
+      }
+    }
+  }
+  output_file.close();
+  return filename;
 }

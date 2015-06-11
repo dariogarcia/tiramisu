@@ -15,3 +15,7 @@ List of todo things in tiramisu project
 - [ ] Make sure include policy (relative path with "../include") is appropriate.
 - [ ] Write an interactive menu for loading layers and images from files.
 - [ ] Parallelize with OpenMP.
+
+## Todos related with general tiramisu research
+
+- [ ] Adjust the threshold parameters to distribution of activations. Study which "mean+(stdDev*x)" fits a log-scale distribution.
