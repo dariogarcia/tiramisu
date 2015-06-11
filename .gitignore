@@ -2,3 +2,4 @@ build/*
 build/main
 deprecated
 images/*
+tmp/*
