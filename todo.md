@@ -19,3 +19,5 @@ List of todo things in tiramisu project
 ## Todos related with general tiramisu research
 
 - [ ] Adjust the threshold parameters to distribution of activations. Study which "mean+(stdDev*x)" fits a log-scale distribution.
+- [ ] Test if additional edges between features are relevant and useful for the mining process.
+- [ ] Research and implement community detection algorithms on the graph generated. 
