@@ -2,6 +2,9 @@
 
 List of todo things in tiramisu project
 
+## PRIORITARY
+- [ ] Shift from a map based implementation to a vector-index or CSR implementation
+
 ## Todos related with scripts/
 
 - [ ] Modify bulk_feature_extraction.sh to make it path independent. Add a second parameter which indicates location of caffe instalation
