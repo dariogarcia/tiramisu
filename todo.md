@@ -3,7 +3,7 @@
 List of todo things in tiramisu project
 
 ## PRIORITARY
-- [ ] Shift from a map based implementation to a vector-index or CSR implementation
+- [ ] Shift from a map based implementation to a vector-index or CRS implementation. Under work
 
 ## Todos related with scripts/
 
