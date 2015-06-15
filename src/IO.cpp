@@ -48,26 +48,22 @@ void IO::loadImagesAndLayers(string path, map<string,Image> &images, map<string,
       string imageName = string(pDirent2->d_name)
         .substr(0,string(pDirent2->d_name).find_last_of("_"));
       //If new layer, set name and store
-      CNNLayer currentLayer;
-      if(layers.find(layerName)==layers.end()){
-        //printf ("IO::loadImagesAndLayers::Adding new layer '%s'\n", layerName.c_str());
+      CNNLayer &currentLayer = layers[layerName];
+      if(currentLayer.getFeatures().size()==0){
+        printf ("IO::loadImagesAndLayers::Adding new layer '%s'\n", layerName.c_str());
         currentLayer.setName(layerName);
         layers.insert(pair<string,CNNLayer>(layerName,currentLayer));
       }
-      currentLayer = layers[layerName];
       currentLayer.addFeatures(fullpath);
-      layers[layerName] = currentLayer;
       //If new image, set name and path and store
-      Image currentImage;
-      if(images.find(imageName)==images.end()) {
-        //printf ("IO::loadImagesAndLayers::Adding new image '%s'\n", imageName.c_str());
+      Image &currentImage = images[imageName];
+      if(currentImage.getActivations().size()==0) {
+        printf ("IO::loadImagesAndLayers::Adding new image '%s'\n", imageName.c_str());
         currentImage.setName(imageName);
         currentImage.setPath(path+string(pDirent->d_name));
         images.insert(pair<string,Image>(imageName,currentImage));
       }
-      currentImage = images[imageName];
       currentImage.addActivations(fullpath,layerName); 
-      images[imageName] = currentImage;
     }
     closedir(pDir2);
   }
@@ -114,16 +110,14 @@ void IO::loadImages(string path, map<string,Image> &images){
       string imageName = string(pDirent2->d_name)
         .substr(0,string(pDirent2->d_name).find_last_of("_"));
       //If new image, set name and path and store
-      Image currentImage;
-      if(images.find(imageName)==images.end()) {
-        //printf ("IO::loadImages::Adding new image '%s'\n", imageName.c_str());
+      Image &currentImage = images[imageName];
+      if(currentImage.getActivations().size()==0) {
+        printf ("IO::loadImages::Adding new image '%s'\n", imageName.c_str());
         currentImage.setName(imageName);
         currentImage.setPath(path+string(pDirent->d_name));
         images.insert(pair<string,Image>(imageName,currentImage));
       }
-      currentImage = images[imageName];
       currentImage.addActivations(fullpath,layerName); 
-      images[imageName] = currentImage;
     }
     closedir(pDir2);
   }
@@ -164,15 +158,13 @@ void IO::loadLayers(string path, map<string,CNNLayer> &layers){
       string imageName = string(pDirent2->d_name)
         .substr(0,string(pDirent2->d_name).find_last_of("_"));
       //If new layer, set name and store
-      CNNLayer currentLayer;
-      if(layers.find(layerName)==layers.end()){
-        //printf ("IO::loadLayers::Adding new layer '%s'\n", layerName.c_str());
+      CNNLayer &currentLayer = layers[layerName];
+      if(currentLayer.getFeatures().size()==0){
+        printf ("IO::loadLayers::Adding new layer '%s'\n", layerName.c_str());
         currentLayer.setName(layerName);
         layers.insert(pair<string,CNNLayer>(layerName,currentLayer));
       }
-      currentLayer = layers[layerName];
       currentLayer.addFeatures(fullpath);
-      layers[layerName] = currentLayer;
     }
     closedir(pDir2);
   }

@@ -10,12 +10,15 @@ using std::vector;
 class CNNFeature {
   public:
     inline int getId() {return id;}
+    inline int getNumValues() {return numValues;}
     inline float getMean() {return mean; }
     inline float getStdDev() {return standardDev; }
     inline float getAbsDev() {return absoluteDev; }
     inline float getActivationThreshold() {return activationThreshold; }
     inline vector<float> getValues() {return values; }
     inline void setId(int i) { id = i;}
+    inline void setNumValues(int n) { numValues = n;}
+    inline void increaseNumValues() { numValues++;}
     inline void setMean(float m) {mean = m; }
     inline void setStdDev(float d) {standardDev = d; }
     inline void setAbsDev(float d) {absoluteDev = d; }
@@ -28,6 +31,7 @@ class CNNFeature {
 
   protected:
     int id;
+    int numValues;
     float mean;
     float standardDev;
     float absoluteDev;

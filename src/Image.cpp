@@ -17,7 +17,7 @@ void Image::addActivations(string path, string layerName){
   ifstream infile(path.c_str());
   string line;
   if(infile.is_open()){
-    map<int,Activation> layerActivations = activations[layerName];
+    map<int,Activation> &layerActivations = activations[layerName];
     map<int,float> values;
     while(getline(infile,line)){
       vector<std::string> strs;
@@ -25,14 +25,12 @@ void Image::addActivations(string path, string layerName){
       copy(istream_iterator<string>(is),istream_iterator<string>(),back_inserter<vector<string> >(strs));
       int key = stoi(strs[1]);
       float value = stof(strs[0]);
-      Activation featActivation = layerActivations[key];
+      Activation &featActivation = layerActivations[key];
       featActivation.setValue(value);
       featActivation.setLayerId(layerName);
       featActivation.setFeatureId(key);
-      layerActivations[key] = featActivation;
     }
     infile.close();
-    activations[layerName] = layerActivations;
   }
   else printf("Image::addActivations:: Unable to open file\n");
 }

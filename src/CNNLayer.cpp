@@ -19,15 +19,20 @@ void CNNLayer::addFeatures(string path){
       copy(istream_iterator<string>(is),istream_iterator<string>(),back_inserter<vector<string> >(strs));
       int key = stoi(strs[1]);
       float value = stof(strs[0]);
-      CNNFeature feat = features[key];
-      feat.setId(key);
+      CNNFeature &feat = features[key];
+      //If its the first time we found this feature, initialize
       if(feat.getValues().size()==0){
+        feat.setId(key);
         feat.setMean(-1);
         feat.setStdDev(-1);
         feat.setAbsDev(-1);
+        feat.setNumValues(1);
+        feat.addValue(value);
       }
-      feat.addValue(value);
-      features[key]=feat;
+      else {
+        if(value!=0) feat.addValue(value);
+        feat.increaseNumValues();
+      }
     }
     infile.close();
   }

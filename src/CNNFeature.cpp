@@ -7,7 +7,7 @@ void CNNFeature::computeMean(){
     for(vector<float>::iterator i=values.begin();i!=values.end();i++) {
       mean=mean+*i;
     }
-    mean = mean/values.size();
+    mean = mean/numValues;
 }
 
 void CNNFeature::computeAbsDev(){
@@ -15,7 +15,11 @@ void CNNFeature::computeAbsDev(){
     for(vector<float>::iterator i=values.begin();i!=values.end();i++) {
       absoluteDev=absoluteDev+abs(*i-mean);
     }
-    absoluteDev = absoluteDev/values.size();
+    //Add the deviation of the null values
+    for(int i =values.size(); i<=numValues; i++){
+      absoluteDev=absoluteDev+mean;
+    }
+    absoluteDev = absoluteDev/numValues;
 }
 
 void CNNFeature::computeStdDev(){
@@ -23,7 +27,11 @@ void CNNFeature::computeStdDev(){
     for(vector<float>::iterator i=values.begin();i!=values.end();i++) {
       standardDev=standardDev+((*i-mean)*(*i-mean));
     }
-    standardDev = sqrt(standardDev/values.size());
+    //Add the deviation of the null values
+    for(int i = values.size(); i<numValues ; i++){
+      standardDev=standardDev+((mean)*(mean)); 
+    }
+    standardDev = sqrt(standardDev/(numValues-1));
 }
 
 void CNNFeature::computeStatistics(){
