@@ -2,6 +2,12 @@
 
 List of todo things in tiramisu project
 
+## PRIORITARY todos, decreasing in priority order
+
+- [ ] Modify the output method of the caffe branch, to write a binary file. Addapt the tiramisu input code to binary format.
+- [ ] Read and store the statistics of 1,000 or so layer's features
+- [ ] Test cosine distance similarities and differences
+- [ ] Design an accumulative-proportional clustering algorithm that combines deviation strength and multi-layer similarities. Test.
 
 ## Todos related with scripts/
 
