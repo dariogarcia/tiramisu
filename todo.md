@@ -2,12 +2,14 @@
 
 List of todo things in tiramisu project
 
-## PRIORITARY todos, decreasing in priority order
+## PRIORITARY todos, in priority order
 
 - [ ] Modify the output method of the caffe branch, to write a binary file. Addapt the tiramisu input code to binary format.
-- [ ] Read and store the statistics of 1,000 or so layer's features
-- [ ] Test cosine distance similarities and differences
-- [ ] Design an accumulative-proportional clustering algorithm that combines deviation strength and multi-layer similarities. Test.
+- [ ] Test cosine distance similarities and differences of the raw activations of a set of images X
+- [ ] Compute the statistics of features by considering a set of images Y
+- [ ] Test cosine distance similarities and differences of the relevant features of a set images disjoint with Y.
+- [ ] Design an accumulative-proportional community detection algorithm that combines deviation strength and multi-layer similarities.
+- [ ] Test community detection algorithm on a set of images disjoint with Y.
 
 ## Todos related with scripts/
 
@@ -27,6 +29,4 @@ List of todo things in tiramisu project
 
 - [ ] Adjust the threshold parameters to distribution of activations. Study which "mean+(stdDev*x)" fits a log-scale distribution.
 - [ ] Test if additional edges between features are relevant and useful for the mining process. Consider adding layers as vertices, and features belonging to layers as edges.
-- [ ] Research and implement community detection algorithms on the graph generated. Explore algorithms based on accumulative/proportional ratios (e.g., like INF_LOG_2D) 
 - [ ] Is it interesting to shift from a map-vector based implementation to a vector-index or CRS implementation?
-- [ ] Test euclidean distance on image vector representation
