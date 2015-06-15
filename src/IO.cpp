@@ -1,6 +1,7 @@
 #include <dirent.h>
 #include <cstring>
 #include <map>
+#include <set>
 #include <fstream>
 
 #include "../include/IO.hpp"
@@ -9,6 +10,7 @@
 #include "../include/Util.hpp"
 
 using std::map;
+using std::set;
 using std::ofstream;
 
 //Reads a directory containing sub-directories/images,
@@ -26,6 +28,7 @@ void IO::loadImagesAndLayers(string path, map<string,Image> &images, map<string,
     printf ("IO::loadImagesAndLayers::Cannot open directory '%s'\n", path.c_str());
     return;
   }
+  set<string> images_loaded;
   //For each directory in the input path
   while ((pDirent = readdir(pDir)) != NULL) {
     if(string(pDirent->d_name).find(".")!= string::npos) continue;
@@ -47,6 +50,10 @@ void IO::loadImagesAndLayers(string path, map<string,Image> &images, map<string,
         .substr(string(pDirent2->d_name).find_last_of("_")+1);
       string imageName = string(pDirent2->d_name)
         .substr(0,string(pDirent2->d_name).find_last_of("_"));
+      if(images_loaded.find(imageName)==images_loaded.end()){
+        printf ("IO::loadImagesAndLayers::Processing file of new image '%s'\n", imageName.c_str());
+        images_loaded.insert(imageName);
+      }
       //If new layer, set name and store
       CNNLayer &currentLayer = layers[layerName];
       if(currentLayer.getFeatures().size()==0){
@@ -88,6 +95,7 @@ void IO::loadImages(string path, map<string,Image> &images){
     printf ("IO::loadImages::Cannot open directory '%s'\n", path.c_str());
     return;
   }
+  set<string> images_loaded;
   //For each directory in the input path
   while ((pDirent = readdir(pDir)) != NULL) {
     if(string(pDirent->d_name).find(".")!= string::npos) continue;
@@ -109,6 +117,10 @@ void IO::loadImages(string path, map<string,Image> &images){
         .substr(string(pDirent2->d_name).find_last_of("_")+1);
       string imageName = string(pDirent2->d_name)
         .substr(0,string(pDirent2->d_name).find_last_of("_"));
+      if(images_loaded.find(imageName)==images_loaded.end()){
+        printf ("IO::loadImagesAndLayers::Processing file of new image '%s'\n", imageName.c_str());
+        images_loaded.insert(imageName);
+      }
       //If new image, set name and path and store
       Image &currentImage = images[imageName];
       if(currentImage.getActivations().size()==0) {
@@ -136,6 +148,7 @@ void IO::loadLayers(string path, map<string,CNNLayer> &layers){
     printf ("IO::loadLayers::Cannot open directory '%s'\n", path.c_str());
     return;
   }
+  set<string> images_loaded;
   //For each directory in the input path
   while ((pDirent = readdir(pDir)) != NULL) {
     if(string(pDirent->d_name).find(".")!= string::npos) continue;
@@ -157,6 +170,10 @@ void IO::loadLayers(string path, map<string,CNNLayer> &layers){
         .substr(string(pDirent2->d_name).find_last_of("_")+1);
       string imageName = string(pDirent2->d_name)
         .substr(0,string(pDirent2->d_name).find_last_of("_"));
+      if(images_loaded.find(imageName)==images_loaded.end()){
+        printf ("IO::loadImagesAndLayers::Processing file of new image '%s'\n", imageName.c_str());
+        images_loaded.insert(imageName);
+      }
       //If new layer, set name and store
       CNNLayer &currentLayer = layers[layerName];
       if(currentLayer.getFeatures().size()==0){
