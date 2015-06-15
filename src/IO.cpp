@@ -11,8 +11,13 @@
 using std::map;
 using std::ofstream;
 
-//Loads a directory containing directories of one or more images.
-//It builds the images, features and layers data structures and statistics
+//Reads a directory containing sub-directories/images,
+// and loads the data of each sub-directory/image.
+//Feature activation data is stored per layers/files,
+// each layer/file containing lists of features.
+//Features are lines of comma separated activation values
+// and feature identifiers.
+//It also computes a few statistics for the values of each feature
 void IO::loadImagesAndLayers(string path, map<string,Image> &images, map<string,CNNLayer> &layers){
   struct dirent *pDirent;
   DIR *pDir;
@@ -45,7 +50,7 @@ void IO::loadImagesAndLayers(string path, map<string,Image> &images, map<string,
       //If new layer, set name and store
       CNNLayer currentLayer;
       if(layers.find(layerName)==layers.end()){
-        printf ("IO::loadImagesAndLayers::Adding new layer '%s'\n", layerName.c_str());
+        //printf ("IO::loadImagesAndLayers::Adding new layer '%s'\n", layerName.c_str());
         currentLayer.setName(layerName);
         layers.insert(pair<string,CNNLayer>(layerName,currentLayer));
       }
@@ -55,7 +60,7 @@ void IO::loadImagesAndLayers(string path, map<string,Image> &images, map<string,
       //If new image, set name and path and store
       Image currentImage;
       if(images.find(imageName)==images.end()) {
-        printf ("IO::loadImagesAndLayers::Adding new image '%s'\n", imageName.c_str());
+        //printf ("IO::loadImagesAndLayers::Adding new image '%s'\n", imageName.c_str());
         currentImage.setName(imageName);
         currentImage.setPath(path+string(pDirent->d_name));
         images.insert(pair<string,Image>(imageName,currentImage));
@@ -71,7 +76,7 @@ void IO::loadImagesAndLayers(string path, map<string,Image> &images, map<string,
   //Once all images have been loaded, compute the layer statistics
   for(map<string,CNNLayer>::iterator it=layers.begin();it!=layers.end();it++){
     it->second.computeLayerStatistics();
-    printf ("IO::loadImagesAndLayers::Done computing statistics of layer %s\n",it->second.getName().c_str());
+    //printf ("IO::loadImagesAndLayers::Done computing statistics of layer %s\n",it->second.getName().c_str());
   }
   printf ("IO::loadImagesAndLayers::Done computing all layer statistics\n");
 }
@@ -111,7 +116,7 @@ void IO::loadImages(string path, map<string,Image> &images){
       //If new image, set name and path and store
       Image currentImage;
       if(images.find(imageName)==images.end()) {
-        printf ("IO::loadImages::Adding new image '%s'\n", imageName.c_str());
+        //printf ("IO::loadImages::Adding new image '%s'\n", imageName.c_str());
         currentImage.setName(imageName);
         currentImage.setPath(path+string(pDirent->d_name));
         images.insert(pair<string,Image>(imageName,currentImage));
@@ -161,7 +166,7 @@ void IO::loadLayers(string path, map<string,CNNLayer> &layers){
       //If new layer, set name and store
       CNNLayer currentLayer;
       if(layers.find(layerName)==layers.end()){
-        printf ("IO::loadLayers::Adding new layer '%s'\n", layerName.c_str());
+        //printf ("IO::loadLayers::Adding new layer '%s'\n", layerName.c_str());
         currentLayer.setName(layerName);
         layers.insert(pair<string,CNNLayer>(layerName,currentLayer));
       }
@@ -176,7 +181,7 @@ void IO::loadLayers(string path, map<string,CNNLayer> &layers){
   //Once all layers have been loaded, compute their statistics
   for(map<string,CNNLayer>::iterator it=layers.begin();it!=layers.end();it++){
     it->second.computeLayerStatistics();
-    printf ("IO::loadLayers::Done computing statistics of layer %s\n",it->second.getName().c_str());
+    //printf ("IO::loadLayers::Done computing statistics of layer %s\n",it->second.getName().c_str());
   }
   printf ("IO::loadLayers::Done computing all layer statistics\n");
 }
