@@ -22,4 +22,5 @@ List of todo things in tiramisu project
 - [ ] Adjust the threshold parameters to distribution of activations. Study which "mean+(stdDev*x)" fits a log-scale distribution.
 - [ ] Test if additional edges between features are relevant and useful for the mining process. Consider adding layers as vertices, and features belonging to layers as edges.
 - [ ] Research and implement community detection algorithms on the graph generated. Explore algorithms based on accumulative/proportional ratios (e.g., like INF_LOG_2D) 
-- [ ] Is it interestint to shift from a map-vector based implementation to a vector-index or CRS implementation?
+- [ ] Is it interesting to shift from a map-vector based implementation to a vector-index or CRS implementation?
+- [ ] Test euclidean distance on image vector representation
