@@ -5,6 +5,7 @@
 #include "../include/Image.hpp"
 #include "../include/CNNLayer.hpp"
 #include "../include/IO.hpp"
+#include "../include/Util.hpp"
 
 using std::map;
 using std::pair;
@@ -19,6 +20,11 @@ int main(int argc, char* argv[]){
   //  it->second.computeRelevantFeatures(data.second);
   //}
   //printf("MAIN::Done computing images relevant features\n");
+
+  //Generate a random filename
+  char rand_name[5];
+  Util::generate_random_string(rand_name,5);
+  string filename = string(argv[1])+"somefile_"+string(rand_name)+".tir";
 
   IO::writeLayersToBinaryFile("/tmp/test",data.second);
   //IO::writeImagesVerticesToTXTFile(data.first);

@@ -9,7 +9,6 @@
 #include "../include/IO.hpp"
 #include "../include/Image.hpp"
 #include "../include/CNNLayer.hpp"
-#include "../include/Util.hpp"
 
 using std::map;
 using std::set;
@@ -200,11 +199,7 @@ void IO::loadLayersFromTXTFile(string path, map<string,CNNLayer> &layers){
 }
 
 //Store in an output file the list of vertices defined by images
-string IO::writeImagesVerticesToTXTFile(const map<string,Image> &images){
-  //Generate a random string to build a unique filename
-  char rand_name[5];
-  Util::generate_random_string(rand_name,5);
-  string filename = "./output/imagesVertices_"+string(rand_name)+".tir";
+string IO::writeImagesVerticesToTXTFile(string filename, const map<string,Image> &images){
   ofstream output_file;
   output_file.open(filename);
   //Each image is a vertex
@@ -216,11 +211,7 @@ string IO::writeImagesVerticesToTXTFile(const map<string,Image> &images){
 }
 
 //Store in an output file the list of vertices defined by layers
-string IO::writeLayersVerticesToTXTFile(const map<string,CNNLayer> &layers){
-  //Generate a random string to build a unique filename
-  char rand_name[5];
-  Util::generate_random_string(rand_name,5);
-  string filename = "./output/layersVertices_"+string(rand_name)+".tir";
+string IO::writeLayersVerticesToTXTFile(string filename, const map<string,CNNLayer> &layers){
   ofstream output_file;
   output_file.open(filename);
   //For each layer
@@ -236,11 +227,7 @@ string IO::writeLayersVerticesToTXTFile(const map<string,CNNLayer> &layers){
 }
 
 //Store in the same output file the list of vertices defined by layers and images
-string IO::writeImagesAndLayersVerticesToTXTFile(const map<string,Image> &images, const map<string,CNNLayer> &layers){
-  //Generate a random string to build a unique filename
-  char rand_name[5];
-  Util::generate_random_string(rand_name,5);
-  string filename = "./output/images-layersVertices_"+string(rand_name)+".tir";
+string IO::writeImagesAndLayersVerticesToTXTFile(string filename, const map<string,Image> &images, const map<string,CNNLayer> &layers){
   ofstream output_file;
   output_file.open(filename);
   //Each image is a vertex
@@ -260,11 +247,7 @@ string IO::writeImagesAndLayersVerticesToTXTFile(const map<string,Image> &images
 }
 
 //Store in an output file the list of edges defined by layers and images
-string IO::writeImagesAndLayersEdgesToTXTFile(const map<string,Image> &images, const map<string,CNNLayer> &layers){
-  //Generate a random string to build a unique filename
-  char rand_name[5];
-  Util::generate_random_string(rand_name,5);
-  string filename = "./output/imagesEdges_"+string(rand_name)+".tir";
+string IO::writeImagesAndLayersEdgesToTXTFile(string filename, const map<string,Image> &images, const map<string,CNNLayer> &layers){
   ofstream output_file;
   output_file.open(filename);
   //For each image
@@ -285,15 +268,11 @@ string IO::writeImagesAndLayersEdgesToTXTFile(const map<string,Image> &images, c
 }
 
 //Store in an output file the features loaded form images
-vector<string> IO::writeLayersToTXTFile(const map<string,CNNLayer> &layers){
+vector<string> IO::writeLayersToTXTFile(string filename, const map<string,CNNLayer> &layers){
   vector<string> filenames;
-  //Generate a random string to build a unique filename
-  char rand_name[5];
-  Util::generate_random_string(rand_name,5);
   //For each layer
   for(map<string,CNNLayer>::const_iterator it = layers.begin(); it!=layers.end(); it++){
     map<int,CNNFeature> lay = it->second.getFeatures();
-    string filename = "./output/layersInfo_"+string(it->first)+"_"+string(rand_name)+".tir";
     ofstream output_file;
     output_file.open(filename);
     //Each feature is a vertex
