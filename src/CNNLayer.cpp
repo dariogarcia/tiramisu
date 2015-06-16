@@ -39,6 +39,9 @@ void CNNLayer::addFeatures(string path){
   else printf("CNNLayer::addFeatures:: Unable to open file\n");
 }
 
+void CNNLayer::addBasicFeature(pair<int,CNNFeature> feat){
+  features.insert(feat);
+}
 
 //Method to explore and print contents of a set of CNNLayers
 //Intended for validation of loading process

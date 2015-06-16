@@ -22,6 +22,7 @@ class CNNFeature {
     inline void setMean(float m) {mean = m; }
     inline void setStdDev(float d) {standardDev = d; }
     inline void setAbsDev(float d) {absoluteDev = d; }
+    inline void setActivationThreshold(float at) {activationThreshold = at; }
     inline void addValue(float val) {values.push_back(val);} 
     void computeMean();
     void computeAbsDev();

@@ -3,6 +3,7 @@
 #include <map>
 #include <set>
 #include <fstream>
+#include <istream>
 #include <iostream>
 
 #include "../include/IO.hpp"
@@ -13,6 +14,8 @@
 using std::map;
 using std::set;
 using std::ofstream;
+using std::ifstream;
+using std::ios;
 
 //Reads a directory containing sub-directories/images,
 // and loads the data of each sub-directory/image.
@@ -21,12 +24,12 @@ using std::ofstream;
 //Features are lines of comma separated activation values
 // and feature identifiers.
 //It also computes a few statistics for the values of each feature
-void IO::loadImagesAndLayers(string path, map<string,Image> &images, map<string,CNNLayer> &layers){
+void IO::loadImagesAndLayersFromTXTFile(string path, map<string,Image> &images, map<string,CNNLayer> &layers){
   struct dirent *pDirent;
   DIR *pDir;
   pDir = opendir(path.c_str());
   if (pDir == NULL) {
-    printf ("IO::loadImagesAndLayers::Cannot open directory '%s'\n", path.c_str());
+    printf ("IO::loadImagesAndLayersFromTXTFile::Cannot open directory '%s'\n", path.c_str());
     return;
   }
   set<string> images_loaded;
@@ -37,7 +40,7 @@ void IO::loadImagesAndLayers(string path, map<string,Image> &images, map<string,
     DIR *pDir2;
     pDir2 = opendir((path+string("/")+string(pDirent->d_name)).c_str());
     if (pDir2 == NULL) {
-        printf ("IO::loadImagesAndLayers::Cannot open sub-directory '%s'\n", 
+        printf ("IO::loadImagesAndLayersFromTXTFile::Cannot open sub-directory '%s'\n", 
           (path+string("/")+string(pDirent->d_name)).c_str());
         continue;
     }
@@ -46,19 +49,19 @@ void IO::loadImagesAndLayers(string path, map<string,Image> &images, map<string,
       if(string(pDirent2->d_name).find(".")!= string::npos) continue;
       string fullpath = (path+string(pDirent->d_name)+
         string("/")+string(pDirent2->d_name)).c_str();
-      //printf ("IO::loadImagesAndLayers::Processing feature file '%s'\n", fullpath.c_str());
+      //printf ("IO::loadImagesAndLayersFromTXTFile::Processing feature file '%s'\n", fullpath.c_str());
       string layerName = string(pDirent2->d_name)
         .substr(string(pDirent2->d_name).find_last_of("_")+1);
       string imageName = string(pDirent2->d_name)
         .substr(0,string(pDirent2->d_name).find_last_of("_"));
       if(images_loaded.find(imageName)==images_loaded.end()){
         images_loaded.insert(imageName);
-        printf ("IO::loadImagesAndLayers::Processing file of new image '%s' number %lu\n", imageName.c_str(),images_loaded.size());
+        printf ("IO::loadImagesAndLayersFromTXTFile::Processing file of new image '%s' number %lu\n", imageName.c_str(),images_loaded.size());
       }
       //If new layer, set name and store
       CNNLayer &currentLayer = layers[layerName];
       if(currentLayer.getFeatures().size()==0){
-        printf ("IO::loadImagesAndLayers::Adding new layer '%s'\n", layerName.c_str());
+        printf ("IO::loadImagesAndLayersFromTXTFile::Adding new layer '%s'\n", layerName.c_str());
         currentLayer.setName(layerName);
         layers.insert(pair<string,CNNLayer>(layerName,currentLayer));
       }
@@ -66,7 +69,7 @@ void IO::loadImagesAndLayers(string path, map<string,Image> &images, map<string,
       //If new image, set name and path and store
       Image &currentImage = images[imageName];
       if(currentImage.getActivations().size()==0) {
-        printf ("IO::loadImagesAndLayers::Adding new image '%s'\n", imageName.c_str());
+        printf ("IO::loadImagesAndLayersFromTXTFile::Adding new image '%s'\n", imageName.c_str());
         currentImage.setName(imageName);
         currentImage.setPath(path+string(pDirent->d_name));
         images.insert(pair<string,Image>(imageName,currentImage));
@@ -76,24 +79,24 @@ void IO::loadImagesAndLayers(string path, map<string,Image> &images, map<string,
     closedir(pDir2);
   }
   closedir (pDir);
-  printf ("IO::loadImagesAndLayers::Total loaded images: '%lu'\n", images.size());
+  printf ("IO::loadImagesAndLayersFromTXTFile::Total loaded images: '%lu'\n", images.size());
   //Once all images have been loaded, compute the layer statistics
   for(map<string,CNNLayer>::iterator it=layers.begin();it!=layers.end();it++){
     it->second.computeLayerStatistics();
-    //printf ("IO::loadImagesAndLayers::Done computing statistics of layer %s\n",it->second.getName().c_str());
+    //printf ("IO::loadImagesAndLayersFromTXTFile::Done computing statistics of layer %s\n",it->second.getName().c_str());
   }
-  printf ("IO::loadImagesAndLayers::Done computing all layer statistics\n");
+  printf ("IO::loadImagesAndLayersFromTXTFile::Done computing all layer statistics\n");
 }
 
 
 //Loads a directory containing directories of one or more images.
 //It builds the images data structures and statistics
-void IO::loadImages(string path, map<string,Image> &images){
+void IO::loadImagesFromTXTFile(string path, map<string,Image> &images){
   struct dirent *pDirent;
   DIR *pDir;
   pDir = opendir(path.c_str());
   if (pDir == NULL) {
-    printf ("IO::loadImages::Cannot open directory '%s'\n", path.c_str());
+    printf ("IO::loadImagesFromTXTFile::Cannot open directory '%s'\n", path.c_str());
     return;
   }
   set<string> images_loaded;
@@ -104,7 +107,7 @@ void IO::loadImages(string path, map<string,Image> &images){
     DIR *pDir2;
     pDir2 = opendir((path+string("/")+string(pDirent->d_name)).c_str());
     if (pDir2 == NULL) {
-        printf ("IO::loadImages::Cannot open sub-directory '%s'\n", 
+        printf ("IO::loadImagesFromTXTFile::Cannot open sub-directory '%s'\n", 
           (path+string("/")+string(pDirent->d_name)).c_str());
         continue;
     }
@@ -113,19 +116,19 @@ void IO::loadImages(string path, map<string,Image> &images){
       if(string(pDirent2->d_name).find(".")!= string::npos) continue;
       string fullpath = (path+string(pDirent->d_name)+
         string("/")+string(pDirent2->d_name)).c_str();
-      //printf ("IO::loadImages::Processing feature file '%s'\n", fullpath.c_str());
+      //printf ("IO::loadImagesFromTXTFile::Processing feature file '%s'\n", fullpath.c_str());
       string layerName = string(pDirent2->d_name)
         .substr(string(pDirent2->d_name).find_last_of("_")+1);
       string imageName = string(pDirent2->d_name)
         .substr(0,string(pDirent2->d_name).find_last_of("_"));
       if(images_loaded.find(imageName)==images_loaded.end()){
         images_loaded.insert(imageName);
-        printf ("IO::loadImagesAndLayers::Processing file of new image '%s' number %lu\n", imageName.c_str(),images_loaded.size());
+        printf ("IO::loadImagesFromTXTFile::Processing file of new image '%s' number %lu\n", imageName.c_str(),images_loaded.size());
       }
       //If new image, set name and path and store
       Image &currentImage = images[imageName];
       if(currentImage.getActivations().size()==0) {
-        printf ("IO::loadImages::Adding new image '%s'\n", imageName.c_str());
+        printf ("IO::loadImagesFromTXTFile::Adding new image '%s'\n", imageName.c_str());
         currentImage.setName(imageName);
         currentImage.setPath(path+string(pDirent->d_name));
         images.insert(pair<string,Image>(imageName,currentImage));
@@ -135,18 +138,18 @@ void IO::loadImages(string path, map<string,Image> &images){
     closedir(pDir2);
   }
   closedir (pDir);
-  printf ("IO::loadImages::Total loaded images: '%lu'\n", images.size());
+  printf ("IO::loadImagesFromTXTFile::Total loaded images: '%lu'\n", images.size());
 }
 
 
 //Loads a directory containing directories of one or more images.
 //It builds the features and layers data structures and statistics
-void IO::loadLayers(string path, map<string,CNNLayer> &layers){
+void IO::loadLayersFromTXTFile(string path, map<string,CNNLayer> &layers){
   struct dirent *pDirent;
   DIR *pDir;
   pDir = opendir(path.c_str());
   if (pDir == NULL) {
-    printf ("IO::loadLayers::Cannot open directory '%s'\n", path.c_str());
+    printf ("IO::loadLayersFromTXTFile::Cannot open directory '%s'\n", path.c_str());
     return;
   }
   set<string> images_loaded;
@@ -157,7 +160,7 @@ void IO::loadLayers(string path, map<string,CNNLayer> &layers){
     DIR *pDir2;
     pDir2 = opendir((path+string("/")+string(pDirent->d_name)).c_str());
     if (pDir2 == NULL) {
-        printf ("IO::loadLayers::Cannot open sub-directory '%s'\n", 
+        printf ("IO::loadLayersFromTXTFile::Cannot open sub-directory '%s'\n", 
           (path+string("/")+string(pDirent->d_name)).c_str());
         continue;
     }
@@ -166,19 +169,19 @@ void IO::loadLayers(string path, map<string,CNNLayer> &layers){
       if(string(pDirent2->d_name).find(".")!= string::npos) continue;
       string fullpath = (path+string(pDirent->d_name)+
         string("/")+string(pDirent2->d_name)).c_str();
-      //printf ("IO::loadLayers::Processing feature file '%s'\n", fullpath.c_str());
+      //printf ("IO::loadLayersFromTXTFile::Processing feature file '%s'\n", fullpath.c_str());
       string layerName = string(pDirent2->d_name)
         .substr(string(pDirent2->d_name).find_last_of("_")+1);
       string imageName = string(pDirent2->d_name)
         .substr(0,string(pDirent2->d_name).find_last_of("_"));
       if(images_loaded.find(imageName)==images_loaded.end()){
         images_loaded.insert(imageName);
-        printf ("IO::loadImagesAndLayers::Processing file of new image '%s' number %lu\n", imageName.c_str(),images_loaded.size());
+        printf ("IO::loadLayersFromTXTFile::Processing file of new image '%s' number %lu\n", imageName.c_str(),images_loaded.size());
       }
       //If new layer, set name and store
       CNNLayer &currentLayer = layers[layerName];
       if(currentLayer.getFeatures().size()==0){
-        printf ("IO::loadLayers::Adding new layer '%s'\n", layerName.c_str());
+        printf ("IO::loadLayersFromTXTFile::Adding new layer '%s'\n", layerName.c_str());
         currentLayer.setName(layerName);
         layers.insert(pair<string,CNNLayer>(layerName,currentLayer));
       }
@@ -187,17 +190,17 @@ void IO::loadLayers(string path, map<string,CNNLayer> &layers){
     closedir(pDir2);
   }
   closedir (pDir);
-  printf ("IO::loadLayers::Total loaded layers: '%lu'\n", layers.size());
+  printf ("IO::loadLayersFromTXTFile::Total loaded layers: '%lu'\n", layers.size());
   //Once all layers have been loaded, compute their statistics
   for(map<string,CNNLayer>::iterator it=layers.begin();it!=layers.end();it++){
     it->second.computeLayerStatistics();
-    //printf ("IO::loadLayers::Done computing statistics of layer %s\n",it->second.getName().c_str());
+    //printf ("IO::loadLayersFromTXTFile::Done computing statistics of layer %s\n",it->second.getName().c_str());
   }
-  printf ("IO::loadLayers::Done computing all layer statistics\n");
+  printf ("IO::loadLayersFromTXTFile::Done computing all layer statistics\n");
 }
 
 //Store in an output file the list of vertices defined by images
-string IO::writeImagesVertices(const map<string,Image> &images){
+string IO::writeImagesVerticesToTXTFile(const map<string,Image> &images){
   //Generate a random string to build a unique filename
   char rand_name[5];
   Util::generate_random_string(rand_name,5);
@@ -213,7 +216,7 @@ string IO::writeImagesVertices(const map<string,Image> &images){
 }
 
 //Store in an output file the list of vertices defined by layers
-string IO::writeLayersVertices(const map<string,CNNLayer> &layers){
+string IO::writeLayersVerticesToTXTFile(const map<string,CNNLayer> &layers){
   //Generate a random string to build a unique filename
   char rand_name[5];
   Util::generate_random_string(rand_name,5);
@@ -233,7 +236,7 @@ string IO::writeLayersVertices(const map<string,CNNLayer> &layers){
 }
 
 //Store in the same output file the list of vertices defined by layers and images
-string IO::writeImagesAndLayersVertices(const map<string,Image> &images, const map<string,CNNLayer> &layers){
+string IO::writeImagesAndLayersVerticesToTXTFile(const map<string,Image> &images, const map<string,CNNLayer> &layers){
   //Generate a random string to build a unique filename
   char rand_name[5];
   Util::generate_random_string(rand_name,5);
@@ -257,7 +260,7 @@ string IO::writeImagesAndLayersVertices(const map<string,Image> &images, const m
 }
 
 //Store in an output file the list of edges defined by layers and images
-string IO::writeImagesAndLayersEdges(const map<string,Image> &images, const map<string,CNNLayer> &layers){
+string IO::writeImagesAndLayersEdgesToTXTFile(const map<string,Image> &images, const map<string,CNNLayer> &layers){
   //Generate a random string to build a unique filename
   char rand_name[5];
   Util::generate_random_string(rand_name,5);
@@ -282,7 +285,7 @@ string IO::writeImagesAndLayersEdges(const map<string,Image> &images, const map<
 }
 
 //Store in an output file the features loaded form images
-vector<string> IO::writeLayersInfo(const map<string,CNNLayer> &layers){
+vector<string> IO::writeLayersToTXTFile(const map<string,CNNLayer> &layers){
   vector<string> filenames;
   //Generate a random string to build a unique filename
   char rand_name[5];
@@ -303,45 +306,83 @@ vector<string> IO::writeLayersInfo(const map<string,CNNLayer> &layers){
   return filenames;
 }
 
-void IO::dumpToFile(string const filename, map<string,CNNLayer> const layers){
+void IO::writeLayersToBinaryFile(string const filename, map<string,CNNLayer> const layers){
   size_t num_layers = layers.size();
   size_t namesSize[num_layers];
   size_t featuresPerLayer[num_layers];
-  size_t total_features = 0;
   //Compute total number of features, features per layer, and layer name lenghts
   int i=0;
   for(map<string,CNNLayer>::const_iterator it = layers.begin(); it!=layers.end(); it++){
     namesSize[i] = it->first.size();
     featuresPerLayer[i] = it->second.getFeatures().size();
-    total_features+=it->second.getFeatures().size();
     i++;
   }
-  ofstream fout( filename.c_str(), std::ios::out | std::ios::binary );
+  ofstream fout( filename.c_str(), ios::out | ios::binary );
   if (fout.is_open()) {
     //Write num layers, num values, values per layer, and sizes of layer names
     fout.write( (char*)&num_layers, sizeof(size_t) );
-    fout.write( (char*)&namesSize, sizeof(char)*num_layers );
-    fout.write( (char*)&total_features, sizeof(size_t) );
-    fout.write( (char*)&featuresPerLayer, sizeof(size_t)*total_features );
+    fout.write( (char*)&namesSize, sizeof(size_t)*num_layers );
+    fout.write( (char*)&featuresPerLayer, sizeof(size_t)*num_layers );
     //For each layer
     map<string,CNNLayer>::const_iterator it = layers.begin();
     for ( size_t ilayer = 0; ilayer < num_layers; ilayer += 1 ) {
       //TODO: ERROR HANDLING if(it==layers.end())
       //Write layer name
-      fout.write( (char*)&it->first, sizeof(char)*namesSize[ilayer] );
+      string tmp_str = it->first;
+      fout.write( (char*)&(tmp_str), sizeof(char)*namesSize[ilayer] );
       //For each feature
       map<int,CNNFeature>::iterator it2 = it->second.getFeatures().begin();
       for( size_t ifeat = 0; ifeat < featuresPerLayer[ilayer]; ifeat++){
         //TODO: ERROR HANDLING if (it2==it->second.getFeatures().end())
         //Write feature Id, mean, stdDev and activationThreshold
-        //fout.write( (char*)(it2->second.getId()), sizeof(size_t) );
-        //fout.write( (char*)(it2->second.getMean()), sizeof(float) );
-        //fout.write( (char*)(it2->second.getStdDev()), sizeof(float) );
-        //fout.write( (char*)(it2->second.getActivationThreshold()), sizeof(float) );
-        //fout.write( reinterpret_cast<char*>(it2->second.getActivationThreshold()), sizeof(float) );
+        int tmp_int = it2->second.getId();
+        fout.write( (char*)(&tmp_int), sizeof(size_t) );
+        float tmp_float = it2->second.getMean();
+        fout.write( reinterpret_cast<char*>(&tmp_float), sizeof(float) );
+        tmp_float = it2->second.getStdDev();
+        fout.write( reinterpret_cast<char*>(&tmp_float), sizeof(float) );
+        tmp_float = it2->second.getActivationThreshold();
+        fout.write( reinterpret_cast<char*>(&tmp_float), sizeof(float) );
         it2++;
       } 
       it++;
+    }
+  }
+}
+
+void IO::loadLayersFromBinaryFile(string const filename, map<string,CNNLayer> &layers){
+  ifstream fin( filename.c_str(), ios::out | ios::binary  );
+  if (fin.is_open()) {
+    int num_layers;
+    size_t namesSize[num_layers];
+    size_t featuresPerLayer[num_layers];
+    fin.read((char*) &num_layers, sizeof(size_t) );
+    fin.read((char*) &namesSize, sizeof(size_t)*num_layers );
+    fin.read((char*) &featuresPerLayer, sizeof(size_t)*num_layers );
+    //For each layer
+    CNNLayer currentLayer;
+    string currentName;
+    for ( size_t ilayer = 0; ilayer < num_layers; ilayer += 1 ) {
+      char* tmp_str = new char[namesSize[ilayer]+1];
+      fin.read( (char*)&tmp_str, namesSize[ilayer] );
+      tmp_str[namesSize[ilayer]] = '\0';
+      currentName = tmp_str;
+      //For each feature
+      for( size_t ifeat = 0; ifeat < featuresPerLayer[ilayer]; ifeat++){
+        CNNFeature currentFeature;
+        int currentId;
+        //Write feature Id, mean, stdDev and activationThreshold
+        fin.read( (char*)(&currentId), sizeof(size_t) );
+        float tmp_float;
+        fin.read( reinterpret_cast<char*>(&tmp_float), sizeof(float) );
+        currentFeature.setMean(tmp_float);
+        fin.read( reinterpret_cast<char*>(&tmp_float), sizeof(float) );
+        currentFeature.setStdDev(tmp_float);
+        fin.read( reinterpret_cast<char*>(&tmp_float), sizeof(float) );
+        currentFeature.setActivationThreshold(tmp_float);
+        currentLayer.addBasicFeature(pair<int,CNNFeature>(currentId,currentFeature));
+      }
+      layers.insert(pair<string,CNNLayer>(currentName,currentLayer));
     }
   }
 }

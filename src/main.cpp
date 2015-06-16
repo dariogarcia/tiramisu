@@ -11,20 +11,20 @@ using std::pair;
 
 int main(int argc, char* argv[]){
   pair<map<string,Image>,map<string,CNNLayer> > data;
-  IO::loadImagesAndLayers(argv[1],data.first, data.second);
-  //IO::loadLayers(argv[2], data.second);
-  //IO::loadImages(argv[3], data.first);
+  //IO::loadImagesAndLayersFromTXTFile(argv[1],data.first, data.second);
+  IO::loadLayersFromTXTFile(argv[1], data.second);
+  //IO::loadImagesFromTXTFile(argv[3], data.first);
   printf("MAIN::Done loading images\n");
-  for(map<string,Image>::iterator it = data.first.begin(); it!=data.first.end(); it++){
-    it->second.computeRelevantFeatures(data.second);
-  }
-  printf("MAIN::Done computing images relevant features\n");
+  //for(map<string,Image>::iterator it = data.first.begin(); it!=data.first.end(); it++){
+  //  it->second.computeRelevantFeatures(data.second);
+  //}
+  //printf("MAIN::Done computing images relevant features\n");
 
+  IO::writeLayersToBinaryFile("/tmp/test",data.second);
+  //IO::writeImagesVerticesToTXTFile(data.first);
+  //IO::writeLayersVerticesToTXTFile(data.second);
+  //IO::writeImagesAndLayersEdgesToTXTFile(data.first,data.second);
   
-  IO::writeImagesVertices(data.first);
-  IO::writeLayersVertices(data.second);
-  IO::writeImagesAndLayersEdges(data.first,data.second);
-
   
 //  //Print feature values
 //  for(map<string,CNNLayer>::iterator it = data.second.begin();it!=data.second.end();it++){
@@ -33,16 +33,18 @@ int main(int argc, char* argv[]){
 
 
 
+
+  IO::loadLayersFromBinaryFile("/tmp/test",data.second);
+
 //  //Print layer data
 //  for(map<string,CNNLayer>::iterator it = data.second.begin();it!=data.second.end();it++){
 //    map<int,CNNFeature> feats = it->second.getFeatures();
 //    for(map<int,CNNFeature>::iterator it2=feats.begin(); it2!=feats.end();it2++){
 //      CNNFeature f = it2->second;
-//      printf("%f %f %s\n",f.getMean(),f.getStdDev(),it->first.c_str());
+//      printf("Mean: %f StdDev:%f LayerName:%s FeatureId:%u\n",
+//        f.getMean(),f.getStdDev(),it->first.c_str(),f.getId());
 //    }
 //  }
-
-
 
 //  //Print images relevant features and why
 //  for(map<string,Image>::iterator it = data.first.begin(); it!=data.first.end(); it++){

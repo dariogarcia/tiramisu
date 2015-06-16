@@ -17,6 +17,7 @@ class CNNLayer {
     inline void setName(string n) { name = n;}
     inline void setFeatures(map<int,CNNFeature> fs) { features = fs;}
     void addFeatures(const string path);
+    void addBasicFeature(pair<int,CNNFeature> feat);
     void exploreCNNLayer();
     void computeLayerStatistics();
     pair<float,float> getFeatMeanAbsDev(int fId) {return pair<float,float> (features[fId].getMean(),features[fId].getStdDev());}

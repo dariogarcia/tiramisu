@@ -7,7 +7,7 @@ void CNNFeature::computeMean(){
     for(vector<float>::iterator i=values.begin();i!=values.end();i++) {
       mean=mean+*i;
     }
-    mean = mean/numValues;
+    if(mean!=0) mean = mean/numValues;
 }
 
 void CNNFeature::computeAbsDev(){
@@ -19,7 +19,7 @@ void CNNFeature::computeAbsDev(){
     for(int i =values.size(); i<=numValues; i++){
       absoluteDev=absoluteDev+mean;
     }
-    absoluteDev = absoluteDev/numValues;
+    if(absoluteDev!=0) absoluteDev = absoluteDev/numValues;
 }
 
 void CNNFeature::computeStdDev(){
@@ -31,7 +31,7 @@ void CNNFeature::computeStdDev(){
     for(int i = values.size(); i<numValues ; i++){
       standardDev=standardDev+((mean)*(mean)); 
     }
-    standardDev = sqrt(standardDev/(numValues-1));
+    if(standardDev!=0) standardDev = sqrt(standardDev/(numValues-1));
 }
 
 void CNNFeature::computeStatistics(){
@@ -44,3 +44,4 @@ void CNNFeature::computeStatistics(){
 void CNNFeature::computeActivationThreshold(){
     activationThreshold = mean + (3*standardDev);
 }
+
