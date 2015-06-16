@@ -4,7 +4,7 @@ List of todo things in tiramisu project
 
 ## PRIORITARY todos, in priority order
 
-- [ ] Modify the output method of the caffe branch, to write a binary file. Addapt the tiramisu input code to binary format.
+- [x] Modify the output method of the caffe branch, to write a binary file. Addapt the tiramisu input code to binary format.
 - [ ] Test cosine distance similarities and differences of the raw activations of a set of images X
 - [ ] Compute the statistics of features by considering a set of images Y
 - [ ] Test cosine distance similarities and differences of the relevant features of a set images disjoint with Y.
