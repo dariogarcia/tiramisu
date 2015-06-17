@@ -14,9 +14,24 @@ void Util::generate_random_string(char *s, const int len) {
   s[len] = 0;
 }
 
-//float Util:euclideanDistance(Image img1, Image img2){
-//  float distance=0; 
-//  
-//
-//  return distance;
-//}
+float Util::euclideanDistanceActivations(const Image &img1, const Image &img2){
+  float distance=0; 
+  //For each layer
+  for(map<string,map<int,float> >::const_iterator it = img1.getActivations().begin();
+    it!=img1.getActivations().end(); it++){
+    //For each feature
+    for(map<int,float>::const_iterator it2 = it->second.begin(); it2!=it->second.end(); it2++){
+      //If layer exists in img2
+      if(img2.getActivations().find(it->first)!=img2.getActivations().end()){
+        //If feature exists in img2
+        if(img2.getActivations()[it->first].find(it2->first)!=img2.getActivations()[it->first].end()){
+          distance+= (it2->second-img2.getActivations()[it->first][it2->first])*(it2->second-img2.getActivations()[it->first][it2->first]);
+        }
+        else distance+= (it2->second)*(it2->second);
+      }
+      else distance+= (it2->second)*(it2->second);
+    }
+  }
+
+  return distance;
+}
