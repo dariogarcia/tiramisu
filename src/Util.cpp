@@ -2,6 +2,7 @@
 #include <ctime>
 
 #include "../include/Util.hpp"
+#include "../include/Image.hpp"
 
 void Util::generate_random_string(char *s, const int len) {
   srand(time(0));
@@ -12,3 +13,10 @@ void Util::generate_random_string(char *s, const int len) {
   }
   s[len] = 0;
 }
+
+//float Util:euclideanDistance(Image img1, Image img2){
+//  float distance=0; 
+//  
+//
+//  return distance;
+//}

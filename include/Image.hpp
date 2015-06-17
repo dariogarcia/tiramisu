@@ -4,7 +4,6 @@
 #include <string>
 #include <map>
 
-#include "Activation.hpp"
 #include "CNNLayer.hpp"
 
 using std::string;
@@ -14,11 +13,11 @@ class Image {
   public:
     string getName() const {return name;}
     string getPath() const {return path;}
-    inline map<string,map<int,Activation> > getActivations() const {return activations;}
+    inline map<string,map<int,float> > getActivations() const {return activations;}
     inline map<string,map<int,float> > getRelevantFeatures() const {return relevantFeatures;}
     inline void setName(string n) {name=n;}
     inline void setPath(string p) {path=p;}
-    inline void setActivations(map<string,map<int,Activation> > a) {activations=a;}
+    inline void setActivations(map<string,map<int,float> > a) {activations=a;}
     void addActivations(const string path, const string layerName);
     void exploreImage() ;
     void computeRelevantFeatures(map<string,CNNLayer> &CNN);
@@ -26,7 +25,7 @@ class Image {
   protected:
     string name;
     string path;
-    map<string,map<int,Activation> > activations;
+    map<string,map<int,float> > activations;
     map<string,map<int,float> > relevantFeatures;
 }; //  Image
 

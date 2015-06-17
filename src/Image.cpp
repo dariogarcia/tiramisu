@@ -17,7 +17,7 @@ void Image::addActivations(string path, string layerName){
   ifstream infile(path.c_str());
   string line;
   if(infile.is_open()){
-    map<int,Activation> &layerActivations = activations[layerName];
+    map<int,float> &layerActivations = activations[layerName];
     map<int,float> values;
     while(getline(infile,line)){
       vector<std::string> strs;
@@ -25,10 +25,7 @@ void Image::addActivations(string path, string layerName){
       copy(istream_iterator<string>(is),istream_iterator<string>(),back_inserter<vector<string> >(strs));
       int key = stoi(strs[1]);
       float value = stof(strs[0]);
-      Activation &featActivation = layerActivations[key];
-      featActivation.setValue(value);
-      featActivation.setLayerId(layerName);
-      featActivation.setFeatureId(key);
+      layerActivations[key] = value;
     }
     infile.close();
   }
@@ -38,17 +35,17 @@ void Image::addActivations(string path, string layerName){
 //Method to explore and print contents of a set of images
 //Intended for validation of loading process
 void Image::exploreImage(){
-  printf("-Image with name '%s', path '%s', has '%lu' activations \n",name.c_str(),path.c_str(),activations.size());
+  printf("-Image with name '%s', path '%s', has '%u' activations \n",name.c_str(),path.c_str(),activations.size());
   int activationCounter = 0;
-  for(map<string,map<int,Activation> >::iterator it2 = activations.begin();it2!=activations.end(); it2++){
-    map<int,Activation> currentActivation = it2->second;
-    printf("--Activation num: '%u', name '%s', has '%lu' values \n",
+  for(map<string,map<int,float> >::iterator it2 = activations.begin();it2!=activations.end(); it2++){
+    map<int,float> currentActivation = it2->second;
+    printf("--Activation num: '%u', name '%s', has '%u' values \n",
       activationCounter, it2->first.c_str(), currentActivation.size());
     int valueCounter = 0;
-    for(map<int,Activation>::iterator it3 = currentActivation.begin(); it3!=currentActivation.end();
+    for(map<int,float>::iterator it3 = currentActivation.begin(); it3!=currentActivation.end();
       it3++){
-      printf("---Value num: '%u', is '%f' for layer '%s' and feature '%u'\n",
-        valueCounter,it3->second.getValue(),it3->second.getCNNLayerId().c_str(),it3->second.getFeatureId());
+      printf("---Value num: '%u' is '%f''\n",
+        valueCounter,it3->second);
       valueCounter++;
     }
     activationCounter++;
@@ -60,15 +57,15 @@ void Image::computeRelevantFeatures(map<string,CNNLayer> &cnn){
   //For each layer
   for(map<string,CNNLayer>::iterator it = cnn.begin();it!=cnn.end();it++){
     map<int,CNNFeature> features = it->second.getFeatures();
-    map<int,Activation> imageActivations = activations[it->first];
+    map<int,float> imageActivations = activations[it->first];
     //If its the first time we read a layer, add it
     if(relevantFeatures.find(it->first)==relevantFeatures.end())
       relevantFeatures.insert(pair<string,map<int,float> >(it->first,emptyMap));
     //For each feature in the layer
     for(map<int,CNNFeature>::iterator it2=features.begin(); it2!=features.end();it2++){
       //If the feature is strongly activated, store it
-      if(imageActivations[it2->first].getValue() > it2->second.getActivationThreshold()){
-        relevantFeatures[it->first].insert(pair<int,float> (it2->first,imageActivations[it2->first].getValue()));
+      if(imageActivations[it2->first] > it2->second.getActivationThreshold()){
+        relevantFeatures[it->first].insert(pair<int,float> (it2->first,imageActivations[it2->first]));
       } 
     }
   }
