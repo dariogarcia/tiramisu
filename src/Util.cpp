@@ -1,5 +1,6 @@
 #include <cstdlib>
 #include <ctime>
+#include <math.h>
 
 #include "../include/Util.hpp"
 #include "../include/Image.hpp"
@@ -27,11 +28,11 @@ float Util::euclideanDistanceActivations(const Image &img1, const Image &img2){
         if(img2.getActivations()[it->first].find(it2->first)!=img2.getActivations()[it->first].end()){
           distance+= (it2->second-img2.getActivations()[it->first][it2->first])*(it2->second-img2.getActivations()[it->first][it2->first]);
         }
+        //Else assume its value is 0
         else distance+= (it2->second)*(it2->second);
       }
       else distance+= (it2->second)*(it2->second);
     }
   }
-
-  return distance;
+  return sqrt(distance);
 }
