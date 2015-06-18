@@ -36,7 +36,7 @@ void CNNLayer::addFeatures(string path){
     }
     infile.close();
   }
-  else printf("CNNLayer::addFeatures:: Unable to open file\n");
+  else printf("CNNLayer::addFeatures::ERROR Unable to open file%s\n",path.c_str());
 }
 
 void CNNLayer::addBasicFeature(pair<int,CNNFeature> feat){

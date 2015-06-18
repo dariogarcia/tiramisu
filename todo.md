@@ -25,6 +25,7 @@ List of todo things in tiramisu project
 - [ ] Make sure include policy (relative path with "../include") is appropriate.
 - [ ] Write an interactive menu for loading layers and images from files.
 - [ ] Parallelize with OpenMP.
+- [ ] If first parameter of main does not end with "/" it will crash. Fix it.
 
 ## Todos related with general tiramisu research
 

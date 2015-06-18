@@ -289,7 +289,7 @@ void IO::writeLayersToBinaryFile(string const filename, map<string,CNNLayer> con
   size_t num_layers = layers.size();
   size_t namesSize[num_layers];
   size_t featuresPerLayer[num_layers];
-  //Compute total number of features, features per layer, and layer name lenghts
+  //Compute features per layer, and layer name lenghts
   int i=0;
   for(map<string,CNNLayer>::const_iterator it = layers.begin(); it!=layers.end(); it++){
     namesSize[i] = it->first.size();
@@ -303,65 +303,81 @@ void IO::writeLayersToBinaryFile(string const filename, map<string,CNNLayer> con
     fout.write( (char*)&namesSize, sizeof(size_t)*num_layers );
     fout.write( (char*)&featuresPerLayer, sizeof(size_t)*num_layers );
     //For each layer
-    map<string,CNNLayer>::const_iterator it = layers.begin();
-    for ( size_t ilayer = 0; ilayer < num_layers; ilayer += 1 ) {
-      //TODO: ERROR HANDLING if(it==layers.end())
+    size_t ilayer = 0;
+    for(map<string,CNNLayer>::const_iterator it = layers.begin(); it!=layers.end(); it++){
+      map<int,CNNFeature> feats =  it->second.getFeatures();
       //Write layer name
-      string tmp_str = it->first;
+      const char* tmp_str = new char[namesSize[ilayer]];
+      tmp_str = it->first.c_str();
       fout.write( (char*)&(tmp_str), sizeof(char)*namesSize[ilayer] );
       //For each feature
-      map<int,CNNFeature>::iterator it2 = it->second.getFeatures().begin();
-      for( size_t ifeat = 0; ifeat < featuresPerLayer[ilayer]; ifeat++){
-        //TODO: ERROR HANDLING if (it2==it->second.getFeatures().end())
+      int size = feats.size();
+      char* buffer;
+      buffer = (char*) malloc ((sizeof(float)*3+sizeof(int))*size);
+      int current_size=0;
+      for(map<int,CNNFeature>::iterator it2 = feats.begin(); it2 != feats.end(); it2++){
         //Write feature Id, mean, stdDev and activationThreshold
-        int tmp_int = it2->second.getId();
-        fout.write( (char*)(&tmp_int), sizeof(size_t) );
-        float tmp_float = it2->second.getMean();
-        fout.write( reinterpret_cast<char*>(&tmp_float), sizeof(float) );
-        tmp_float = it2->second.getStdDev();
-        fout.write( reinterpret_cast<char*>(&tmp_float), sizeof(float) );
-        tmp_float = it2->second.getActivationThreshold();
-        fout.write( reinterpret_cast<char*>(&tmp_float), sizeof(float) );
-        it2++;
-      } 
-      it++;
+        *((size_t *)&buffer[current_size]) = it2->second.getId();
+        current_size += sizeof(int);
+        *((float *)&buffer[current_size]) = it2->second.getMean();
+        current_size += sizeof(float);
+        *((float *)&buffer[current_size]) = it2->second.getStdDev();
+        current_size += sizeof(float);
+        *((float *)&buffer[current_size]) = it2->second.getActivationThreshold();
+        current_size += sizeof(float);
+      }
+      int idzero = *((int *)&buffer[0]);
+      float floatzero = *((float*)&buffer[(sizeof(int))]);
+      float floatone = *((float*)&buffer[(sizeof(int))+sizeof(float)]);
+      fout.write( (char*)(buffer), sizeof(float)*3*size + sizeof(int)*size );
+      ilayer++;
     }
+    fout.close();
   }
+  else printf ("IO::writeLayersToBinaryFile::Cant open file to write %s\n",filename.c_str());
 }
 
 void IO::loadLayersFromBinaryFile(string const filename, map<string,CNNLayer> &layers){
   ifstream fin( filename.c_str(), ios::out | ios::binary  );
   if (fin.is_open()) {
     int num_layers;
+    fin.read((char*) &num_layers, sizeof(size_t) );
     size_t namesSize[num_layers];
     size_t featuresPerLayer[num_layers];
-    fin.read((char*) &num_layers, sizeof(size_t) );
     fin.read((char*) &namesSize, sizeof(size_t)*num_layers );
     fin.read((char*) &featuresPerLayer, sizeof(size_t)*num_layers );
     //For each layer
     CNNLayer currentLayer;
     string currentName;
-    for ( size_t ilayer = 0; ilayer < num_layers; ilayer += 1 ) {
-      char* tmp_str = new char[namesSize[ilayer]+1];
-      fin.read( (char*)&tmp_str, namesSize[ilayer] );
-      tmp_str[namesSize[ilayer]] = '\0';
+    for ( int i = 0; i < num_layers; i++) {
+      char* tmp_str = new char[namesSize[i]+1];
+      fin.read( (char*)&tmp_str, namesSize[i] );
+      tmp_str[namesSize[i]] = '\0';
       currentName = tmp_str;
       //For each feature
-      for( size_t ifeat = 0; ifeat < featuresPerLayer[ilayer]; ifeat++){
+      for(int j = 0; j < featuresPerLayer[i]; j++){
+        //Read feature Id, mean, stdDev and activationThreshold
         CNNFeature currentFeature;
-        int currentId;
-        //Write feature Id, mean, stdDev and activationThreshold
-        fin.read( (char*)(&currentId), sizeof(size_t) );
-        float tmp_float;
-        fin.read( reinterpret_cast<char*>(&tmp_float), sizeof(float) );
-        currentFeature.setMean(tmp_float);
-        fin.read( reinterpret_cast<char*>(&tmp_float), sizeof(float) );
-        currentFeature.setStdDev(tmp_float);
-        fin.read( reinterpret_cast<char*>(&tmp_float), sizeof(float) );
-        currentFeature.setActivationThreshold(tmp_float);
-        currentLayer.addBasicFeature(pair<int,CNNFeature>(currentId,currentFeature));
+        char * reader = (char*) malloc (sizeof(int));
+        fin.read( reader, sizeof(int) );
+        currentFeature.setId(*(int*)reader);
+        char * reader_float = (char*) malloc (sizeof(float));
+        fin.read( reader_float, sizeof(float) );
+        currentFeature.setMean(*(float*)reader_float);
+        printf("--\n");
+        char * reader_float2 = (char*) malloc (sizeof(float));
+        fin.read( reader_float2, sizeof(float) );
+        currentFeature.setStdDev( *(float*)reader_float2);
+        char * reader_float3 = (char*) malloc (sizeof(float));
+        fin.read( reader_float3, sizeof(float) );
+        currentFeature.setActivationThreshold(*(float*)reader_float3);
+        printf("loaded feat %u\n",currentFeature.getId());
+        currentLayer.addBasicFeature(pair<int,CNNFeature>(*(int*)reader,currentFeature));
+        printf("--\n");
       }
+      printf("loaded layer %s\n",currentName.c_str());
       layers.insert(pair<string,CNNLayer>(currentName,currentLayer));
+      printf("__\n");
     }
   }
 }
