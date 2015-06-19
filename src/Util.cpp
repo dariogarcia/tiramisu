@@ -15,7 +15,7 @@ void Util::generate_random_string(char *s, const int len) {
   s[len] = 0;
 }
 
-float Util::euclideanDistanceActivations(const map<string,CNNLayer> &layers, const Image &img1, const Image &img2){
+float Util::euclideanDistanceImageActivations(const map<string,CNNLayer> &layers, const Image &img1, const Image &img2){
   float distance=0; 
   //For each layer
   for(map<string,CNNLayer>::const_iterator l_it=layers.begin(); l_it!=layers.end(); l_it++){
@@ -36,3 +36,27 @@ float Util::euclideanDistanceActivations(const map<string,CNNLayer> &layers, con
   }
   return sqrt(distance);
 }
+
+float Util::euclideanDistanceImageClass(const map<string,CNNLayer> &layers, const ImageClass &imgc1, const ImageClass &imgc2){
+  float distance=0;
+  //For each layer
+  for(map<string,CNNLayer>::const_iterator l_it=layers.begin(); l_it!=layers.end(); l_it++){
+    //If layer does not exist in one imageClass, error by now. TODO: Avoid error, assume al features are 0
+    if(imgc1.getMeanActivations().find(l_it->first)==imgc1.getMeanActivations().end()||
+        imgc2.getMeanActivations().find(l_it->first)==imgc2.getMeanActivations().end()){
+      printf("Util::euclideanDistanceImageClass::ERROR::ImageClass/es do not contain layer\n");
+      return 0;
+    }
+    const map<int,float> &mAct1 = imgc1.getMeanActivations().find(l_it->first)->second;
+    const map<int,float> &mAct2 = imgc2.getMeanActivations().find(l_it->first)->second;
+    //For each feature
+    for(map<int,CNNFeature>::const_iterator f_it= l_it->second.getFeaturesConst().begin(); f_it!= l_it->second.getFeaturesConst().end(); f_it++){
+      float val1=0, val2=0;
+      if(mAct1.find(f_it->first)!=mAct1.end()) val1 = mAct1.find(f_it->first)->second;
+      if(mAct2.find(f_it->first)!=mAct2.end()) val2 = mAct2.find(f_it->first)->second;
+      distance+=(val1-val2)*(val1-val2);
+    }
+  }
+  return sqrt(distance);
+}
+
