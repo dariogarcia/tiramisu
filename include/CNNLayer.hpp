@@ -13,7 +13,8 @@ using std::pair;
 class CNNLayer {
   public:
     inline string getName() const {return name;}
-    inline map<int,CNNFeature> getFeatures() const {return features; }
+    inline map<int,CNNFeature>& getFeaturesDyn() {return features; }
+    inline const map<int,CNNFeature>& getFeaturesConst() const {return features; }
     inline void setName(string n) { name = n;}
     inline void setFeatures(const map<int,CNNFeature> &fs) { features = fs;}
     void addFeatures(const string path);
