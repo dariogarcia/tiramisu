@@ -307,9 +307,12 @@ void IO::writeLayersToBinaryFile(string const filename, map<string,CNNLayer> con
     for(map<string,CNNLayer>::const_iterator it = layers.begin(); it!=layers.end(); it++){
       map<int,CNNFeature> feats =  it->second.getFeatures();
       //Write layer name
-      const char* tmp_str = new char[namesSize[ilayer]];
-      tmp_str = it->first.c_str();
-      fout.write( (char*)&(tmp_str), sizeof(char)*namesSize[ilayer] );
+      char* tmp_str = new char[namesSize[ilayer]+1];
+      //tmp_str = it->first.c_str();
+      std::copy(it->first.begin(), it->first.end(), tmp_str);
+      tmp_str[namesSize[ilayer]] = '\0'; // don't forget the terminating 0
+
+      fout.write( (char*)tmp_str, sizeof(char)*namesSize[ilayer]+1 );
       //For each feature
       int size = feats.size();
       char* buffer;
@@ -347,13 +350,12 @@ void IO::loadLayersFromBinaryFile(string const filename, map<string,CNNLayer> &l
     fin.read((char*) &namesSize, sizeof(size_t)*num_layers );
     fin.read((char*) &featuresPerLayer, sizeof(size_t)*num_layers );
     //For each layer
-    CNNLayer currentLayer;
-    string currentName;
     for ( int i = 0; i < num_layers; i++) {
+      CNNLayer currentLayer;
       char* tmp_str = new char[namesSize[i]+1];
-      fin.read( (char*)&tmp_str, namesSize[i] );
-      tmp_str[namesSize[i]] = '\0';
-      currentName = tmp_str;
+      fin.read( tmp_str, namesSize[i]+1 );
+      tmp_str[namesSize[i]+1] = '\0';
+      string currentName (tmp_str);
       //For each feature
       for(int j = 0; j < featuresPerLayer[i]; j++){
         //Read feature Id, mean, stdDev and activationThreshold
@@ -364,20 +366,16 @@ void IO::loadLayersFromBinaryFile(string const filename, map<string,CNNLayer> &l
         char * reader_float = (char*) malloc (sizeof(float));
         fin.read( reader_float, sizeof(float) );
         currentFeature.setMean(*(float*)reader_float);
-        printf("--\n");
         char * reader_float2 = (char*) malloc (sizeof(float));
         fin.read( reader_float2, sizeof(float) );
         currentFeature.setStdDev( *(float*)reader_float2);
         char * reader_float3 = (char*) malloc (sizeof(float));
         fin.read( reader_float3, sizeof(float) );
         currentFeature.setActivationThreshold(*(float*)reader_float3);
-        printf("loaded feat %u\n",currentFeature.getId());
         currentLayer.addBasicFeature(pair<int,CNNFeature>(*(int*)reader,currentFeature));
-        printf("--\n");
       }
-      printf("loaded layer %s\n",currentName.c_str());
+      //printf("loaded layer %s\n",currentName.c_str());
       layers.insert(pair<string,CNNLayer>(currentName,currentLayer));
-      printf("__\n");
     }
   }
 }
