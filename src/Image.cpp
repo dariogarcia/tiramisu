@@ -52,10 +52,10 @@ void Image::exploreImage(){
   }
 }
 
-void Image::computeRelevantFeatures(map<string,CNNLayer> &cnn){
+void Image::computeRelevantFeatures(const map<string,CNNLayer> &cnn){
   map<int,float> emptyMap;
   //For each layer
-  for(map<string,CNNLayer>::iterator it = cnn.begin();it!=cnn.end();it++){
+  for(map<string,CNNLayer>::const_iterator it = cnn.begin();it!=cnn.end();it++){
     map<int,CNNFeature> features = it->second.getFeatures();
     map<int,float> imageActivations = activations[it->first];
     //If its the first time we read a layer, add it

@@ -17,10 +17,10 @@ class Image {
     inline map<string,map<int,float> > getRelevantFeatures() const {return relevantFeatures;}
     inline void setName(string n) {name=n;}
     inline void setPath(string p) {path=p;}
-    inline void setActivations(map<string,map<int,float> > a) {activations=a;}
+    inline void setActivations(const map<string,map<int,float> > &a) {activations=a;}
     void addActivations(const string path, const string layerName);
     void exploreImage() ;
-    void computeRelevantFeatures(map<string,CNNLayer> &CNN);
+    void computeRelevantFeatures(const map<string,CNNLayer> &CNN);
 
   protected:
     string name;

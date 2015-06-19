@@ -6,6 +6,7 @@ List of todo things in tiramisu project
 
 - [x] Modify the output method of the caffe branch, to write a binary file. Addapt the tiramisu input code to binary format.
 - [ ] Test cosine distance similarities and differences of the raw activations of a set of images X
+- [ ] Build class image representations. Test cosine distance similarities and differences on those
 - [ ] Compute the statistics of features by considering a set of images Y
 - [ ] Build a vector of normalized relevant activations strengths e.g., mean+(X*stdDev)<value, if(x=1)val=0.25, if(x=2)val=0.5,...
 - [ ] Test cosine distance similarities and differences of the relevant features of a set images disjoint with Y.
@@ -26,9 +27,10 @@ List of todo things in tiramisu project
 - [ ] Write an interactive menu for loading layers and images from files.
 - [ ] Parallelize with OpenMP.
 - [ ] If first parameter of main does not end with "/" it will crash. Fix it.
+- [ ] To generalize, it may be appropriate to move computeRelevantFeatures from Image to Util, so ImageClass can use it.
 
 ## Todos related with general tiramisu research
 
 - [ ] Adjust the threshold parameters to distribution of activations. Study which "mean+(stdDev*x)" fits a log-scale distribution.
-- [ ] Test if additional edges between features are relevant and useful for the mining process. Consider adding layers as vertices, and features belonging to layers as edges.
+- [ ] Test if additional edges between features are relevant and useful for the mining process. Consider adding layers as vertices, and features belonging to layers as edges. Also imageclasses.
 - [ ] Is it interesting to shift from a map-vector based implementation to a vector-index or CRS implementation for the activation vectors of images?
