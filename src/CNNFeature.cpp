@@ -42,6 +42,6 @@ void CNNFeature::computeStatistics(){
 }
 
 void CNNFeature::computeActivationThreshold(){
-    activationThreshold = mean + (3*standardDev);
+    activationThreshold = mean + (.3*standardDev);
 }
 

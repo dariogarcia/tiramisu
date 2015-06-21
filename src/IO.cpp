@@ -51,17 +51,22 @@ void IO::loadImagesAndLayersFromTXTFile(string path, map<string,Image> &images, 
       //printf ("IO::loadImagesAndLayersFromTXTFile::Processing feature file '%s'\n", fullpath.c_str());
       string layerName = string(pDirent2->d_name)
         .substr(string(pDirent2->d_name).find_last_of("_")+1);
+      //std::cout << "layer:" << layerName << std::endl;
       string imageName = string(pDirent2->d_name)
         .substr(0,string(pDirent2->d_name).find_last_of("_"));
+      //std::cout << "image:" << imageName << std::endl;
       if(images_loaded.find(imageName)==images_loaded.end()){
         images_loaded.insert(imageName);
-        printf ("IO::loadImagesAndLayersFromTXTFile::Processing file of new image '%s' number %u\n", imageName.c_str(),images_loaded.size());
+        //printf ("IO::loadImagesAndLayersFromTXTFile::Processing file of new image '%s' number %u\n", imageName.c_str(),images_loaded.size());
+        std::cout << "IO::loadImagesAndLayersFromTXTFile::Processing file of new image " << imageName.c_str();
+        std::cout << " number " << images_loaded.size() << std::endl;
       }
       //If new layer, set name and store
       CNNLayer &currentLayer = layers[layerName];
       if(currentLayer.getFeaturesConst().size()==0){
-        printf ("IO::loadImagesAndLayersFromTXTFile::Adding new layer '%s'\n", layerName.c_str());
-        currentLayer.setName(layerName);
+        //printf ("IO::loadImagesAndLayersFromTXTFile::Adding new layer '%s'\n", layerName.c_str());
+        std::cout << "IO::loadImagesAndLayersFromTXTFile::Adding new layer " << layerName.c_str() << std::endl;
+        currentLayer.setName(layerName);         
         layers.insert(pair<string,CNNLayer>(layerName,currentLayer));
       }
       currentLayer.addFeatures(fullpath);
@@ -78,7 +83,8 @@ void IO::loadImagesAndLayersFromTXTFile(string path, map<string,Image> &images, 
     closedir(pDir2);
   }
   closedir (pDir);
-  printf ("IO::loadImagesAndLayersFromTXTFile::Total loaded images: '%u'\n", images.size());
+  //printf ("IO::loadImagesAndLayersFromTXTFile::Total loaded images: '%u'\n", images.size());
+  std::cout << "IO::loadImagesAndLayersFromTXTFile::Total loaded images: " << images.size() << std::endl;
   //Once all images have been loaded, compute the layer statistics
   for(map<string,CNNLayer>::iterator it=layers.begin();it!=layers.end();it++){
     it->second.computeLayerStatistics();
@@ -122,7 +128,9 @@ void IO::loadImagesFromTXTFile(string path, map<string,Image> &images){
         .substr(0,string(pDirent2->d_name).find_last_of("_"));
       if(images_loaded.find(imageName)==images_loaded.end()){
         images_loaded.insert(imageName);
-        printf ("IO::loadImagesFromTXTFile::Processing file of new image '%s' number %u\n", imageName.c_str(),images_loaded.size());
+        //printf ("IO::loadImagesFromTXTFile::Processing file of new image '%s' number %u\n", imageName.c_str(),images_loaded.size());
+        std::cout << "IO::loadImagesFromTXTFile::Processing file of new image " << imageName.c_str();
+        std::cout << " number " << images_loaded.size() << std::endl;
       }
       //If new image, set name and path and store
       Image &currentImage = images[imageName];
@@ -137,7 +145,8 @@ void IO::loadImagesFromTXTFile(string path, map<string,Image> &images){
     closedir(pDir2);
   }
   closedir (pDir);
-  printf ("IO::loadImagesFromTXTFile::Total loaded images: '%u'\n", images.size());
+  //printf ("IO::loadImagesFromTXTFile::Total loaded images: '%u'\n", images.size());
+  std::cout << "IO::loadImagesFromTXTFile::Total loaded images: "<< images.size() << std::endl;
 }
 
 
@@ -175,7 +184,9 @@ void IO::loadLayersFromTXTFile(string path, map<string,CNNLayer> &layers){
         .substr(0,string(pDirent2->d_name).find_last_of("_"));
       if(images_loaded.find(imageName)==images_loaded.end()){
         images_loaded.insert(imageName);
-        printf ("IO::loadLayersFromTXTFile::Processing file of new image '%s' number %u\n", imageName.c_str(),images_loaded.size());
+        //printf ("IO::loadLayersFromTXTFile::Processing file of new image '%s' number %u\n", imageName.c_str(),images_loaded.size());
+        std::cout << "IO::loadLayersFromTXTFile::Processing file of new image " << imageName.c_str();
+        std::cout << " number " << images_loaded.size() << std::endl;
       }
       //If new layer, set name and store
       CNNLayer &currentLayer = layers[layerName];
@@ -189,13 +200,15 @@ void IO::loadLayersFromTXTFile(string path, map<string,CNNLayer> &layers){
     closedir(pDir2);
   }
   closedir (pDir);
-  printf ("IO::loadLayersFromTXTFile::Total loaded layers: '%u'\n", layers.size());
+  //printf ("IO::loadLayersFromTXTFile::Total loaded layers: '%u'\n", layers.size());
+  std::cout << "IO::loadLayersFromTXTFile::Total loaded layers: " << layers.size();
   //Once all layers have been loaded, compute their statistics
   for(map<string,CNNLayer>::iterator it=layers.begin();it!=layers.end();it++){
     it->second.computeLayerStatistics();
     //printf ("IO::loadLayersFromTXTFile::Done computing statistics of layer %s\n",it->second.getName().c_str());
   }
   printf ("IO::loadLayersFromTXTFile::Done computing all layer statistics\n");
+  std::cout << "IO::loadLayersFromTXTFile::Done computing all layer statistics\n";
 }
 
 //Store in an output file the list of vertices defined by images

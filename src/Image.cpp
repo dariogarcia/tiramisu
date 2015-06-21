@@ -2,6 +2,7 @@
 #include <sstream>
 #include <iterator>
 #include <vector>
+#include <iostream>
 
 #include "../include/Image.hpp"
 
@@ -35,17 +36,21 @@ void Image::addActivations(string path, string layerName){
 //Method to explore and print contents of a set of images
 //Intended for validation of loading process
 void Image::exploreImage(){
-  printf("-Image with name '%s', path '%s', has '%u' activations \n",name.c_str(),path.c_str(),activations.size());
+  //printf("-Image with name '%s', path '%s', has '%u' activations \n",name.c_str(),path.c_str(),activations.size());
+  std::cout << "-Image with name " << name.c_str() << ", path " << path.c_str() << " has " << activations.size() << std::endl;
   int activationCounter = 0;
   for(map<string,map<int,float> >::iterator it2 = activations.begin();it2!=activations.end(); it2++){
     map<int,float> currentActivation = it2->second;
-    printf("--Activation num: '%u', name '%s', has '%u' values \n",
-      activationCounter, it2->first.c_str(), currentActivation.size());
+    /*printf("--Activation num: '%u', name '%s', has '%u' values \n",
+      activationCounter, it2->first.c_str(), currentActivation.size());*/
+    std::cout << "--Activation num: " << activationCounter << " name ";
+    std::cout << it2->first.c_str() << " has " << currentActivation.size() << " values" << std::endl;
     int valueCounter = 0;
     for(map<int,float>::iterator it3 = currentActivation.begin(); it3!=currentActivation.end();
       it3++){
-      printf("---Value num: '%u' is '%f''\n",
-        valueCounter,it3->second);
+      /*printf("---Value num: '%u' is '%f''\n",
+        valueCounter,it3->second); */
+      std::cout << "---Value num: " << valueCounter << " is " << it3->second << std::endl;
       valueCounter++;
     }
     activationCounter++;

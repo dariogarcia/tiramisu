@@ -2,6 +2,7 @@
 #include <sstream>
 #include <iterator>
 #include "../include/CNNLayer.hpp"
+#include <iostream>
 
 using std::ifstream;
 using std::istringstream;
@@ -46,13 +47,17 @@ void CNNLayer::addBasicFeature(const pair<int,CNNFeature> &feat){
 //Method to explore and print contents of a set of CNNLayers
 //Intended for validation of loading process
 void CNNLayer::exploreCNNLayer(){
-  printf("-Layer with name '%s', has '%u' activations \n", name.c_str(), features.size());
+  //printf("-Layer with name '%s', has '%u' activations \n", name.c_str(), features.size());
+    std::cout << "-Layer with name " << name.c_str() << "has " << features.size() << " activations" << std::endl;
   int featureCounter = 0;
   for(map<int,CNNFeature>::iterator it2 = features.begin(); it2!=features.end(); it2++){
     CNNFeature currentFeature = it2->second;
-    printf("--Feature num: '%d', with Id '%d':'%d', has mean '%f', stdDev '%f', absDev '%f' and '%u' values\n",
+    /*printf("--Feature num: '%d', with Id '%d':'%d', has mean '%f', stdDev '%f', absDev '%f' and '%u' values\n",
       featureCounter,currentFeature.getId(),it2->first,currentFeature.getMean(),
-      currentFeature.getStdDev(),currentFeature.getAbsDev(),currentFeature.getValues().size());
+      currentFeature.getStdDev(),currentFeature.getAbsDev(),currentFeature.getValues().size());*/
+    std::cout << "--Feature num: " << featureCounter << "with Id " << currentFeature.getId() << ":" << it2->first;
+    std::cout << "has mean " << currentFeature.getMean() << ", stdDev " << currentFeature.getStdDev();
+    std::cout << ", absDev" << currentFeature.getAbsDev() << ", and " << currentFeature.getValues().size() << " values" << std::endl;
     vector<float> values = currentFeature.getValues();
     int valueCounter = 0;
     for(vector<float>::iterator it3 = values.begin(); it3!=values.end(); it3++){
