@@ -11,10 +11,12 @@ using std::map;
 
 class Image {
   public:
-    string getName() const {return name;}
-    string getPath() const {return path;}
-    inline map<string,map<int,float> > getActivations() const {return activations;}
-    inline map<string,map<int,float> > getRelevantFeatures() const {return relevantFeatures;}
+    inline string getName() const {return name;}
+    inline string getPath() const {return path;}
+    inline map<string,map<int,float> > getActivationsDyn() const {return activations;}
+    inline const map<string,map<int,float> >& getActivationsConst() const {return activations;}
+    inline map<string,map<int,float> >& getRelevantFeaturesDyn() {return relevantFeatures;}
+    inline const map<string,map<int,float> >& getRelevantFeaturesConst() const {return relevantFeatures;}
     inline void setName(string n) {name=n;}
     inline void setPath(string p) {path=p;}
     inline void setActivations(const map<string,map<int,float> > &a) {activations=a;}

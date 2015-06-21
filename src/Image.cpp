@@ -35,11 +35,11 @@ void Image::addActivations(string path, string layerName){
 //Method to explore and print contents of a set of images
 //Intended for validation of loading process
 void Image::exploreImage(){
-  printf("-Image with name '%s', path '%s', has '%lu' activations \n",name.c_str(),path.c_str(),activations.size());
+  printf("-Image with name '%s', path '%s', has '%u' activations \n",name.c_str(),path.c_str(),activations.size());
   int activationCounter = 0;
   for(map<string,map<int,float> >::iterator it2 = activations.begin();it2!=activations.end(); it2++){
     map<int,float> currentActivation = it2->second;
-    printf("--Activation num: '%u', name '%s', has '%lu' values \n",
+    printf("--Activation num: '%u', name '%s', has '%u' values \n",
       activationCounter, it2->first.c_str(), currentActivation.size());
     int valueCounter = 0;
     for(map<int,float>::iterator it3 = currentActivation.begin(); it3!=currentActivation.end();
@@ -53,16 +53,17 @@ void Image::exploreImage(){
 }
 
 void Image::computeRelevantFeatures(const map<string,CNNLayer> &cnn){
-  map<int,float> emptyMap;
   //For each layer
   for(map<string,CNNLayer>::const_iterator it = cnn.begin();it!=cnn.end();it++){
-    map<int,CNNFeature> features = it->second.getFeatures();
+    const map<int,CNNFeature> &features = it->second.getFeaturesConst();
     map<int,float> imageActivations = activations[it->first];
     //If its the first time we read a layer, add it
-    if(relevantFeatures.find(it->first)==relevantFeatures.end())
+    if(relevantFeatures.find(it->first)==relevantFeatures.end()){
+      map<int,float> emptyMap;
       relevantFeatures.insert(pair<string,map<int,float> >(it->first,emptyMap));
+    }
     //For each feature in the layer
-    for(map<int,CNNFeature>::iterator it2=features.begin(); it2!=features.end();it2++){
+    for(map<int,CNNFeature>::const_iterator it2=features.begin(); it2!=features.end();it2++){
       //If the feature is strongly activated, store it
       if(imageActivations[it2->first] > it2->second.getActivationThreshold()){
         relevantFeatures[it->first].insert(pair<int,float> (it2->first,imageActivations[it2->first]));
