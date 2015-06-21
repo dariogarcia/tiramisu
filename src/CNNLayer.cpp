@@ -50,13 +50,13 @@ void CNNLayer::exploreCNNLayer(){
   int featureCounter = 0;
   for(map<int,CNNFeature>::iterator it2 = features.begin(); it2!=features.end(); it2++){
     CNNFeature currentFeature = it2->second;
-    printf("--Feature num: '%u', with Id '%u':'%u', has mean '%f', stdDev '%f', absDev '%f' and '%u' values\n",
+    printf("--Feature num: '%d', with Id '%d':'%d', has mean '%f', stdDev '%f', absDev '%f' and '%u' values\n",
       featureCounter,currentFeature.getId(),it2->first,currentFeature.getMean(),
       currentFeature.getStdDev(),currentFeature.getAbsDev(),currentFeature.getValues().size());
     vector<float> values = currentFeature.getValues();
     int valueCounter = 0;
     for(vector<float>::iterator it3 = values.begin(); it3!=values.end(); it3++){
-      printf("---Value num: '%u' is '%f'\n",valueCounter,*it3);
+      printf("---Value num: '%d' is '%f'\n",valueCounter,*it3);
       valueCounter++;
     }
     featureCounter++;

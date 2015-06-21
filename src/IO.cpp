@@ -59,7 +59,7 @@ void IO::loadImagesAndLayersFromTXTFile(string path, map<string,Image> &images, 
       }
       //If new layer, set name and store
       CNNLayer &currentLayer = layers[layerName];
-      if(currentLayer.getFeatures().size()==0){
+      if(currentLayer.getFeaturesConst().size()==0){
         printf ("IO::loadImagesAndLayersFromTXTFile::Adding new layer '%s'\n", layerName.c_str());
         currentLayer.setName(layerName);
         layers.insert(pair<string,CNNLayer>(layerName,currentLayer));
@@ -67,7 +67,7 @@ void IO::loadImagesAndLayersFromTXTFile(string path, map<string,Image> &images, 
       currentLayer.addFeatures(fullpath);
       //If new image, set name and path and store
       Image &currentImage = images[imageName];
-      if(currentImage.getActivations().size()==0) {
+      if(currentImage.getActivationsDyn().size()==0) {
         printf ("IO::loadImagesAndLayersFromTXTFile::Adding new image '%s'\n", imageName.c_str());
         currentImage.setName(imageName);
         currentImage.setPath(path+string(pDirent->d_name));
@@ -126,7 +126,7 @@ void IO::loadImagesFromTXTFile(string path, map<string,Image> &images){
       }
       //If new image, set name and path and store
       Image &currentImage = images[imageName];
-      if(currentImage.getActivations().size()==0) {
+      if(currentImage.getActivationsDyn().size()==0) {
         printf ("IO::loadImagesFromTXTFile::Adding new image '%s'\n", imageName.c_str());
         currentImage.setName(imageName);
         currentImage.setPath(path+string(pDirent->d_name));
@@ -179,7 +179,7 @@ void IO::loadLayersFromTXTFile(string path, map<string,CNNLayer> &layers){
       }
       //If new layer, set name and store
       CNNLayer &currentLayer = layers[layerName];
-      if(currentLayer.getFeatures().size()==0){
+      if(currentLayer.getFeaturesConst().size()==0){
         printf ("IO::loadLayersFromTXTFile::Adding new layer '%s'\n", layerName.c_str());
         currentLayer.setName(layerName);
         layers.insert(pair<string,CNNLayer>(layerName,currentLayer));
@@ -216,9 +216,9 @@ string IO::writeLayersVerticesToTXTFile(string filename, const map<string,CNNLay
   output_file.open(filename);
   //For each layer
   for(map<string,CNNLayer>::const_iterator it = layers.begin(); it!=layers.end(); it++){
-    map<int,CNNFeature> lay = it->second.getFeatures();
+    const map<int,CNNFeature> &lay = it->second.getFeaturesConst();
     //Each feature is a vertex
-    for(map<int,CNNFeature>::iterator it2 = lay.begin(); it2!=lay.end(); it2++){
+    for(map<int,CNNFeature>::const_iterator it2 = lay.begin(); it2!=lay.end(); it2++){
       output_file<<it->second.getName()<<"_"<<it2->second.getId()<<"\n";  
     }
   }
@@ -236,9 +236,9 @@ string IO::writeImagesAndLayersVerticesToTXTFile(string filename, const map<stri
   }
   //For each layer
   for(map<string,CNNLayer>::const_iterator it = layers.begin(); it!=layers.end(); it++){
-    map<int,CNNFeature> lay = it->second.getFeatures();
+    const map<int,CNNFeature> &lay = it->second.getFeaturesConst();
     //Each feature is a vertex
-    for(map<int,CNNFeature>::iterator it2 = lay.begin(); it2!=lay.end(); it2++){
+    for(map<int,CNNFeature>::const_iterator it2 = lay.begin(); it2!=lay.end(); it2++){
       output_file<<it->second.getName()<<"_"<<it2->second.getId()<<"\n";  
     }
   }
@@ -252,7 +252,7 @@ string IO::writeImagesAndLayersEdgesToTXTFile(string filename, const map<string,
   output_file.open(filename);
   //For each image
   for(map<string,Image>::const_iterator it = images.begin(); it!=images.end(); it++){
-    map<string,map<int,float> > lays = it->second.getRelevantFeatures();
+    const map<string,map<int,float> > &lays = it->second.getRelevantFeaturesConst();
     string imageVertexName = it->second.getName();
     //For each layer
     for(map<string,map<int,float> >::const_iterator it2 = lays.begin();it2!=lays.end();it2++){
@@ -272,11 +272,11 @@ vector<string> IO::writeLayersToTXTFile(string filename, const map<string,CNNLay
   vector<string> filenames;
   //For each layer
   for(map<string,CNNLayer>::const_iterator it = layers.begin(); it!=layers.end(); it++){
-    map<int,CNNFeature> lay = it->second.getFeatures();
+    const map<int,CNNFeature> &lay = it->second.getFeaturesConst();
     ofstream output_file;
     output_file.open(filename);
     //Each feature is a vertex
-    for(map<int,CNNFeature>::iterator it2 = lay.begin(); it2!=lay.end(); it2++){
+    for(map<int,CNNFeature>::const_iterator it2 = lay.begin(); it2!=lay.end(); it2++){
       output_file<<it2->second.getId()<<" "<<it2->second.getMean()<<" "<<it2->second.getStdDev()<<"\n";  
     }
     output_file.close();
@@ -293,7 +293,7 @@ void IO::writeLayersToBinaryFile(string const filename, map<string,CNNLayer> con
   int i=0;
   for(map<string,CNNLayer>::const_iterator it = layers.begin(); it!=layers.end(); it++){
     namesSize[i] = it->first.size();
-    featuresPerLayer[i] = it->second.getFeatures().size();
+    featuresPerLayer[i] = it->second.getFeaturesConst().size();
     i++;
   }
   ofstream fout( filename.c_str(), ios::out | ios::binary );
@@ -305,7 +305,7 @@ void IO::writeLayersToBinaryFile(string const filename, map<string,CNNLayer> con
     //For each layer
     size_t ilayer = 0;
     for(map<string,CNNLayer>::const_iterator it = layers.begin(); it!=layers.end(); it++){
-      map<int,CNNFeature> feats =  it->second.getFeatures();
+      const map<int,CNNFeature> &feats =  it->second.getFeaturesConst();
       //Write layer name
       char* tmp_str = new char[namesSize[ilayer]+1];
       //tmp_str = it->first.c_str();
@@ -318,7 +318,7 @@ void IO::writeLayersToBinaryFile(string const filename, map<string,CNNLayer> con
       char* buffer;
       buffer = (char*) malloc ((sizeof(float)*3+sizeof(int))*size);
       int current_size=0;
-      for(map<int,CNNFeature>::iterator it2 = feats.begin(); it2 != feats.end(); it2++){
+      for(map<int,CNNFeature>::const_iterator it2 = feats.begin(); it2 != feats.end(); it2++){
         //Write feature Id, mean, stdDev and activationThreshold
         *((size_t *)&buffer[current_size]) = it2->second.getId();
         current_size += sizeof(int);
