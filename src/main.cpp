@@ -1,6 +1,7 @@
 #include <dirent.h>
 #include <cstring>
 #include <map>
+#include <iostream>
 
 #include "../include/Image.hpp"
 #include "../include/ImageClass.hpp"
@@ -13,7 +14,13 @@ using std::pair;
 
 int main(int argc, char* argv[]){
   pair<map<string,Image>,map<string,CNNLayer> > data;
-  IO::loadImagesAndLayersFromTXTFile(argv[1],data.first, data.second);
+  if (argc == 1){ 
+      std::cout << "MAIN::Using default directory './images/other' as source of images as a parameter" << std::endl;
+      std::string str_default_path ("./images/other/");
+      IO::loadImagesAndLayersFromTXTFile(str_default_path,data.first, data.second);
+  }
+  else
+      IO::loadImagesAndLayersFromTXTFile(argv[1]+string("/"),data.first, data.second);
   //IO::loadLayersFromTXTFile(argv[1], data.second);
   //IO::loadImagesFromTXTFile(argv[3], data.first);
   printf("MAIN::Done loading images\n");
