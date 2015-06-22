@@ -285,7 +285,7 @@ vector<string> IO::writeLayersToTXTFile(string filename, const map<string,CNNLay
   return filenames;
 }
 
-void IO::writeLayersToBinaryFile(string const filename, map<string,CNNLayer> const layers){
+void IO::writeLayersToBinaryFile(string const filename, map<string,CNNLayer> const &layers){
   size_t num_layers = layers.size();
   size_t namesSize[num_layers];
   size_t featuresPerLayer[num_layers];
@@ -379,3 +379,80 @@ void IO::loadLayersFromBinaryFile(string const filename, map<string,CNNLayer> &l
     }
   }
 }
+
+
+
+void IO::writeImageClassToBinaryFile(string const filename, ImageClass const &imageC){
+  //Compute self name size
+  size_t imageClass_name_size = imageC.getName().size();
+  //Compute image names size
+  size_t num_images_names = imageC.getImageNames().size();
+  size_t image_name_size[num_images_names];
+  int nameIDX = 0;
+  for(vector<string>::const_iterator it = imageC.getImageNames().begin(); it!=imageC.getImageNames().end(); it++){
+    image_name_size[nameIDX] = (*it).size();
+    nameIDX++;
+  }
+  //Compute num layers and layers name size
+  size_t num_layers = imageC.getMeanActivations().size();
+  size_t layer_namesSize[num_layers];
+  size_t featuresPerLayer[num_layers];
+  //Compute features per layer, and layer name lenghts
+  int i=0;
+  for(map<string,map<int,float> >::const_iterator it = imageC.getMeanActivations().begin(); it!=imageC.getMeanActivations().end(); it++){
+    layer_namesSize[i] = it->first.size();
+    featuresPerLayer[i] = it->second.size();
+    i++;
+  }
+  ofstream fout( filename.c_str(), ios::out | ios::binary );
+  if (fout.is_open()) {
+    //Write self name size and name,
+    fout.write( (char*)&imageClass_name_size, sizeof(size_t));
+    char * name = new char[imageClass_name_size+1];
+    std::copy(imageC.getName().begin(), imageC.getName().end(), name);
+    name[imageClass_name_size] = '\0';
+    fout.write( (char*)name, sizeof(char)*imageClass_name_size+1);
+    //Write num images, image names size and image names
+    fout.write( (char*)&num_images_names, sizeof(size_t));
+    fout.write( (char*)&image_name_size, sizeof(size_t)*num_images_names);
+    size_t iImage = 0; 
+    for(vector<string>::const_iterator it = imageC.getImageNames().begin(); it!=imageC.getImageNames().end(); it++){
+      char * img_name = new char[image_name_size[iImage]+1];
+      std::copy((*it).begin(), (*it).end(), img_name);
+      img_name[image_name_size[iImage]] = '\0';
+      fout.write( (char*)img_name, sizeof(char)*image_name_size[iImage]+1);
+      iImage++;
+    }
+    //Write num layers, num values, values per layer, and sizes of layer names
+    fout.write( (char*)&num_layers, sizeof(size_t) );
+    fout.write( (char*)&layer_namesSize, sizeof(size_t)*num_layers );
+    fout.write( (char*)&featuresPerLayer, sizeof(size_t)*num_layers );
+    //For each layer
+    size_t ilayer = 0;
+    for(map<string,map<int,float> >::const_iterator it = imageC.getMeanActivations().begin(); it!=imageC.getMeanActivations().end(); it++){
+      const map<int,float> &feats =  it->second;
+      //Write layer name
+      char* tmp_str = new char[layer_namesSize[ilayer]+1];
+      std::copy(it->first.begin(), it->first.end(), tmp_str);
+      tmp_str[layer_namesSize[ilayer]] = '\0'; // don't forget the terminating 0
+      fout.write( (char*)tmp_str, sizeof(char)*layer_namesSize[ilayer]+1 );
+      //For each feature
+      int size = feats.size();
+      char* buffer;
+      buffer = (char*) malloc ((sizeof(int)+sizeof(float))*size);
+      int current_size=0;
+      for(map<int,float>::const_iterator it2 = feats.begin(); it2 != feats.end(); it2++){
+        //Write feature Id, mean, stdDev and activationThreshold
+        *((size_t *)&buffer[current_size]) = it2->first;
+        current_size += sizeof(int);
+        *((float *)&buffer[current_size]) = it2->second;
+        current_size += sizeof(float);
+      }
+      fout.write( (char*)(buffer), sizeof(int)*size + sizeof(float)*size );
+      ilayer++;
+    }
+    fout.close();
+  }
+  else printf ("IO::writeImageClassToBinaryFile::Cant open file to write %s\n",filename.c_str());
+}
+
