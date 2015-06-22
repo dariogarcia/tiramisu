@@ -1,6 +1,7 @@
 #include <iterator>
 
 #include "../include/ImageClass.hpp"
+#include "../include/Util.hpp"
 
 //Computes the mean activation from a set of images which are suposed to belong to this imageClass
 //WARNING: Removes any previously stored meanActivations and image names
@@ -38,4 +39,22 @@ void ImageClass::computeMeanActivations(const map<string,Image> &images, const m
       //printf("processed feature %u\n",currentFeat);
     }
   }
+}
+
+ImageClass ImageClass::findClosestClassByEucliDist(const vector<ImageClass> &iClassCandidates, const map<string,CNNLayer> &layers){
+  const ImageClass &target = *this;
+  if(iClassCandidates.size()<1){
+    printf("ImageClass::findClosestClassByEucliDist::ERROR empty vector of candidates to compare. Returning self.\n");
+    return target;
+  }
+  ImageClass closest = iClassCandidates.front();
+  float closestDist = Util::euclideanDistanceImageClass(layers, target, closest);
+  for (vector<ImageClass>::const_iterator i = std::next(iClassCandidates.begin()); i != iClassCandidates.end(); i++){
+    float currentDist = Util::euclideanDistanceImageClass(layers, target, *i);
+    if(currentDist<closestDist){
+      closestDist=currentDist;
+      closest = *i;
+    }
+  }
+  return closest;
 }
