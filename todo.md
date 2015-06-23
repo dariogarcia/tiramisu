@@ -28,6 +28,7 @@ List of todo things in tiramisu project
 - [ ] Parallelize with OpenMP.
 - [ ] If first parameter of main does not end with "/" it will crash. Fix it.
 - [ ] To generalize, it may be appropriate to move computeRelevantFeatures from Image to Util, so ImageClass can use it.
+- [ ] Test the following mehods: ImageClass::computeMeanActivation, ImageClass::writeImageClassToBinaryFile (implement the read!), ImageClass::findClosestClassByEucliDist, Util::euclideanDistanceImageClass
 
 ## Todos related with general tiramisu research
 
