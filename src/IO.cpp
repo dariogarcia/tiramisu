@@ -5,6 +5,8 @@
 #include <fstream>
 #include <istream>
 #include <iostream>
+#include <sstream>
+#include <iterator>
 
 #include "../include/IO.hpp"
 #include "../include/Image.hpp"
@@ -15,6 +17,9 @@ using std::set;
 using std::ofstream;
 using std::ifstream;
 using std::ios;
+using std::istringstream;
+using std::istream_iterator;
+using std::back_inserter;
 
 //Reads a directory containing sub-directories/images,
 // and loads the data of each sub-directory/image.
@@ -69,7 +74,7 @@ void IO::loadImagesAndLayersFromTXTFile(string path, map<string,Image> &images, 
       Image &currentImage = images[imageName];
       if(currentImage.getActivationsDyn().size()==0) {
         printf ("IO::loadImagesAndLayersFromTXTFile::Adding new image '%s'\n", imageName.c_str());
-        currentImage.setName(imageName);
+        currentImage.setImageName(imageName);
         currentImage.setPath(path+string(pDirent->d_name));
         images.insert(pair<string,Image>(imageName,currentImage));
       }
@@ -128,7 +133,7 @@ void IO::loadImagesFromTXTFile(string path, map<string,Image> &images){
       Image &currentImage = images[imageName];
       if(currentImage.getActivationsDyn().size()==0) {
         printf ("IO::loadImagesFromTXTFile::Adding new image '%s'\n", imageName.c_str());
-        currentImage.setName(imageName);
+        currentImage.setImageName(imageName);
         currentImage.setPath(path+string(pDirent->d_name));
         images.insert(pair<string,Image>(imageName,currentImage));
       }
@@ -198,13 +203,34 @@ void IO::loadLayersFromTXTFile(string path, map<string,CNNLayer> &layers){
   printf ("IO::loadLayersFromTXTFile::Done computing all layer statistics\n");
 }
 
+
+//Read a file with the image names and image classes, and update image data with them accordingly
+void IO::readAndSetImageClasses(string path, map<string,Image> &images){
+  ifstream infile(path.c_str());
+  string line;
+  if(infile.is_open()){
+    while(getline(infile,line)){
+      vector<std::string> strs;
+      istringstream is(line);
+      copy(istream_iterator<string>(is),istream_iterator<string>(),back_inserter<vector<string> >(strs));
+      string image_name = strs[0];
+      string image_class_name = strs[1];
+      //Find the image in the map and update its class name
+      images[image_name].setClassName(image_class_name);
+    }
+    infile.close();
+  }
+  else printf("IO::readImageClasses::ERROR Unable to open file%s\n",path.c_str());
+}
+
+
 //Store in an output file the list of vertices defined by images
 string IO::writeImagesVerticesToTXTFile(string filename, const map<string,Image> &images){
   ofstream output_file;
   output_file.open(filename);
   //Each image is a vertex
   for(map<string,Image>::const_iterator it = images.begin(); it!=images.end(); it++){
-    output_file<<it->second.getName()<<"\n";  
+    output_file<<it->second.getImageName()<<"\n";  
   }
   output_file.close();
   return filename;
@@ -232,7 +258,7 @@ string IO::writeImagesAndLayersVerticesToTXTFile(string filename, const map<stri
   output_file.open(filename);
   //Each image is a vertex
   for(map<string,Image>::const_iterator it = images.begin(); it!=images.end(); it++){
-    output_file<<it->second.getName()<<"\n";  
+    output_file<<it->second.getImageName()<<"\n";  
   }
   //For each layer
   for(map<string,CNNLayer>::const_iterator it = layers.begin(); it!=layers.end(); it++){
@@ -253,7 +279,7 @@ string IO::writeImagesAndLayersEdgesToTXTFile(string filename, const map<string,
   //For each image
   for(map<string,Image>::const_iterator it = images.begin(); it!=images.end(); it++){
     const map<string,map<int,float> > &lays = it->second.getRelevantFeaturesConst();
-    string imageVertexName = it->second.getName();
+    string imageVertexName = it->second.getImageName();
     //For each layer
     for(map<string,map<int,float> >::const_iterator it2 = lays.begin();it2!=lays.end();it2++){
       map<int,float> feat = it2->second;
@@ -381,7 +407,7 @@ void IO::loadLayersFromBinaryFile(string const filename, map<string,CNNLayer> &l
 }
 
 
-
+//TODO: not validated. To implement reader as well
 void IO::writeImageClassToBinaryFile(string const filename, ImageClass const &imageC){
   //Compute self name size
   size_t imageClass_name_size = imageC.getName().size();

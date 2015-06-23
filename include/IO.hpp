@@ -19,6 +19,7 @@ class IO {
     static void loadImagesAndLayersFromTXTFile(string path, map<string,Image> &images, map<string,CNNLayer> &layers);
     static void loadImagesFromTXTFile(string path, map<string,Image> &images);
     static void loadLayersFromTXTFile(string path, map<string,CNNLayer> &layers);
+    static void readAndSetImageClasses(string path, map<string,Image> &images);
     static string writeImagesVerticesToTXTFile(string filename, const map<string,Image> &images);
     static string writeLayersVerticesToTXTFile(string filename, const map<string,CNNLayer> &layers);
     static string writeImagesAndLayersVerticesToTXTFile(string filename, const map<string,Image> &images, const map<string,CNNLayer> &layers);
