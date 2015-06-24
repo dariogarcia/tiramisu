@@ -215,6 +215,7 @@ void IO::readAndSetImageClasses(string path, map<string,Image> &images){
       copy(istream_iterator<string>(is),istream_iterator<string>(),back_inserter<vector<string> >(strs));
       string image_name = strs[0];
       string image_class_name = strs[1];
+      for(int i = 2 ; i<strs.size(); i++) image_class_name = image_class_name + " " + strs[i];
       //Find the image in the map and update its class name
       images[image_name].setClassName(image_class_name);
     }
