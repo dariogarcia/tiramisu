@@ -35,12 +35,12 @@ void Image::addActivations(string path, string layerName){
 //Method to explore and print contents of a set of images
 //Intended for validation of loading process
 void Image::exploreImage(){
-  printf("-Image with name '%s', path '%s', has '%u' activations \n",imageName.c_str(),path.c_str(),activations.size());
+  printf("-Image with name '%s', path '%s', has '%u' activations \n",imageName.c_str(),path.c_str(), (unsigned int)activations.size());
   int activationCounter = 0;
   for(map<string,map<int,float> >::iterator it2 = activations.begin();it2!=activations.end(); it2++){
     map<int,float> currentActivation = it2->second;
     printf("--Activation num: '%u', name '%s', has '%u' values \n",
-      activationCounter, it2->first.c_str(), currentActivation.size());
+      activationCounter, it2->first.c_str(), (unsigned int)currentActivation.size());
     int valueCounter = 0;
     for(map<int,float>::iterator it3 = currentActivation.begin(); it3!=currentActivation.end();
       it3++){

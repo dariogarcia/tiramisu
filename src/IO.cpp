@@ -60,7 +60,7 @@ void IO::loadImagesAndLayersFromTXTFile(string path, map<string,Image> &images, 
         .substr(0,string(pDirent2->d_name).find_last_of("_"));
       if(images_loaded.find(imageName)==images_loaded.end()){
         images_loaded.insert(imageName);
-        printf ("IO::loadImagesAndLayersFromTXTFile::Processing file of new image '%s' number %u\n", imageName.c_str(),images_loaded.size());
+        printf ("IO::loadImagesAndLayersFromTXTFile::Processing file of new image '%s' number %u\n", imageName.c_str(),(unsigned int)images_loaded.size());
       }
       //If new layer, set name and store
       CNNLayer &currentLayer = layers[layerName];
@@ -83,7 +83,7 @@ void IO::loadImagesAndLayersFromTXTFile(string path, map<string,Image> &images, 
     closedir(pDir2);
   }
   closedir (pDir);
-  printf ("IO::loadImagesAndLayersFromTXTFile::Total loaded images: '%u'\n", images.size());
+  printf ("IO::loadImagesAndLayersFromTXTFile::Total loaded images: '%u'\n", (unsigned int)images.size());
   //Once all images have been loaded, compute the layer statistics
   for(map<string,CNNLayer>::iterator it=layers.begin();it!=layers.end();it++){
     it->second.computeLayerStatistics();
@@ -127,7 +127,7 @@ void IO::loadImagesFromTXTFile(string path, map<string,Image> &images){
         .substr(0,string(pDirent2->d_name).find_last_of("_"));
       if(images_loaded.find(imageName)==images_loaded.end()){
         images_loaded.insert(imageName);
-        printf ("IO::loadImagesFromTXTFile::Processing file of new image '%s' number %u\n", imageName.c_str(),images_loaded.size());
+        printf ("IO::loadImagesFromTXTFile::Processing file of new image '%s' number %u\n", imageName.c_str(),(unsigned int)images_loaded.size());
       }
       //If new image, set name and path and store
       Image &currentImage = images[imageName];
@@ -142,7 +142,7 @@ void IO::loadImagesFromTXTFile(string path, map<string,Image> &images){
     closedir(pDir2);
   }
   closedir (pDir);
-  printf ("IO::loadImagesFromTXTFile::Total loaded images: '%u'\n", images.size());
+  printf ("IO::loadImagesFromTXTFile::Total loaded images: '%u'\n", (unsigned int)images.size());
 }
 
 
@@ -180,7 +180,7 @@ void IO::loadLayersFromTXTFile(string path, map<string,CNNLayer> &layers){
         .substr(0,string(pDirent2->d_name).find_last_of("_"));
       if(images_loaded.find(imageName)==images_loaded.end()){
         images_loaded.insert(imageName);
-        printf ("IO::loadLayersFromTXTFile::Processing file of new image '%s' number %u\n", imageName.c_str(),images_loaded.size());
+        printf ("IO::loadLayersFromTXTFile::Processing file of new image '%s' number %u\n", imageName.c_str(),(unsigned int)images_loaded.size());
       }
       //If new layer, set name and store
       CNNLayer &currentLayer = layers[layerName];
@@ -194,7 +194,7 @@ void IO::loadLayersFromTXTFile(string path, map<string,CNNLayer> &layers){
     closedir(pDir2);
   }
   closedir (pDir);
-  printf ("IO::loadLayersFromTXTFile::Total loaded layers: '%u'\n", layers.size());
+  printf ("IO::loadLayersFromTXTFile::Total loaded layers: '%u'\n", (unsigned int)layers.size());
   //Once all layers have been loaded, compute their statistics
   for(map<string,CNNLayer>::iterator it=layers.begin();it!=layers.end();it++){
     it->second.computeLayerStatistics();
