@@ -1,7 +1,10 @@
 #include <iterator>
+#include <algorithm>
 
 #include "../include/ImageClass.hpp"
 #include "../include/Util.hpp"
+
+using std::find;
 
 //Computes the mean activation from a set of images which are suposed to belong to this imageClass
 //WARNING: Removes any previously stored meanActivations and image names
@@ -14,7 +17,6 @@ void ImageClass::computeMeanActivations(const map<string,Image> &images, const m
   for(map<string,CNNLayer>::const_iterator it = CNN.begin(); it!=CNN.end(); it++){
     string currentLayer = it->first;
     const map<int,CNNFeature> &layerFeats = it->second.getFeaturesConst();
-    printf("processing layer %s\n",currentLayer.c_str());
     //If its the first time we read a layer, add it
     if(meanActivations.find(currentLayer)==meanActivations.end()){
       map<int,float> emptyMap;
@@ -23,7 +25,7 @@ void ImageClass::computeMeanActivations(const map<string,Image> &images, const m
     //For each feature in the layer
     for(map<int,CNNFeature>::const_iterator it2=layerFeats.begin(); it2!=layerFeats.end();it2++){
       int currentFeat = it2->first;
-      float totalActivations;
+      float totalActivations=0.0;
       //Add the activation from each image
       for(map<string,Image>::const_iterator it3 = images.begin(); it3!=images.end();it3++){
         const map<string,map<int,float> > &imageLayers = it3->second.getActivationsConst();
@@ -37,6 +39,48 @@ void ImageClass::computeMeanActivations(const map<string,Image> &images, const m
       }
       meanActivations[currentLayer][currentFeat] = totalActivations/(float)numImages;
       //printf("processed feature %u\n",currentFeat);
+    }
+  }
+}
+
+
+//Computes the mean activation of some images which belong to this imageClass.
+//The list of images which belong are defined in the vector
+//WARNING: Removes any previously stored meanActivations and image names
+void ImageClass::computeMeanActivations(vector<string> &imagesByClass, const map<string,Image> &images, const map<string,CNNLayer> &CNN){
+  meanActivations.clear();
+  imageNames.clear();
+  int numImages = imagesByClass.size();
+  for(map<string,Image>::const_iterator it3 = images.begin(); it3!=images.end();it3++){
+    if(find(imagesByClass.begin(),imagesByClass.end(),it3->first)==imagesByClass.end()) continue;
+    imageNames.push_back(it3->first);
+  }
+  //For each layer
+  for(map<string,CNNLayer>::const_iterator it = CNN.begin(); it!=CNN.end(); it++){
+    string currentLayer = it->first;
+    const map<int,CNNFeature> &layerFeats = it->second.getFeaturesConst();
+    //If its the first time we read a layer, add it
+    if(meanActivations.find(currentLayer)==meanActivations.end()){
+      map<int,float> emptyMap;
+      meanActivations.insert(pair<string,map<int,float> >(currentLayer,emptyMap));
+    }
+    //For each feature in the layer
+    for(map<int,CNNFeature>::const_iterator it2=layerFeats.begin(); it2!=layerFeats.end();it2++){
+      int currentFeat = it2->first;
+      float totalActivations=0.0;
+      //Add the activation from each image
+      for(map<string,Image>::const_iterator it3 = images.begin(); it3!=images.end();it3++){
+        if(find(imagesByClass.begin(),imagesByClass.end(),it3->first)==imagesByClass.end()) continue;
+        const map<string,map<int,float> > &imageLayers = it3->second.getActivationsConst();
+        const map<int,float> &imageFeats = imageLayers.find(currentLayer)->second;
+        if(imageFeats!=imageLayers.end()->second){
+          if(imageFeats.find(currentFeat)!=imageFeats.end()){
+            //Add value
+            totalActivations+=imageFeats.find(currentFeat)->second;
+          }
+        }
+      }
+      meanActivations[currentLayer][currentFeat] = totalActivations/(float)numImages;
     }
   }
 }

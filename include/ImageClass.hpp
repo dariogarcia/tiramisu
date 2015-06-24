@@ -18,8 +18,10 @@ class ImageClass {
     inline const vector<string>& getImageNames() const {return imageNames;}
     inline const map<string,map<int,float> >& getMeanActivations() const {return meanActivations;}
     inline void setName(string n) {name=n;}
+    inline void setImageNames(vector<string> n) {imageNames=n;}
     inline void addImageName(string n) {imageNames.push_back(n);}
     void computeMeanActivations(const map<string,Image> &images, const map<string,CNNLayer> &CNN);
+    void computeMeanActivations(vector<string> &imageByClass, const map<string,Image> &images, const map<string,CNNLayer> &CNN);
     ImageClass findClosestClassByEucliDist(const vector<ImageClass> &iClassCandidates, const map<string,CNNLayer> &layers);
 
   protected:

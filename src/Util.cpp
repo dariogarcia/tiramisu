@@ -64,7 +64,10 @@ float Util::euclideanDistanceImageClass(const map<string,CNNLayer> &layers, cons
 //Fills the imageClasses structure with the mean activations of the images beloning to each class found in images
 //According to the topology defined by CNN
 void Util::computeImageClasses(const map<string,Image> &images, const map<string,CNNLayer> &CNN,  map<string,ImageClass> &imageClasses){
-  map<string,map<string,Image> > imagesByClass;
+  if(CNN.size()==0){
+      printf("Util::computeImageClasses::WARNING::CNN has no layers. Returning no image classes\n");
+  }
+  map<string,vector<string> > imagesByClass;
   //Organize images by their class. For each image...
   for(map<string,Image>::const_iterator it = images.begin(); it!=images.end(); it++){
     const Image& currentImage = it->second;
@@ -73,12 +76,14 @@ void Util::computeImageClasses(const map<string,Image> &images, const map<string
       continue;
     }
     //Add image to the temporal structure associating the images of this class
-    imagesByClass[currentImage.getClassName()].insert(pair<string,Image> (it->first,currentImage));
+    imagesByClass[currentImage.getClassName()].push_back(it->first);
   }
   //Compute each image class and store it
-  for(map<string,map<string,Image> >::iterator it = imagesByClass.begin(); it!=imagesByClass.end(); it++){
+  for(map<string,vector<string> >::iterator it = imagesByClass.begin(); it!=imagesByClass.end(); it++){
     ImageClass currentImageClass;
-    currentImageClass.computeMeanActivations(imagesByClass[it->first],CNN);
+    currentImageClass.computeMeanActivations(imagesByClass[it->first],images,CNN);
+    currentImageClass.setName(it->first);
+    currentImageClass.setImageNames(it->second);
     imageClasses.insert(pair<string,ImageClass> (it->first,currentImageClass));
   }
 }
