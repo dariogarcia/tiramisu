@@ -51,6 +51,7 @@ void ImageClass::computeMeanActivations(vector<string> &imagesByClass, const map
   meanActivations.clear();
   imageNames.clear();
   int numImages = imagesByClass.size();
+  //Store the names of the images belonging to the class (i.e., found in the vector)
   for(map<string,Image>::const_iterator it3 = images.begin(); it3!=images.end();it3++){
     if(find(imagesByClass.begin(),imagesByClass.end(),it3->first)==imagesByClass.end()) continue;
     imageNames.push_back(it3->first);
@@ -80,23 +81,23 @@ void ImageClass::computeMeanActivations(vector<string> &imagesByClass, const map
           }
         }
       }
-      meanActivations[currentLayer][currentFeat] = totalActivations/(float)numImages;
+      if(totalActivations!=0.0) meanActivations[currentLayer][currentFeat] = totalActivations/(float)numImages;
     }
   }
 }
 
-ImageClass ImageClass::findClosestClassByEucliDist(const vector<ImageClass> &iClassCandidates, const map<string,CNNLayer> &layers){
+pair<ImageClass,float> ImageClass::findClosestClassByEucliDist(const vector<ImageClass> &iClassCandidates, const map<string,CNNLayer> &layers){
   const ImageClass &target = *this;
   if(iClassCandidates.size()<1){
     printf("ImageClass::findClosestClassByEucliDist::ERROR empty vector of candidates to compare. Returning self.\n");
-    return target;
+    return pair<ImageClass,float>(target,0.0);
   }
   ImageClass closest;
   ///If the first is self, skip
   if(iClassCandidates.front().getName().compare(target.getName())==0){
     if(next(iClassCandidates.begin())==iClassCandidates.end()){
       printf("ImageClass::findClosestClassByEucliDist::ERROR one one class to compare and it is self. Returning self.\n");
-      return target;
+      return pair<ImageClass,float>(target,0.0);
     }
     closest = *next(iClassCandidates.begin());
   }
@@ -111,21 +112,21 @@ ImageClass ImageClass::findClosestClassByEucliDist(const vector<ImageClass> &iCl
       closest = *i;
     }
   }
-  return closest;
+  return pair<ImageClass,float>(closest,closestDist);
 }
 
-ImageClass ImageClass::findClosestClassByEucliDist(const map<string,ImageClass> &iClassCandidates, const map<string,CNNLayer> &layers){
+pair<ImageClass,float> ImageClass::findClosestClassByEucliDist(const map<string,ImageClass> &iClassCandidates, const map<string,CNNLayer> &layers){
   const ImageClass &target = *this;
   if(iClassCandidates.size()<1){
     printf("ImageClass::findClosestClassByEucliDist::ERROR empty vector of candidates to compare. Returning self.\n");
-    return target;
+    return pair<ImageClass,float>(target,0.0);
   }
   ImageClass closest;
   //If the first is self, skip
   if(iClassCandidates.begin()->second.getName().compare(target.getName())==0){
     if(next(iClassCandidates.begin())==iClassCandidates.end()){
-      printf("ImageClass::findClosestClassByEucliDist::ERROR one one class to compare and it is self. Returning self.\n");
-      return target;
+      printf("ImageClass::findClosestClassByEucliDist::ERROR only one class to compare and it is self. Returning self.\n");
+      return pair<ImageClass,float>(target,0.0);
     }
     closest = next(iClassCandidates.begin())->second;
   }
@@ -136,9 +137,11 @@ ImageClass ImageClass::findClosestClassByEucliDist(const map<string,ImageClass> 
     if(i->second.getName().compare(target.getName())==0) continue;
     float currentDist = Util::euclideanDistanceImageClass(layers, target, i->second);
     if(currentDist<closestDist){
+      printf("new closest for %s is %s at %f\n",target.getName().c_str(),i->first.c_str(),currentDist);
       closestDist=currentDist;
       closest = i->second;
     }
+    printf("closest for %s is still %s with %f. %s was further at %f\n",target.getName().c_str(),closest.getName().c_str(),closestDist,i->first.c_str(),currentDist);
   }
-  return closest;
+  return pair<ImageClass,float>(closest,closestDist);
 }

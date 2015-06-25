@@ -16,9 +16,37 @@ using std::pair;
 int main(int argc, char* argv[]){
   pair<map<string,Image>,map<string,CNNLayer> > data;
 
+  time_t t_init;
+  time(&t_init);
+  IO::loadLayersFromTXTFile(argv[1], data.second);
+  time_t t_end;
+  time(&t_end);
+  double t_diff = difftime (t_end,t_init);
+  printf("Load layers took %f\n",t_diff);
+  
+  time(&t_init);
+  IO::loadImagesFromTXTFile(argv[2], data.first);
+  time(&t_end);
+  printf("Load images took %f\n",difftime (t_end,t_init));
+  
+  time(&t_init);
+  IO::readAndSetImageClasses(argv[3], data.first);
+  time(&t_end);
+  printf("Read & set image classes took %f\n",difftime (t_end,t_init));
+  
+  time(&t_init);
+  map<string,ImageClass> imageClasses;
+  Util::computeImageClasses(data.first, data.second , imageClasses);
+  time(&t_end);
+  printf("Compute image classes took %f\n",difftime (t_end,t_init));
 
-
-
+  time(&t_init);
+  for(map<string,ImageClass>::iterator it = imageClasses.begin(); it!=imageClasses.end(); it++){
+    pair<ImageClass,float> closest = it->second.findClosestClassByEucliDist(imageClasses, data.second);
+    printf("Closest class to %s is %s at distance %f\n",it->first.c_str(),closest.first.getName().c_str(),closest.second);
+  }
+  time(&t_end);
+  printf("Compute image classes took %f\n",difftime (t_end,t_init));
 
 
 ///////////////////////////////////////////////////////////
@@ -89,8 +117,10 @@ int main(int argc, char* argv[]){
   //Find the closest image class by euclidean distance to one from within a set
   //vector<ImageClass> iClassCandidates;
   //ImageClass closest = imageclass.findClosestClassByEucliDist(iClassCandidates, data.second);
+  //map<string,ImageClass> iClassCandidates;
+  //ImageClass closest = imageclass.findClosestClassByEucliDist(iClassCandidates, data.second);
 
-  //Find the closest image class by euclidean distance to one from within a set
+  //Find the euclidean distance between two image classes
   //ImageClass imgc1, imgc2;
   //float euclDist = Util::euclideanDistanceImageClass(data.second, imgc1, imgc2);
 

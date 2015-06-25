@@ -67,7 +67,6 @@ void IO::loadImagesAndLayersFromTXTFile(string path, map<string,Image> &images, 
       if(currentLayer.getFeaturesConst().size()==0){
         printf ("IO::loadImagesAndLayersFromTXTFile::Adding new layer '%s'\n", layerName.c_str());
         currentLayer.setName(layerName);
-        layers.insert(pair<string,CNNLayer>(layerName,currentLayer));
       }
       currentLayer.addFeatures(fullpath);
       //If new image, set name and path and store
@@ -76,7 +75,6 @@ void IO::loadImagesAndLayersFromTXTFile(string path, map<string,Image> &images, 
         printf ("IO::loadImagesAndLayersFromTXTFile::Adding new image '%s'\n", imageName.c_str());
         currentImage.setImageName(imageName);
         currentImage.setPath(path+string(pDirent->d_name));
-        images.insert(pair<string,Image>(imageName,currentImage));
       }
       currentImage.addActivations(fullpath,layerName); 
     }
@@ -95,6 +93,7 @@ void IO::loadImagesAndLayersFromTXTFile(string path, map<string,Image> &images, 
 
 //Loads a directory containing directories of one or more images.
 //It builds the images data structures and statistics
+//WARNING: unpredicted behavior if input images already had information of images with the same name
 void IO::loadImagesFromTXTFile(string path, map<string,Image> &images){
   struct dirent *pDirent;
   DIR *pDir;
@@ -103,7 +102,6 @@ void IO::loadImagesFromTXTFile(string path, map<string,Image> &images){
     printf ("IO::loadImagesFromTXTFile::Cannot open directory '%s'\n", path.c_str());
     return;
   }
-  set<string> images_loaded;
   //For each directory in the input path
   while ((pDirent = readdir(pDir)) != NULL) {
     if(string(pDirent->d_name).find(".")!= string::npos) continue;
@@ -111,31 +109,21 @@ void IO::loadImagesFromTXTFile(string path, map<string,Image> &images){
     DIR *pDir2;
     pDir2 = opendir((path+string("/")+string(pDirent->d_name)).c_str());
     if (pDir2 == NULL) {
-        printf ("IO::loadImagesFromTXTFile::Cannot open sub-directory '%s'\n", 
-          (path+string("/")+string(pDirent->d_name)).c_str());
+        printf ("IO::loadImagesFromTXTFile::Cannot open sub-directory '%s'\n", (path+string("/")+string(pDirent->d_name)).c_str());
         continue;
     }
     //Read each file
     while ((pDirent2 = readdir(pDir2)) != NULL) {
       if(string(pDirent2->d_name).find(".")!= string::npos) continue;
-      string fullpath = (path+string(pDirent->d_name)+
-        string("/")+string(pDirent2->d_name)).c_str();
-      //printf ("IO::loadImagesFromTXTFile::Processing feature file '%s'\n", fullpath.c_str());
-      string layerName = string(pDirent2->d_name)
-        .substr(string(pDirent2->d_name).find_last_of("_")+1);
-      string imageName = string(pDirent2->d_name)
-        .substr(0,string(pDirent2->d_name).find_last_of("_"));
-      if(images_loaded.find(imageName)==images_loaded.end()){
-        images_loaded.insert(imageName);
-        printf ("IO::loadImagesFromTXTFile::Processing file of new image '%s' number %u\n", imageName.c_str(),(unsigned int)images_loaded.size());
-      }
-      //If new image, set name and path and store
+      string fullpath = (path+string(pDirent->d_name)+string("/")+string(pDirent2->d_name)).c_str();
+      string layerName = string(pDirent2->d_name).substr(string(pDirent2->d_name).find_last_of("_")+1);
+      string imageName = string(pDirent2->d_name).substr(0,string(pDirent2->d_name).find_last_of("_"));
+      //If new image, set name and path
       Image &currentImage = images[imageName];
       if(currentImage.getActivationsDyn().size()==0) {
         printf ("IO::loadImagesFromTXTFile::Adding new image '%s'\n", imageName.c_str());
         currentImage.setImageName(imageName);
         currentImage.setPath(path+string(pDirent->d_name));
-        images.insert(pair<string,Image>(imageName,currentImage));
       }
       currentImage.addActivations(fullpath,layerName); 
     }
@@ -187,7 +175,6 @@ void IO::loadLayersFromTXTFile(string path, map<string,CNNLayer> &layers){
       if(currentLayer.getFeaturesConst().size()==0){
         printf ("IO::loadLayersFromTXTFile::Adding new layer '%s'\n", layerName.c_str());
         currentLayer.setName(layerName);
-        layers.insert(pair<string,CNNLayer>(layerName,currentLayer));
       }
       currentLayer.addFeatures(fullpath);
     }
@@ -217,7 +204,10 @@ void IO::readAndSetImageClasses(string path, map<string,Image> &images){
       string image_class_name = strs[1];
       for(int i = 2 ; i<strs.size(); i++) image_class_name = image_class_name + " " + strs[i];
       //Find the image in the map and update its class name
-      images[image_name].setClassName(image_class_name);
+      if(images.find(image_name)==images.end()){
+        //printf("IO::readImageClasses::Label %s belongs to no image\n",image_name.c_str());
+      }
+      else images[image_name].setClassName(image_class_name);
     }
     infile.close();
   }

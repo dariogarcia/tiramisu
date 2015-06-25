@@ -25,7 +25,7 @@ void Image::addActivations(string path, string layerName){
       copy(istream_iterator<string>(is),istream_iterator<string>(),back_inserter<vector<string> >(strs));
       int key = stoi(strs[1]);
       float value = stof(strs[0]);
-      layerActivations[key] = value;
+      if(value!=0) layerActivations[key] = value;
     }
     infile.close();
   }
