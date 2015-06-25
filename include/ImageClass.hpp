@@ -23,6 +23,7 @@ class ImageClass {
     void computeMeanActivations(const map<string,Image> &images, const map<string,CNNLayer> &CNN);
     void computeMeanActivations(vector<string> &imageByClass, const map<string,Image> &images, const map<string,CNNLayer> &CNN);
     ImageClass findClosestClassByEucliDist(const vector<ImageClass> &iClassCandidates, const map<string,CNNLayer> &layers);
+    ImageClass findClosestClassByEucliDist(const map<string,ImageClass> &iClassCandidates, const map<string,CNNLayer> &layers);
 
   protected:
     string name;

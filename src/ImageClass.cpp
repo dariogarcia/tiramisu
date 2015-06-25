@@ -91,13 +91,53 @@ ImageClass ImageClass::findClosestClassByEucliDist(const vector<ImageClass> &iCl
     printf("ImageClass::findClosestClassByEucliDist::ERROR empty vector of candidates to compare. Returning self.\n");
     return target;
   }
-  ImageClass closest = iClassCandidates.front();
+  ImageClass closest;
+  ///If the first is self, skip
+  if(iClassCandidates.front().getName().compare(target.getName())==0){
+    if(next(iClassCandidates.begin())==iClassCandidates.end()){
+      printf("ImageClass::findClosestClassByEucliDist::ERROR one one class to compare and it is self. Returning self.\n");
+      return target;
+    }
+    closest = *next(iClassCandidates.begin());
+  }
+  else closest = iClassCandidates.front();
   float closestDist = Util::euclideanDistanceImageClass(layers, target, closest);
   for (vector<ImageClass>::const_iterator i = std::next(iClassCandidates.begin()); i != iClassCandidates.end(); i++){
+    //Skip self comparation
+    if((*i).getName().compare(target.getName())==0) continue;
     float currentDist = Util::euclideanDistanceImageClass(layers, target, *i);
     if(currentDist<closestDist){
       closestDist=currentDist;
       closest = *i;
+    }
+  }
+  return closest;
+}
+
+ImageClass ImageClass::findClosestClassByEucliDist(const map<string,ImageClass> &iClassCandidates, const map<string,CNNLayer> &layers){
+  const ImageClass &target = *this;
+  if(iClassCandidates.size()<1){
+    printf("ImageClass::findClosestClassByEucliDist::ERROR empty vector of candidates to compare. Returning self.\n");
+    return target;
+  }
+  ImageClass closest;
+  //If the first is self, skip
+  if(iClassCandidates.begin()->second.getName().compare(target.getName())==0){
+    if(next(iClassCandidates.begin())==iClassCandidates.end()){
+      printf("ImageClass::findClosestClassByEucliDist::ERROR one one class to compare and it is self. Returning self.\n");
+      return target;
+    }
+    closest = next(iClassCandidates.begin())->second;
+  }
+  else closest = iClassCandidates.begin()->second;
+  float closestDist = Util::euclideanDistanceImageClass(layers, target, closest);
+  for (map<string,ImageClass>::const_iterator i = std::next(iClassCandidates.begin()); i != iClassCandidates.end(); i++){
+    //Skip self comparation
+    if(i->second.getName().compare(target.getName())==0) continue;
+    float currentDist = Util::euclideanDistanceImageClass(layers, target, i->second);
+    if(currentDist<closestDist){
+      closestDist=currentDist;
+      closest = i->second;
     }
   }
   return closest;
