@@ -20,19 +20,34 @@ float Util::euclideanDistanceImageActivations(const map<string,CNNLayer> &layers
   //For each layer
   for(map<string,CNNLayer>::const_iterator l_it=layers.begin(); l_it!=layers.end(); l_it++){
     //If layer does not exist in one image, error by now. TODO: Avoid error, assume al features are 0
-    if(img1.getActivationsConst().find(l_it->first)==img1.getActivationsConst().end()||
-        img2.getActivationsConst().find(l_it->first)==img2.getActivationsConst().end()){
+    if(img1.getLayersIDX().find(l_it->first)==img1.getLayersIDX().end()||
+    img2.getLayersIDX().find(l_it->first)==(img2.getLayersIDX().end())){    
       printf("Util::euclideanDistanceActivations::ERROR::Image/s do not contain layer\n");
       return 0.0;
     }
-    const map<int,float> &act1 = img1.getActivationsConst().find(l_it->first)->second;
-    const map<int,float> &act2 = img2.getActivationsConst().find(l_it->first)->second;
-    for(map<int,CNNFeature>::const_iterator f_it= l_it->second.getFeaturesConst().begin(); f_it!= l_it->second.getFeaturesConst().end(); f_it++){
-      float val1=0.0, val2=0.0;
-      if(act1.find(f_it->first)!=act1.end()) val1 = act1.find(f_it->first)->second;
-      if(act2.find(f_it->first)!=act2.end()) val2 = act2.find(f_it->first)->second;
-      distance+=(val1-val2)*(val1-val2);
-    } 
+    const map<string,int>& layersIDX = img1.getLayersIDX();
+    const vector<pair<int,float> > &act1 = img1.getActivationsConst()[layersIDX.find(l_it->first)->second];
+    const vector<pair<int,float> > &act2 = img2.getActivationsConst()[layersIDX.find(l_it->first)->second];
+    //const map<int,float> &act1 = img1.getActivationsConst().find(l_it->first)->second;
+    //const map<int,float> &act2 = img2.getActivationsConst().find(l_it->first)->second;
+    //for(map<int,CNNFeature>::const_iterator f_it= l_it->second.getFeaturesConst().begin(); f_it!= l_it->second.getFeaturesConst().end(); f_it++){
+    vector<pair<int,float> >::const_iterator it1 = act1.begin();
+    vector<pair<int,float> >::const_iterator it2 = act2.begin();
+    while(it1!=act1.end() && it2!=act2.end()){
+      if(it1->first<it2->first){
+        distance+=(it1->second*it1->second);
+        it1++;
+      }
+      else if(it2->first<it1->first){
+        distance+=(it2->second*it2->second);
+        it2++;
+      }
+      else{
+        distance+=(it1->second-it2->second)*(it1->second-it2->second);
+        it1++;
+        it2++;
+      }
+    }
   }
   return sqrt(distance);
 }

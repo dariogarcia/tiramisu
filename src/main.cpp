@@ -40,6 +40,12 @@ int main(int argc, char* argv[]){
   time(&t_end);
   printf("Compute image classes took %f\n",difftime (t_end,t_init));
 
+
+
+  //for(map<string,ImageClass>::iterator it = imageClasses.begin(); it!=imageClasses.end(); it++){
+  //  it->second.printAccumulatedMeanAct();
+  //}
+
   time(&t_init);
   for(map<string,ImageClass>::iterator it = imageClasses.begin(); it!=imageClasses.end(); it++){
     pair<ImageClass,float> closest = it->second.findClosestClassByEucliDist(imageClasses, data.second);

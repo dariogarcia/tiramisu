@@ -28,14 +28,15 @@ void ImageClass::computeMeanActivations(const map<string,Image> &images, const m
       float totalActivations=0.0;
       //Add the activation from each image
       for(map<string,Image>::const_iterator it3 = images.begin(); it3!=images.end();it3++){
-        const map<string,map<int,float> > &imageLayers = it3->second.getActivationsConst();
-        const map<int,float> &imageFeats = imageLayers.find(currentLayer)->second;
-        if(imageFeats!=imageLayers.end()->second){
-          if(imageFeats.find(currentFeat)!=imageFeats.end()){
-            //Add value
-            totalActivations+=imageFeats.find(currentFeat)->second;
-          }
+        int idx = it3->second.getLayersIDX().find(currentLayer)->second;
+        const vector<pair<int,float> > &activ = it3->second.getActivationsConst()[idx];
+        float val = 0.0;
+        for(vector<pair<int,float> >::const_iterator it_f = activ.begin();it_f!=activ.end();it_f++){
+          if(it_f->first<currentFeat)it_f++;
+          else if(it_f->first>currentFeat)break;
+          else val = it_f->second;
         }
+        totalActivations+=val;
       }
       meanActivations[currentLayer][currentFeat] = totalActivations/(float)numImages;
       //printf("processed feature %u\n",currentFeat);
@@ -71,15 +72,15 @@ void ImageClass::computeMeanActivations(vector<string> &imagesByClass, const map
       float totalActivations=0.0;
       //Add the activation from each image
       for(map<string,Image>::const_iterator it3 = images.begin(); it3!=images.end();it3++){
-        if(find(imagesByClass.begin(),imagesByClass.end(),it3->first)==imagesByClass.end()) continue;
-        const map<string,map<int,float> > &imageLayers = it3->second.getActivationsConst();
-        const map<int,float> &imageFeats = imageLayers.find(currentLayer)->second;
-        if(imageFeats!=imageLayers.end()->second){
-          if(imageFeats.find(currentFeat)!=imageFeats.end()){
-            //Add value
-            totalActivations+=imageFeats.find(currentFeat)->second;
-          }
+        int idx = it3->second.getLayersIDX().find(currentLayer)->second;
+        const vector<pair<int,float> > &activ = it3->second.getActivationsConst()[idx];
+        float val = 0.0;
+        for(vector<pair<int,float> >::const_iterator it_f = activ.begin();it_f!=activ.end();it_f++){
+          if(it_f->first<currentFeat)it_f++;
+          else if(it_f->first>currentFeat)break;
+          else val = it_f->second;
         }
+        totalActivations+=val;
       }
       if(totalActivations!=0.0) meanActivations[currentLayer][currentFeat] = totalActivations/(float)numImages;
     }

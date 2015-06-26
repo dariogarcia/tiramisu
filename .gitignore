@@ -3,3 +3,4 @@ build/main
 deprecated
 images/*
 tmp/*
+local_run.txt

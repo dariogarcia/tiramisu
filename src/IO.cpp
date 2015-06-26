@@ -269,13 +269,13 @@ string IO::writeImagesAndLayersEdgesToTXTFile(string filename, const map<string,
   output_file.open(filename);
   //For each image
   for(map<string,Image>::const_iterator it = images.begin(); it!=images.end(); it++){
-    const map<string,map<int,float> > &lays = it->second.getRelevantFeaturesConst();
+    const vector<vector<pair< int,float> > > &lays = it->second.getRelevantFeaturesConst();
     string imageVertexName = it->second.getImageName();
+    const map<string,int> &layers_idx = it->second.getLayersIDX();
     //For each layer
-    for(map<string,map<int,float> >::const_iterator it2 = lays.begin();it2!=lays.end();it2++){
-      map<int,float> feat = it2->second;
-      //For each relevant feature
-      for(map<int,float>::const_iterator it3 = feat.begin(); it3!=feat.end(); it3++){
+    for(map<string,int>::const_iterator it2 = layers_idx.begin(); it2!=layers_idx.end(); it2++){
+      const vector<pair< int,float> > &feat = lays[it2->second];
+      for(vector<pair< int,float> >::const_iterator it3=feat.begin(); it3!=feat.end();it3++){
         output_file<<imageVertexName<<" "<<it2->first<<"_"<<it3->first <<"\n";  
       }
     }
