@@ -24,6 +24,7 @@ class ImageClass {
     void computeMeanActivations(vector<string> &imageByClass, const map<string,Image> &images, const map<string,CNNLayer> &CNN);
     pair<ImageClass,float> findClosestClassByEucliDist(const vector<ImageClass> &iClassCandidates, const map<string,CNNLayer> &layers);
     pair<ImageClass,float> findClosestClassByEucliDist(const map<string,ImageClass> &iClassCandidates, const map<string,CNNLayer> &layers);
+    void printAccumulatedMeanAct();
 
   protected:
     string name;

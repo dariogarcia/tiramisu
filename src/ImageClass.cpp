@@ -145,3 +145,14 @@ pair<ImageClass,float> ImageClass::findClosestClassByEucliDist(const map<string,
   }
   return pair<ImageClass,float>(closest,closestDist);
 }
+
+void ImageClass::printAccumulatedMeanAct(){
+  float total = 0;
+  for(map<string,map<int,float> >::iterator it = meanActivations.begin(); it!=meanActivations.end();it++){
+    map<int,float> &layer = it->second;
+    for(map<int,float>::iterator it2 = layer.begin(); it2!=layer.end(); it2++){
+      total+=it2->second;
+    }
+  }
+  printf("ImageClass::printAccumulatedMeanAct::ImageClass %s has an accumulated %f activations\n",name.c_str(),total);
+}
