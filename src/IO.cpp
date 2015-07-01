@@ -226,11 +226,14 @@ void IO::loadFeaturesFromTXTFile(string path, CNNFeatures &cnnfeatures, CNNSchem
     return;
   }
   //Initialize temporal structure and cnnfeatures
-  vector<vector<vector<float> > > values;
+  vector<vector<pair<int,vector<float> > > > values;
   cnnfeatures.features.resize(scheme.getNumLayers());
   values.resize(scheme.getNumLayers());
   for(int i = 0; i<scheme.getNumLayers();i++){
     values[i].resize(scheme.layerSize[i]);
+    for(int j = 0; j<scheme.layerSize[i];j++){
+      values[i][j].first = 0;
+    }
     cnnfeatures.features[i].resize(scheme.layerSize[i]);
   }
   //For each directory in the input path
@@ -244,53 +247,62 @@ void IO::loadFeaturesFromTXTFile(string path, CNNFeatures &cnnfeatures, CNNSchem
         continue;
     }
     //Read each file
+    #pragma omp parallel
     while ((pDirent2 = readdir(pDir2)) != NULL) {
-      if(string(pDirent2->d_name).find(".")!= string::npos) continue;
-      string fullpath = (path+string(pDirent->d_name)+string("/")+string(pDirent2->d_name)).c_str();
-      string layerName = string(pDirent2->d_name).substr(string(pDirent2->d_name).find_last_of("_")+1);
-      string imageName = string(pDirent2->d_name).substr(0,string(pDirent2->d_name).find_last_of("_"));
-      ifstream infile(fullpath.c_str());
-      //Find index of layer
-      int layerCounter = find(scheme.layerIdx.begin(),scheme.layerIdx.end(),layerName) - scheme.layerIdx.begin();
-      if(layerCounter > scheme.layerIdx.size()){
-        printf("IO::loadFeaturesFromTXTFile::Error layer %s not found in scheme\n",layerName.c_str());
-        continue;
-      }
-      string line;
-      if(infile.is_open()){
-        int featureCounter = 0;
-        while(getline(infile,line)){
-          vector<std::string> strs;
-          istringstream is(line);
-          copy(istream_iterator<string>(is),istream_iterator<string>(),back_inserter<vector<string> >(strs));
-          values[layerCounter][featureCounter].push_back(stof(strs[0]));
-          featureCounter++;
+      #pragma omp task firstprivate(pDirent2) shared(scheme)
+      {
+        //Avoid files with '.'
+        if(string(pDirent2->d_name).find(".")== string::npos){
+          string fullpath = (path+string(pDirent->d_name)+string("/")+string(pDirent2->d_name)).c_str();
+          string layerName = string(pDirent2->d_name).substr(string(pDirent2->d_name).find_last_of("_")+1);
+          string imageName = string(pDirent2->d_name).substr(0,string(pDirent2->d_name).find_last_of("_"));
+          ifstream infile(fullpath.c_str());
+          //Find index of layer, make sure its valid
+          int layerCounter = find(scheme.layerIdx.begin(),scheme.layerIdx.end(),layerName) - scheme.layerIdx.begin();
+          if(layerCounter <= scheme.layerIdx.size()){
+            string line;
+            if(infile.is_open()){
+              int featureCounter = 0;
+              while(getline(infile,line)){
+                vector<std::string> strs;
+                istringstream is(line);
+                copy(istream_iterator<string>(is),istream_iterator<string>(),back_inserter<vector<string> >(strs));
+                #pragma omp critical (values)
+                {
+                if(stof(strs[0])!=0)values[layerCounter][featureCounter].second.push_back(stof(strs[0]));
+                else values[layerCounter][featureCounter].first++;
+                }
+                featureCounter++;
+              }
+              infile.close();
+            }
+            else printf("::ERROR Unable to open file%s\n",fullpath.c_str());
+          }
         }
-        infile.close();
       }
-      else printf("::ERROR Unable to open file%s\n",fullpath.c_str());
     }
+    #pragma omp taskwait
     closedir(pDir2);
     printf("IO::loadFeaturesFromTXTFile::Done with folder %s\n",string(pDirent->d_name).c_str());
   }
   closedir (pDir);
-  printf ("IO::loadFeaturesFromTXTFile::Read all values & compute statistics\n");
+  printf ("IO::loadFeaturesFromTXTFile::Read all values, lets compute statistics\n");
   //Once all layers have been loaded, compute their statistics
   int totalLayers = scheme.getNumLayers();
   #pragma omp parallel for schedule(dynamic,1)
   for(int i = 0; i<totalLayers; i++){
     int layerSize = scheme.layerSize[i];
-    float numValues = (float)values[0][0].size();
+    float numValues = (float)values[0][0].first + (float)values[0][0].second.size();
     for(int j = 0 ; j<layerSize; j++){
       //Compute mean
       float mean = 0;
-      for(vector<float>::iterator it=values[i][j].begin();it!=values[i][j].end();it++) {
+      for(vector<float>::iterator it=values[i][j].second.begin();it!=values[i][j].second.end();it++) {
         mean=mean+*it;
       }
       if(mean!=0) mean = mean/numValues;
       //Compute stdDev
       float standardDev = 0;
-      for(vector<float>::iterator it=values[i][j].begin();it!=values[i][j].end();it++) {
+      for(vector<float>::iterator it=values[i][j].second.begin();it!=values[i][j].second.end();it++) {
         standardDev+=(*it-mean)*(*it-mean);
       }
       if(standardDev!=0) standardDev = sqrt(standardDev/(numValues-1));
@@ -299,6 +311,8 @@ void IO::loadFeaturesFromTXTFile(string path, CNNFeatures &cnnfeatures, CNNSchem
       cnnfeatures.features[i][j].stdDev=standardDev;
     }
   }
+  //Deallocate memory, just in case...
+  vector<vector<pair<int,vector<float> > > >().swap(values);
   printf ("IO::loadFeaturesFromTXTFile::Done computing all layer statistics\n");
 }
 
