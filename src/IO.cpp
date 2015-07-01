@@ -167,47 +167,60 @@ void IO::loadImagesFromTXTFile(string path, vector<Image> &images, CNNScheme &sc
         continue;
     }
     //Read each file
+    #pragma omp parallel
     while ((pDirent2 = readdir(pDir2)) != NULL) {
       if(string(pDirent2->d_name).find(".")!= string::npos) continue;
-      string fullpath = (path+string(pDirent->d_name)+string("/")+string(pDirent2->d_name)).c_str();
-      string layerName = string(pDirent2->d_name).substr(string(pDirent2->d_name).find_last_of("_")+1);
-      string imageName = string(pDirent2->d_name).substr(0,string(pDirent2->d_name).find_last_of("_"));
-      //Find index of image
-      int imageCounter = find(imageIdx.begin(),imageIdx.end(),imageName) - imageIdx.begin();
-      //If new image, add it and initialize
-      if(imageCounter >= imageIdx.size()) {
-        Image newImage;
-        newImage.setImageName(imageName);
-        newImage.setPath(path+string(pDirent->d_name));
-        newImage.activations.resize(scheme.getNumLayers());
-        for(int i=0;i<scheme.getNumLayers();i++){
-          vector<pair<int,float> > vec;
-          newImage.activations.push_back(vec);
+      #pragma omp task firstprivate(pDirent2) shared(scheme)
+      {
+        string fullpath = (path+string(pDirent->d_name)+string("/")+string(pDirent2->d_name)).c_str();
+        string layerName = string(pDirent2->d_name).substr(string(pDirent2->d_name).find_last_of("_")+1);
+        string imageName = string(pDirent2->d_name).substr(0,string(pDirent2->d_name).find_last_of("_"));
+        //Find index of image
+        int imageCounter = find(imageIdx.begin(),imageIdx.end(),imageName) - imageIdx.begin();
+        //If new image, add it and initialize
+        if(imageCounter >= imageIdx.size()) {
+          Image newImage;
+          newImage.setImageName(imageName);
+          newImage.setPath(path+string(pDirent->d_name));
+          newImage.activations.resize(scheme.getNumLayers());
+          for(int i=0;i<scheme.getNumLayers();i++){
+            vector<pair<int,float> > vec;
+            newImage.activations.push_back(vec);
+          }
+          #pragma omp critical (images)
+          {
+            images.push_back(newImage);
+            imageIdx.push_back(imageName);
+          }
         }
-        images.push_back(newImage);
-        imageIdx.push_back(imageName);
-      }
-      Image &currentImage = images[imageCounter];
-      //Find index of layer
-      int layerCounter = find(scheme.layerIdx.begin(),scheme.layerIdx.end(),layerName) - scheme.layerIdx.begin();
-      if(layerCounter > scheme.layerIdx.size()){
-        printf("IO::loadImagesFromTXTFile::Error layer %s not found in scheme\n",layerName.c_str());
-        continue;
-      }
-      //Add features values
-      ifstream infile(fullpath.c_str());
-      string line;
-      if(infile.is_open()){
-        while(getline(infile,line)){
-          vector<std::string> strs;
-          istringstream is(line);
-          copy(istream_iterator<string>(is),istream_iterator<string>(),back_inserter<vector<string> >(strs));
-          if(stof(strs[0])!=0) currentImage.activations[layerCounter].push_back(pair<int,float>(stoi(strs[1]),stof(strs[0])));
+        Image &currentImage = images[imageCounter];
+        //Find index of layer
+        int layerCounter = find(scheme.layerIdx.begin(),scheme.layerIdx.end(),layerName) - scheme.layerIdx.begin();
+        if(layerCounter <=scheme.layerIdx.size()){
+          //Add features values
+          ifstream infile(fullpath.c_str());
+          string line;
+          if(infile.is_open()){
+            while(getline(infile,line)){
+              vector<std::string> strs;
+              istringstream is(line);
+              copy(istream_iterator<string>(is),istream_iterator<string>(),back_inserter<vector<string> >(strs));
+              if(stof(strs[0])!=0) currentImage.activations[layerCounter].push_back(pair<int,float>(stoi(strs[1]),stof(strs[0])));
+            }
+            infile.close();
+          }
+          else {
+            #pragma omp critical (print)
+            printf("IO::loadImagesFromTXTFile:: Unable to open file\n");
+          }
         }
-        infile.close();
+        else {
+          #pragma omp critical (print)
+          printf("IO::loadImagesFromTXTFile::Error layer %s not found in scheme\n",layerName.c_str()); 
+        }
       }
-      else printf("IO::loadImagesFromTXTFile:: Unable to open file\n");
     }
+    #pragma omp taskwait
     closedir(pDir2);
     printf("IO::loadImagesFromTXTFile::Done Computing directory %s\n",(path+string(pDirent->d_name)).c_str());
   }
