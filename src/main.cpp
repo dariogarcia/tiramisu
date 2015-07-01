@@ -3,53 +3,63 @@
 #include <map>
 #include <vector>
 
-#include "../include/Image.hpp"
-#include "../include/ImageClass.hpp"
-#include "../include/CNNLayer.hpp"
 #include "../include/IO.hpp"
 #include "../include/Util.hpp"
+#include "../include/CNNScheme.hpp"
+#include "../include/ImageClass.hpp"
 
 using std::map;
 using std::vector;
 using std::pair;
 
 int main(int argc, char* argv[]){
-  pair<map<string,Image>,map<string,CNNLayer> > data;
-
+  CNNScheme scheme;
+  CNNFeatures cnnfeatures;
+  vector<Image> images;
+  
   time_t t_init;
   time(&t_init);
-  IO::loadLayersFromTXTFile(argv[1], data.second);
+  IO::loadSchemeFromTXTFile(argv[1], scheme);
   time_t t_end;
   time(&t_end);
   double t_diff = difftime (t_end,t_init);
-  printf("Load layers took %f\n",t_diff);
+  printf("Load scheme took %f\n",t_diff);
+
+  scheme.printScheme();
+
+  //cnnfeatures.initialize(scheme);
+  //printf("Done initializing\n");
+  //time(&t_init);
+  //IO::loadFeaturesFromTXTFile(argv[1], cnnfeatures, scheme);
+  //time(&t_end);
+  //printf("Load features took %f\n",difftime (t_end,t_init));
+
   
   time(&t_init);
-  IO::loadImagesFromTXTFile(argv[2], data.first);
+  IO::loadImagesFromTXTFile(argv[2], images, scheme);
   time(&t_end);
   printf("Load images took %f\n",difftime (t_end,t_init));
-  
+ 
   time(&t_init);
-  IO::readAndSetImageClasses(argv[3], data.first);
+  IO::readAndSetImageClasses(argv[3], images);
   time(&t_end);
   printf("Read & set image classes took %f\n",difftime (t_end,t_init));
   
   time(&t_init);
-  map<string,ImageClass> imageClasses;
-  Util::computeImageClasses(data.first, data.second , imageClasses);
+  vector<ImageClass> imageClasses;
+  Util::computeImageClasses(images, scheme, imageClasses);
   time(&t_end);
   printf("Compute image classes took %f\n",difftime (t_end,t_init));
 
 
-
-  //for(map<string,ImageClass>::iterator it = imageClasses.begin(); it!=imageClasses.end(); it++){
-  //  it->second.printAccumulatedMeanAct();
-  //}
+  ////for(map<string,ImageClass>::iterator it = imageClasses.begin(); it!=imageClasses.end(); it++){
+  ////  it->second.printAccumulatedMeanAct();
+  ////}
 
   time(&t_init);
-  for(map<string,ImageClass>::iterator it = imageClasses.begin(); it!=imageClasses.end(); it++){
-    pair<ImageClass,float> closest = it->second.findClosestClassByEucliDist(imageClasses, data.second);
-    printf("Closest class to %s is %s at distance %f\n",it->first.c_str(),closest.first.getName().c_str(),closest.second);
+  for(vector<ImageClass>::iterator it = imageClasses.begin(); it!=imageClasses.end(); it++){
+    pair<ImageClass,float> closest = (*it).findClosestClassByEucliDist(imageClasses, scheme);
+    printf("Closest class to %s is %s at distance %f\n",(*it).getName().c_str(),closest.first.getName().c_str(),closest.second);
   }
   time(&t_end);
   printf("Compute image classes took %f\n",difftime (t_end,t_init));
