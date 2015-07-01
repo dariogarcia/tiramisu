@@ -13,24 +13,43 @@ void ImageClass::computeMeanActivations(vector<pair<string,Image *> > &images, c
   imageNames.clear();
   float numImages = (float)images.size();
   for(vector<pair<string,Image *> >::iterator it = images.begin(); it!=images.end();it++) imageNames.push_back(it->first);
-  //For each layer
-  for(int i = 0 ; i < scheme.getNumLayers(); i++){
-    int currentSize = scheme.layerSize[i];
-    vector<pair<int,float> > currentMeans;
-    //For each feature in the layer
-    for(int j=0;j<currentSize;j++){
-      float totalActivations=0.0;
-      //Add the activation from each image
-      for(vector<pair<string,Image *> >::iterator it = images.begin(); it!=images.end();it++){
-         vector<pair<int,float> > &imageFeaturesForLayer = (it->second)->activations[i];
-        for(vector<pair<int,float> >::iterator it2 = imageFeaturesForLayer.begin(); it2!=imageFeaturesForLayer.end(); it2++){
-          if(it2->first==j) totalActivations+=it2->second;
-          else if(it2->first>j)break;
+  //Temporal structure to store activation counts
+  vector<vector<int> > actCount;
+  actCount.resize(scheme.getNumLayers());
+  for(int i = 0; i<scheme.getNumLayers();i++){
+    actCount[i].resize(scheme.layerSize[i]);
+    for(int j = 0; j<scheme.layerSize[i];j++){
+      actCount[i][j] = 0;
+    }
+  }
+  //For each image
+  for(vector<pair<string,Image *> >::iterator it = images.begin(); it!=images.end();it++){
+    vector< vector<pair<int,float> > > &activs = (it->second)->activations;
+    //For each layer
+    int layerCount = 0;
+    for(vector<vector<pair<int,float> > >::iterator it2=activs.begin(); it2!=activs.end(); it2++){
+      vector<int> &layCount = actCount[layerCount];
+      //For each feature
+      for(vector<pair<int,float> >::iterator it3=it2->begin();it3!=it2->end();it3++){
+        layCount[it3->first]++;
+//needs to fix mean activation, initialize positions. needs to initialize in order??
+        for(vector<pair<int,float> >::iterator it4 = (meanActivations[layerCount].begin(); it4!=meanActivations.end();it4++){
+
+
+        (meanActivations[layerCount][it3->first]).second+=it3->second;
         }
       }
-      currentMeans.push_back(pair<int,float>(j,totalActivations/numImages));
+      layerCount++;
     }
-    meanActivations.push_back(currentMeans);
+  }
+  //Now compute mean
+  int layerCount = 0;
+  for(vector<vector<pair<int,float> > >::iterator it = meanActivations.begin(); it!=meanActivations.end();it++){
+    vector<int> &layCount = actCount[layerCount];
+    for(vector<pair<int,float> >::iterator it2=it->begin();it2!=it->end();it2++){
+      it2->second = it2->second/layCount[it2->first];
+    }
+    layerCount++;
   }
 }
 
