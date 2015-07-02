@@ -9,48 +9,109 @@ using std::find;
 //Computes the mean activations based on a set of images which belong to the imageClass
 //WARNING: Removes any previously stored meanActivations and image names
 void ImageClass::computeMeanActivations(vector<pair<string,Image *> > &images, const CNNScheme &scheme){
+  //printf("IN computeMeanActivations for %u images named:\n",images.size());
+  //for(int i = 0;i<images.size();i++)printf("%s\n",images[i].first.c_str());
   meanActivations.clear();
   imageNames.clear();
-  float numImages = (float)images.size();
+  float staticNumImages =  (float)images.size();
   for(vector<pair<string,Image *> >::iterator it = images.begin(); it!=images.end();it++) imageNames.push_back(it->first);
-  //Temporal structure to store activation counts
-  vector<vector<int> > actCount;
-  actCount.resize(scheme.getNumLayers());
+  //For each layer
   for(int i = 0; i<scheme.getNumLayers();i++){
-    actCount[i].resize(scheme.layerSize[i]);
-    for(int j = 0; j<scheme.layerSize[i];j++){
-      actCount[i][j] = 0;
+    float numImages = (float)images.size();
+    vector<pair<int,float> > empty;
+    meanActivations.push_back(empty);
+    //printf("-Layer %u\n",i);
+    //struct to save means of this layer
+    vector<pair<int,float> > currentLayerMeans;
+    //Struct to traverse all images concurrently, initialize at begin of each image values
+    vector<pair<int,float> *> imagePointers;
+    vector<pair<int,float> *> imagePointersEnds;
+    for(int imageIndex = 0 ; imageIndex<images.size(); imageIndex++){
+      imagePointers.push_back(&((images[imageIndex].second->activations[i]).front()));
+      imagePointersEnds.push_back(&((images[imageIndex].second->activations[i]).back()));
+      //printf("--Adding pointer\n");
     }
-  }
-  //For each image
-  for(vector<pair<string,Image *> >::iterator it = images.begin(); it!=images.end();it++){
-    vector< vector<pair<int,float> > > &activs = (it->second)->activations;
-    //For each layer
-    int layerCount = 0;
-    for(vector<vector<pair<int,float> > >::iterator it2=activs.begin(); it2!=activs.end(); it2++){
-      vector<int> &layCount = actCount[layerCount];
-      //For each feature
-      for(vector<pair<int,float> >::iterator it3=it2->begin();it3!=it2->end();it3++){
-        layCount[it3->first]++;
-//needs to fix mean activation, initialize positions. needs to initialize in order??
-        for(vector<pair<int,float> >::iterator it4 = (meanActivations[layerCount].begin(); it4!=meanActivations.end();it4++){
+    //Current smallest index 
+    int smallest = 0;
+    //List of image indices with the smallest index initialize it with those having a value for '0'
+    vector<int> indexSmallests;
+    int count = 0;
+    for(vector<pair<int,float> *>::iterator itP = imagePointers.begin(); itP!=imagePointers.end(); itP++){
+      //TODO: What if image has no values? it breaks at this if?
+      if((*itP)->first==0) indexSmallests.push_back(count);
+      count++;
+    }
+    //printf("Going into loop, of %u only %u have value for 0\n", imagePointers.size(),indexSmallests.size());
+    //TODO: THis can be probably optimized by removing pointers from imagePointers as they are finished
+    //And iterating until the structure is empty.
 
-
-        (meanActivations[layerCount][it3->first]).second+=it3->second;
+    //While not all pointers are done, iterate
+    while(true){
+      //Combine values of smallest, advance pointers, store mean and clear list
+      float combination = 0;
+      for(int smCount = 0 ; smCount< indexSmallests.size(); smCount++){
+        combination+=imagePointers[indexSmallests[smCount]]->second;
+        if(imagePointers[indexSmallests[smCount]]==imagePointersEnds[indexSmallests[smCount]]){
+          imagePointers.erase(imagePointers.begin()+indexSmallests[smCount]);
+          imagePointersEnds.erase(imagePointersEnds.begin()+indexSmallests[smCount]);
+          numImages--;
+          //printf("Pointer of index %u cant be increased, removing\n",indexSmallests[smCount]);
+        }
+        else {
+          imagePointers[indexSmallests[smCount]]++;
+          //printf("Inceasing pointer of index %u \n",indexSmallests[smCount]);
         }
       }
-      layerCount++;
+      //printf("smallest feat %u combination %f indexSmallest.size %u \n",smallest,combination,indexSmallests.size());
+      if(combination>0) meanActivations[i].push_back(pair<int,float>(smallest,combination/staticNumImages));
+      indexSmallests.clear();
+      //Check if we are done, if so exit
+      bool done = true;
+      for(int x = 0 ; x<numImages;x++) {
+        done = done && imagePointers[x]==imagePointersEnds[x];
+      }
+      if(done) break;
+      //Find  a first smallest candidate
+      int newCount = 0;
+      for(;newCount<numImages;newCount++){
+        //Skip all finished elements
+        if(imagePointers[newCount]==imagePointersEnds[newCount]){
+          //printf("Pointer %u is done\n",newCount);
+          continue;
+        }
+        //Found a first candidate
+        else {
+          indexSmallests.push_back(newCount); 
+          smallest = imagePointers[newCount]->first;
+          newCount++;
+          break;
+        }
+      }
+      //printf("First smallest candidate %u\n",smallest);
+      //Given the first, find the smallest 
+      for(;newCount<numImages;newCount++){
+        //New image index for current smallest feature
+        if(imagePointers[newCount]->first==smallest){
+          //printf("Found another one\n");
+          indexSmallests.push_back(newCount);
+        }
+        //If its smaller, reset and update
+        else if(imagePointers[newCount]->first<smallest){
+          indexSmallests.clear();
+          indexSmallests.push_back(newCount);
+          smallest = imagePointers[newCount]->first;
+          //printf("Found a smaller one: %u on index %u\n",smallest,newCount);
+        }
+        newCount++;
+      }
+      //printf("Looping, smallest:%u for %u elems\n",smallest,indexSmallests.size());
     }
+  //printf("-Done with Layer %u\n",i);
   }
-  //Now compute mean
-  int layerCount = 0;
-  for(vector<vector<pair<int,float> > >::iterator it = meanActivations.begin(); it!=meanActivations.end();it++){
-    vector<int> &layCount = actCount[layerCount];
-    for(vector<pair<int,float> >::iterator it2=it->begin();it2!=it->end();it2++){
-      it2->second = it2->second/layCount[it2->first];
-    }
-    layerCount++;
-  }
+  //printf("OUT computeMeanActivations \n");
+  //for(int i = 0; i<scheme.getNumLayers();i++){
+  //  printf("Found %u meanAct for layer idx %u\n",meanActivations[i].size(),i);
+  //}
 }
 
 

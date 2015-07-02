@@ -54,8 +54,12 @@ void Util::generate_random_string(char *s, const int len) {
 //  return sqrt(distance);
 //}
 
-float Util::euclideanDistanceImageClass(const ImageClass &imgc1, const ImageClass &imgc2, const CNNScheme &scheme){
-  float distance=0.0;
+double Util::euclideanDistanceImageClass(const ImageClass &imgc1, const ImageClass &imgc2, const CNNScheme &scheme){
+  double distance=0.0;
+  //printf("Computing distance between %s and %s\n",imgc1.getName().c_str(),imgc2.getName().c_str());
+  if(scheme.getNumLayers()!= imgc1.meanActivations.size() || scheme.getNumLayers()!= imgc2.meanActivations.size()){
+    printf("Util::euclideanDistanceImageClass::WARNING mean activations not available for all %u layers %u %u\n",scheme.getNumLayers(),imgc1.meanActivations.size(),imgc2.meanActivations.size());
+  }
   //For each layer
   for(int i = 0 ; i < scheme.getNumLayers(); i++){
     int currentSize = scheme.layerSize[i];
@@ -63,12 +67,13 @@ float Util::euclideanDistanceImageClass(const ImageClass &imgc1, const ImageClas
     vector<pair<int,float> >::const_iterator it2 = imgc2.meanActivations[i].begin();
     for(int j=0;j<currentSize;j++){
       float val1=0.0, val2=0.0;
-      while(it1->first<j)it1++;
-      while(it2->first<j)it2++;
-      if(it1->first == j) val1 = it1->second;
-      if(it2->first == j) val2 = it2->second;
+      if(it1!=imgc1.meanActivations[i].end()) while(it1->first<j && it1!=imgc1.meanActivations[i].end())it1++;
+      if(it2!=imgc2.meanActivations[i].end()) while(it2->first<j && it2!=imgc2.meanActivations[i].end())it2++;
+      if(it1!=imgc1.meanActivations[i].end())if(it1->first == j) val1 = it1->second;
+      if(it2!=imgc2.meanActivations[i].end())if(it2->first == j) val2 = it2->second;
       distance+=fabs(val1-val2)*fabs(val1-val2);
     }
+    //printf("-Distance found on layer %u:%f\n",i,distance);
   }  
   return sqrt(distance);
 }
@@ -100,17 +105,17 @@ void Util::computeImageClasses(vector<Image> &images, const CNNScheme &scheme, v
   }
   printf("Util::computeImageClasses::Found %u image classes\n",(unsigned int)imagesByClass.size());
   //Compute each image class and store it
-  #pragma omp parallel for schedule(dynamic,1)
+  //pragma omp parallel for schedule(dynamic,1)
   for(vector<pair<string,vector<pair<string,Image *> > > >::iterator it = imagesByClass.begin(); it<imagesByClass.end(); it++){
     ImageClass currentImageClass;
     currentImageClass.setName(it->first);
     for(vector<pair<string,Image *> >::iterator it2 = it->second.begin(); it2!=it->second.end();it2++){
       currentImageClass.addImageName(it2->first);
     }
+    #pragma omp critical (printf)
+    printf("Util::computeImageClasses::Going to compute meanAct of image class %s based on %u images\n",it->first.c_str(),(unsigned int)it->second.size());
     currentImageClass.computeMeanActivations(it->second,scheme);
     #pragma omp critical (imageClasses)
     imageClasses.push_back(currentImageClass);
-    #pragma omp critical (printf)
-    printf("Util::computeImageClasses::Done computing meanAct of image class %s based on %u images\n",it->first.c_str(),(unsigned int)it->second.size());
   }
 }

@@ -206,7 +206,7 @@ void IO::loadImagesFromTXTFile(string path, vector<Image> &images, CNNScheme &sc
                 vector<std::string> strs;
                 istringstream is(line);
                 copy(istream_iterator<string>(is),istream_iterator<string>(),back_inserter<vector<string> >(strs));
-                if(stof(strs[0])!=0) currentImage->activations[layerCounter].push_back(pair<int,float>(stoi(strs[1]),stof(strs[0])));
+                if(stof(strs[0])>1) currentImage->activations[layerCounter].push_back(pair<int,float>(stoi(strs[1]),stof(strs[0])));
               }
               infile.close();
             }
@@ -226,6 +226,7 @@ void IO::loadImagesFromTXTFile(string path, vector<Image> &images, CNNScheme &sc
     closedir(pDir2);
     printf("IO::loadImagesFromTXTFile::Done Computing directory %s\n",(path+string(pDirent->d_name)).c_str());
   }
+  vector<string>().swap(imageIdx); 
   closedir (pDir);
   printf ("IO::loadImagesFromTXTFile::Total loaded images: '%u'\n", (unsigned int)images.size());
 }

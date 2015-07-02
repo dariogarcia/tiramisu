@@ -36,12 +36,12 @@ int main(int argc, char* argv[]){
 
   
   time(&t_init);
-  IO::loadImagesFromTXTFile(argv[2], images, scheme);
+  IO::loadImagesFromTXTFile(argv[1], images, scheme);
   time(&t_end);
   printf("Load images took %f\n",difftime (t_end,t_init));
  
   time(&t_init);
-  IO::readAndSetImageClasses(argv[3], images);
+  IO::readAndSetImageClasses(argv[2], images);
   time(&t_end);
   printf("Read & set image classes took %f\n",difftime (t_end,t_init));
   
@@ -58,7 +58,7 @@ int main(int argc, char* argv[]){
 
   time(&t_init);
   for(vector<ImageClass>::iterator it = imageClasses.begin(); it!=imageClasses.end(); it++){
-    pair<ImageClass,float> closest = (*it).findClosestClassByEucliDist(imageClasses, scheme);
+    pair<ImageClass,double> closest = (*it).findClosestClassByEucliDist(imageClasses, scheme);
     printf("Closest class to %s is %s at distance %f\n",(*it).getName().c_str(),closest.first.getName().c_str(),closest.second);
   }
   time(&t_end);

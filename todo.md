@@ -35,3 +35,8 @@ List of todo things in tiramisu project
 - [ ] Adjust the threshold parameters to distribution of activations. Study which "mean+(stdDev*x)" fits a log-scale distribution.
 - [ ] Test if additional edges between features are relevant and useful for the mining process. Consider adding layers as vertices, and features belonging to layers as edges. Also imageclasses.
 - [ ] Is it interesting to shift from a map-vector based implementation to a vector-index or CRS implementation for the activation vectors of images?
+
+## Bugs to fix
+
+- [ ] When computing the imageclass using a single image with a layer with a single value (e.g., ILSVRC2012_val_00000076_inception-5b-5x5 "10.0098 3614") the value seems not to be stored in meanActivations (in euclideanDist the layer is empty).
+
