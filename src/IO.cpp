@@ -185,6 +185,7 @@ void IO::loadImagesFromTXTFile(string path, vector<Image> &images, CNNScheme &sc
               Image newImage;
               newImage.setImageName(imageName);
               newImage.setPath(path+string(pDirent->d_name));
+              newImage.unsquaredNorm = 0;
               newImage.activations.resize(scheme.getNumLayers());
               for(int i=0;i<scheme.getNumLayers();i++){
                 vector<pair<int,float> > vec;
@@ -206,7 +207,10 @@ void IO::loadImagesFromTXTFile(string path, vector<Image> &images, CNNScheme &sc
                 vector<std::string> strs;
                 istringstream is(line);
                 copy(istream_iterator<string>(is),istream_iterator<string>(),back_inserter<vector<string> >(strs));
-                if(stof(strs[0])>1) currentImage->activations[layerCounter].push_back(pair<int,float>(stoi(strs[1]),stof(strs[0])));
+                if(stof(strs[0])>1) {
+                  currentImage->activations[layerCounter].push_back(pair<int,float>(stoi(strs[1]),stof(strs[0])));
+                  currentImage->unsquaredNorm+=(stof(strs[0])*stof(strs[0]));
+                }
               }
               infile.close();
             }

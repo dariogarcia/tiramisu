@@ -1,5 +1,6 @@
 #include <iterator>
 #include <algorithm>
+#include <cmath>
 
 #include "../include/ImageClass.hpp"
 #include "../include/Util.hpp"
@@ -12,6 +13,7 @@ void ImageClass::computeMeanActivations(vector<pair<string,Image *> > &images, c
   //printf("IN computeMeanActivations for %u images named:\n",images.size());
   meanActivations.clear();
   imageNames.clear();
+  norm = 0;
   float staticNumImages =  (float)images.size();
   ///Store images names
   for(vector<pair<string,Image *> >::iterator it = images.begin(); it!=images.end();it++) imageNames.push_back(it->first);
@@ -40,6 +42,7 @@ void ImageClass::computeMeanActivations(vector<pair<string,Image *> > &images, c
       for(int smCount = 0 ; smCount< indexSmallests.size(); smCount++) combination+=imagePointers[indexSmallests[smCount]]->second;
       if(combination > 0) {
         meanActivations[i].push_back(pair<int,float>(currentSmallestFeature,combination/staticNumImages));
+        norm+=(combination/staticNumImages)*(combination/staticNumImages);
         //printf("ImageClass::computeMeanActivations:: layer:%u featureId:%u meanActivation:%f\n",i,currentSmallestFeature,combination/staticNumImages); 
       }
       //Advance not done vectors. Then remove the done ones and clear list
@@ -82,6 +85,7 @@ void ImageClass::computeMeanActivations(vector<pair<string,Image *> > &images, c
     }
   //printf("-Done with Layer %u\n",i);
   }
+  norm = sqrt(norm);
   //printf("OUT computeMeanActivations \n");
   //for(int i = 0; i<scheme.getNumLayers();i++){
   //  printf("Found %u meanAct for layer idx %u\n",meanActivations[i].size(),i);
@@ -89,38 +93,47 @@ void ImageClass::computeMeanActivations(vector<pair<string,Image *> > &images, c
 }
 
 
-//Computes the mean activations based on a set of images which belong to the imageClass
-//WARNING: Removes any previously stored meanActivations and image names
-void ImageClass::computeMeanActivationsThreshold(vector<pair<string,Image *> > &images, const CNNScheme &scheme, const CNNFeatures &cnn){
-  meanActivations.clear();
-  imageNames.clear();
-  float numImages = (float)images.size();
-  for(vector<pair<string,Image *> >::iterator it = images.begin(); it!=images.end();it++) imageNames.push_back(it->first);
-  //For each layer
-  for(int i = 0 ; i < scheme.getNumLayers(); i++){
-    int currentSize = scheme.layerSize[i];
-    vector<pair<int,float> > currentMeans;
-    //For each feature in the layer
-    for(int j=0;j<currentSize;j++){
-      float totalActivations=0.0;
-      //Add the activation from each image
-      for(vector<pair<string,Image *> >::iterator it = images.begin(); it!=images.end();it++){
-         vector<pair<int,float> > &imageFeaturesForLayer = (it->second)->activations[i];
-        for(vector<pair<int,float> >::iterator it2 = imageFeaturesForLayer.begin(); it2!=imageFeaturesForLayer.end(); it2++){
-          if(it2->first==j) totalActivations+=it2->second;
-          else if(it2->first>j)break;
-        }
-      }
-      //Add value only if passes the threshold
-      const Feature *f = &cnn.features[i][j];
-      if(totalActivations/numImages > f->mean+2*f->stdDev){
-        currentMeans.push_back(pair<int,float>(j,totalActivations/numImages));
-      }
+void ImageClass::normalizeMeanActivations(){
+  for(int i = 0; i<meanActivations.size(); i++){
+    vector<pair<int,float> > &currentLayer = meanActivations[i];
+    for(vector<pair<int,float> >::iterator it = currentLayer.begin(); it!=currentLayer.end(); it++){
+      (*it).second = (*it).second/norm;
     }
-    meanActivations.push_back(currentMeans);
-  }
+  } 
 }
 
+////Computes the mean activations based on a set of images which belong to the imageClass
+////WARNING: Removes any previously stored meanActivations and image names
+//void ImageClass::computeMeanActivationsThreshold(vector<pair<string,Image *> > &images, const CNNScheme &scheme, const CNNFeatures &cnn){
+//  meanActivations.clear();
+//  imageNames.clear();
+//  float numImages = (float)images.size();
+//  for(vector<pair<string,Image *> >::iterator it = images.begin(); it!=images.end();it++) imageNames.push_back(it->first);
+//  //For each layer
+//  for(int i = 0 ; i < scheme.getNumLayers(); i++){
+//    int currentSize = scheme.layerSize[i];
+//    vector<pair<int,float> > currentMeans;
+//    //For each feature in the layer
+//    for(int j=0;j<currentSize;j++){
+//      float totalActivations=0.0;
+//      //Add the activation from each image
+//      for(vector<pair<string,Image *> >::iterator it = images.begin(); it!=images.end();it++){
+//         vector<pair<int,float> > &imageFeaturesForLayer = (it->second)->activations[i];
+//        for(vector<pair<int,float> >::iterator it2 = imageFeaturesForLayer.begin(); it2!=imageFeaturesForLayer.end(); it2++){
+//          if(it2->first==j) totalActivations+=it2->second;
+//          else if(it2->first>j)break;
+//        }
+//      }
+//      //Add value only if passes the threshold
+//      const Feature *f = &cnn.features[i][j];
+//      if(totalActivations/numImages > f->mean+2*f->stdDev){
+//        currentMeans.push_back(pair<int,float>(j,totalActivations/numImages));
+//      }
+//    }
+//    meanActivations.push_back(currentMeans);
+//  }
+//}
+//
 
 ////Computes the mean activation from a set of images which are suposed to belong to this imageClass
 ////WARNING: Removes any previously stored meanActivations and image names

@@ -20,8 +20,10 @@ class ImageClass {
     inline void setImageNames(vector<string> n) {imageNames=n;}
     inline void addImageName(string n) {imageNames.push_back(n);}
     vector<vector<pair<int,float> > > meanActivations;
+    double norm;
+    void normalizeMeanActivations();
     void computeMeanActivations(vector<pair<string,Image *> > &images, const CNNScheme &scheme);
-    void computeMeanActivationsThreshold(vector<pair<string,Image *> > &images, const CNNScheme &scheme, const CNNFeatures &cnn);
+    //void computeMeanActivationsThreshold(vector<pair<string,Image *> > &images, const CNNScheme &scheme, const CNNFeatures &cnn);
     //void computeMeanActivations(vector<string> &imageByClass, const map<string,Image> &images, const map<string,CNNLayer> &CNN);
     //void computeMeanActivations(const map<string,Image> &images, const map<string,CNNLayer> &CNN);
     //void computeMeanActivations(vector<string> &imageByClass, const map<string,Image> &images, const map<string,CNNLayer> &CNN);

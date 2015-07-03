@@ -2,6 +2,7 @@
 #include <sstream>
 #include <iterator>
 #include <vector>
+#include <cmath>
 
 #include "../include/Image.hpp"
 
@@ -13,47 +14,16 @@ using std::istringstream;
 using std::istream_iterator;
 using std::back_inserter;
 
-//void Image::addActivations(string path, string layerName){
-//  ifstream infile(path.c_str());
-//  string line;
-//  int NZV=0;
-//  //Count non-zero elements
-//  if(infile.is_open()){
-//    while(getline(infile,line)){
-//      vector<std::string> strs;
-//      istringstream is(line);
-//      copy(istream_iterator<string>(is),istream_iterator<string>(),back_inserter<vector<string> >(strs));
-//      float value = stof(strs[0]);
-//      if(value!=0) NZV++;
-//    }
-//    infile.close();
-//  }
-//  else {
-//    printf("Image::addActivations:: Unable to open file\n");
-//    return;
-//  }
-//  ifstream infile2(path.c_str());
-//  if(infile2.is_open()){
-//    //Set index for new layer, as the last
-//    layers_IDX.insert(pair<string,int>(layerName,activations.size()));
-//    vector<pair<int,float> > layerActivations (NZV);
-//    while(getline(infile2,line)){
-//      vector<std::string> strs;
-//      istringstream is(line);
-//      copy(istream_iterator<string>(is),istream_iterator<string>(),back_inserter<vector<string> >(strs));
-//      int key = stoi(strs[1]);
-//      float value = stof(strs[0]);
-//      if(value!=0) layerActivations.push_back(pair<int,float>(key,value));
-//    }
-//    activations.push_back(layerActivations);
-//    infile2.close();
-//  }
-//  else {
-//    printf("Image::addActivations:: Unable to open file on a second attempt\n");
-//    return;
-//  }
-//}
-//
+void Image::normalizeActivations(){
+  for(int i = 0; i<activations.size(); i++){
+    vector<pair<int,float> > &currentLayer = activations[i];
+    for(vector<pair<int,float> >::iterator it = currentLayer.begin(); it!=currentLayer.end(); it++){
+      (*it).second = (*it).second/sqrt(unsquaredNorm);
+    }
+  } 
+
+}
+
 ////Method to explore and print contents of a set of images
 ////Intended for validation of loading process
 //void Image::exploreImage(){
