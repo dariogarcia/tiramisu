@@ -39,6 +39,11 @@ int main(int argc, char* argv[]){
   IO::loadImagesFromTXTFile(argv[1], images, scheme);
   time(&t_end);
   printf("Load images took %f\n",difftime (t_end,t_init));
+
+  //time(&t_init);
+  //for(int i = 0 ; i<images.size();i++) images[i].normalizeActivations();
+  //time(&t_end);
+  //printf("Normalizing images took %f\n",difftime (t_end,t_init));
  
   time(&t_init);
   IO::readAndSetImageClasses(argv[2], images);
@@ -52,9 +57,10 @@ int main(int argc, char* argv[]){
   printf("Compute image classes took %f\n",difftime (t_end,t_init));
 
 
-  ////for(map<string,ImageClass>::iterator it = imageClasses.begin(); it!=imageClasses.end(); it++){
-  ////  it->second.printAccumulatedMeanAct();
-  ////}
+//  time(&t_init);
+//  for(int i = 0 ; i<imageClasses.size();i++) imagesClasses[i].normalizeMeanActivations();
+//  time(&t_end);
+//  printf("Normalizing image classes took %f\n",difftime (t_end,t_init));
 
   time(&t_init);
   for(vector<ImageClass>::iterator it = imageClasses.begin(); it!=imageClasses.end(); it++){
