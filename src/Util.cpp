@@ -105,7 +105,7 @@ void Util::computeImageClasses(vector<Image> &images, const CNNScheme &scheme, v
   }
   printf("Util::computeImageClasses::Found %u image classes\n",(unsigned int)imagesByClass.size());
   //Compute each image class and store it
-  //pragma omp parallel for schedule(dynamic,1)
+  #pragma omp parallel for schedule(dynamic,1)
   for(vector<pair<string,vector<pair<string,Image *> > > >::iterator it = imagesByClass.begin(); it<imagesByClass.end(); it++){
     ImageClass currentImageClass;
     currentImageClass.setName(it->first);

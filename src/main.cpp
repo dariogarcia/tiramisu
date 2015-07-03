@@ -62,7 +62,7 @@ int main(int argc, char* argv[]){
     printf("Closest class to %s is %s at distance %f\n",(*it).getName().c_str(),closest.first.getName().c_str(),closest.second);
   }
   time(&t_end);
-  printf("Compute image classes took %f\n",difftime (t_end,t_init));
+  printf("Compute image class distances took %f\n",difftime (t_end,t_init));
 
 
 ///////////////////////////////////////////////////////////

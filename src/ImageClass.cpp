@@ -10,101 +10,75 @@ using std::find;
 //WARNING: Removes any previously stored meanActivations and image names
 void ImageClass::computeMeanActivations(vector<pair<string,Image *> > &images, const CNNScheme &scheme){
   //printf("IN computeMeanActivations for %u images named:\n",images.size());
-  //for(int i = 0;i<images.size();i++)printf("%s\n",images[i].first.c_str());
   meanActivations.clear();
   imageNames.clear();
   float staticNumImages =  (float)images.size();
+  ///Store images names
   for(vector<pair<string,Image *> >::iterator it = images.begin(); it!=images.end();it++) imageNames.push_back(it->first);
   //For each layer
   for(int i = 0; i<scheme.getNumLayers();i++){
-    float numImages = (float)images.size();
-    vector<pair<int,float> > empty;
-    meanActivations.push_back(empty);
-    //printf("-Layer %u\n",i);
-    //struct to save means of this layer
-    vector<pair<int,float> > currentLayerMeans;
+    meanActivations.push_back(vector<pair<int,float> > ());
     //Struct to traverse all images concurrently, initialize at begin of each image values
     vector<pair<int,float> *> imagePointers;
     vector<pair<int,float> *> imagePointersEnds;
     for(int imageIndex = 0 ; imageIndex<images.size(); imageIndex++){
       imagePointers.push_back(&((images[imageIndex].second->activations[i]).front()));
       imagePointersEnds.push_back(&((images[imageIndex].second->activations[i]).back()));
-      //printf("--Adding pointer\n");
     }
-    //Current smallest index 
-    int smallest = 0;
-    //List of image indices with the smallest index initialize it with those having a value for '0'
+    //Current smallest index & list of image indices with the smallest index (initialized at '0')
+    int currentSmallestFeature = 0;
     vector<int> indexSmallests;
     int count = 0;
     for(vector<pair<int,float> *>::iterator itP = imagePointers.begin(); itP!=imagePointers.end(); itP++){
-      //TODO: What if image has no values? it breaks at this if?
       if((*itP)->first==0) indexSmallests.push_back(count);
       count++;
     }
-    //printf("Going into loop, of %u only %u have value for 0\n", imagePointers.size(),indexSmallests.size());
-    //TODO: THis can be probably optimized by removing pointers from imagePointers as they are finished
-    //And iterating until the structure is empty.
-
     //While not all pointers are done, iterate
-    while(true){
-      //Combine values of smallest, advance pointers, store mean and clear list
+    while(!imagePointers.empty()){
+      //Combine values of smallest into mean, store mean
       float combination = 0;
+      for(int smCount = 0 ; smCount< indexSmallests.size(); smCount++) combination+=imagePointers[indexSmallests[smCount]]->second;
+      if(combination > 0) {
+        meanActivations[i].push_back(pair<int,float>(currentSmallestFeature,combination/staticNumImages));
+        //printf("ImageClass::computeMeanActivations:: layer:%u featureId:%u meanActivation:%f\n",i,currentSmallestFeature,combination/staticNumImages); 
+      }
+      //Advance not done vectors. Then remove the done ones and clear list
+      vector<int> pointersDone;
       for(int smCount = 0 ; smCount< indexSmallests.size(); smCount++){
-        combination+=imagePointers[indexSmallests[smCount]]->second;
-        if(imagePointers[indexSmallests[smCount]]==imagePointersEnds[indexSmallests[smCount]]){
-          imagePointers.erase(imagePointers.begin()+indexSmallests[smCount]);
-          imagePointersEnds.erase(imagePointersEnds.begin()+indexSmallests[smCount]);
-          numImages--;
-          //printf("Pointer of index %u cant be increased, removing\n",indexSmallests[smCount]);
-        }
-        else {
+        if(imagePointers[indexSmallests[smCount]]!=imagePointersEnds[indexSmallests[smCount]]){
           imagePointers[indexSmallests[smCount]]++;
           //printf("Inceasing pointer of index %u \n",indexSmallests[smCount]);
         }
+        else pointersDone.push_back(indexSmallests[smCount]);
       }
-      //printf("smallest feat %u combination %f indexSmallest.size %u \n",smallest,combination,indexSmallests.size());
-      if(combination>0) meanActivations[i].push_back(pair<int,float>(smallest,combination/staticNumImages));
+      int numRemoved = 0;
+      for(int rmCount = 0 ; rmCount< pointersDone.size(); rmCount++){
+        if(imagePointers[pointersDone[rmCount]-numRemoved]==imagePointersEnds[pointersDone[rmCount]-numRemoved]){
+          imagePointers.erase(imagePointers.begin()+pointersDone[rmCount]-numRemoved);
+          imagePointersEnds.erase(imagePointersEnds.begin()+pointersDone[rmCount]-numRemoved);
+          numRemoved++;
+        }
+      }
+      if(imagePointers.empty())break;
       indexSmallests.clear();
-      //Check if we are done, if so exit
-      bool done = true;
-      for(int x = 0 ; x<numImages;x++) {
-        done = done && imagePointers[x]==imagePointersEnds[x];
-      }
-      if(done) break;
-      //Find  a first smallest candidate
-      int newCount = 0;
-      for(;newCount<numImages;newCount++){
-        //Skip all finished elements
-        if(imagePointers[newCount]==imagePointersEnds[newCount]){
-          //printf("Pointer %u is done\n",newCount);
-          continue;
-        }
-        //Found a first candidate
-        else {
-          indexSmallests.push_back(newCount); 
-          smallest = imagePointers[newCount]->first;
-          newCount++;
-          break;
-        }
-      }
-      //printf("First smallest candidate %u\n",smallest);
-      //Given the first, find the smallest 
-      for(;newCount<numImages;newCount++){
+      //Find the first smallest candidate
+      indexSmallests.push_back(0); 
+      currentSmallestFeature = imagePointers[0]->first;
+      //Then make sure its the smallest 
+      for(int newCount = 1; newCount<imagePointers.size(); newCount++){
         //New image index for current smallest feature
-        if(imagePointers[newCount]->first==smallest){
-          //printf("Found another one\n");
+        if(imagePointers[newCount]->first == currentSmallestFeature){
           indexSmallests.push_back(newCount);
         }
         //If its smaller, reset and update
-        else if(imagePointers[newCount]->first<smallest){
+        else if(imagePointers[newCount]->first < currentSmallestFeature){
           indexSmallests.clear();
           indexSmallests.push_back(newCount);
-          smallest = imagePointers[newCount]->first;
-          //printf("Found a smaller one: %u on index %u\n",smallest,newCount);
+          currentSmallestFeature = imagePointers[newCount]->first;
         }
         newCount++;
       }
-      //printf("Looping, smallest:%u for %u elems\n",smallest,indexSmallests.size());
+      //printf("Looping, smallest:%u for %u elems\n",currentSmallestFeature,indexSmallests.size());
     }
   //printf("-Done with Layer %u\n",i);
   }
