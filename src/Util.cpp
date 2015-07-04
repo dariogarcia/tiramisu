@@ -58,7 +58,7 @@ double Util::euclideanDistanceImageClass(const ImageClass &imgc1, const ImageCla
   double distance=0.0;
   //printf("Computing distance between %s and %s\n",imgc1.getName().c_str(),imgc2.getName().c_str());
   if(scheme.getNumLayers()!= imgc1.meanActivations.size() || scheme.getNumLayers()!= imgc2.meanActivations.size()){
-    printf("Util::euclideanDistanceImageClass::WARNING mean activations not available for all %u layers %u %u\n",scheme.getNumLayers(),imgc1.meanActivations.size(),imgc2.meanActivations.size());
+    printf("Util::euclideanDistanceImageClass::WARNING mean activations not available for all %u layers %u %u\n",scheme.getNumLayers(),(unsigned int)imgc1.meanActivations.size(),(unsigned int)imgc2.meanActivations.size());
   }
   //For each layer
   for(int i = 0 ; i < scheme.getNumLayers(); i++){
@@ -76,6 +76,35 @@ double Util::euclideanDistanceImageClass(const ImageClass &imgc1, const ImageCla
     //printf("-Distance found on layer %u:%f\n",i,distance);
   }  
   return sqrt(distance);
+}
+
+double Util::cosineDistanceImageClass(const ImageClass &imgc1, const ImageClass &imgc2, const CNNScheme &scheme){
+  double distance=0.0;
+  double numerator=0.0;
+  double denominator1=0.0;
+  double denominator2=0.0;
+  //printf("Computing distance between %s and %s\n",imgc1.getName().c_str(),imgc2.getName().c_str());
+  if(scheme.getNumLayers()!= imgc1.meanActivations.size() || scheme.getNumLayers()!= imgc2.meanActivations.size()){
+    printf("Util::euclideanDistanceImageClass::WARNING mean activations not available for all %u layers %u %u\n",scheme.getNumLayers(),(unsigned int)imgc1.meanActivations.size(),(unsigned int)imgc2.meanActivations.size());
+  }
+  //For each layer
+  for(int i = 0 ; i < scheme.getNumLayers(); i++){
+    int currentSize = scheme.layerSize[i];
+    vector<pair<int,float> >::const_iterator it1 = imgc1.meanActivations[i].begin();
+    vector<pair<int,float> >::const_iterator it2 = imgc2.meanActivations[i].begin();
+    for(int j=0;j<currentSize;j++){
+      float val1=0.0, val2=0.0;
+      if(it1!=imgc1.meanActivations[i].end()) while(it1->first<j && it1!=imgc1.meanActivations[i].end())it1++;
+      if(it2!=imgc2.meanActivations[i].end()) while(it2->first<j && it2!=imgc2.meanActivations[i].end())it2++;
+      if(it1!=imgc1.meanActivations[i].end())if(it1->first == j) val1 = it1->second;
+      if(it2!=imgc2.meanActivations[i].end())if(it2->first == j) val2 = it2->second;
+      numerator+=val1*val2;
+      denominator1+=val1*val1;
+      denominator2+=val2*val2;
+    }
+    //printf("-Distance found on layer %u:%f\n",i,distance);
+  }  
+  return 1.0 - (numerator/(sqrt(denominator1)*sqrt(denominator2)));
 }
 
 //Fills the imageClasses structure with the mean activations of the images belonging to each class found in images

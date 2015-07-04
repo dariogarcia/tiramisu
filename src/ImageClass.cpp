@@ -220,23 +220,27 @@ void ImageClass::normalizeMeanActivations(){
 //  }
 //}
 
-pair<ImageClass,float> ImageClass::findClosestClassByEucliDist(const vector<ImageClass> &iClassCandidates, const CNNScheme &scheme){
+//distanceType = 1 -> euclidean distance
+//distanceType = 2 -> cosine distance
+pair<ImageClass,float> ImageClass::findClosestClass(const vector<ImageClass> &iClassCandidates, const CNNScheme &scheme, int distanceType){
   const ImageClass &target = *this;
   if(iClassCandidates.size()<1){
-    printf("ImageClass::findClosestClassByEucliDist::ERROR empty vector of candidates to compare. Returning self.\n");
+    printf("ImageClass::findClosestClass::ERROR empty vector of candidates to compare. Returning self.\n");
     return pair<ImageClass,float>(target,0.0);
   }
   ImageClass closest;
   //Initialize closest distance to distance to first, unless its self, skip
   if(iClassCandidates.front().getName().compare(target.getName())==0){
     if(next(iClassCandidates.begin())==iClassCandidates.end()){
-      printf("ImageClass::findClosestClassByEucliDist::ERROR one one class to compare and it is self. Returning self.\n");
+      printf("ImageClass::findClosestClass::ERROR one one class to compare and it is self. Returning self.\n");
       return pair<ImageClass,float>(target,0.0);
     }
     closest = *next(iClassCandidates.begin());
   }
   else closest = iClassCandidates.front();
-  float closestDist = Util::euclideanDistanceImageClass(target, closest, scheme);
+  float closestDist = 0.0;
+  if(distanceType==1) closestDist = Util::euclideanDistanceImageClass(target, closest, scheme);
+  else if(distanceType==2) closestDist = Util::cosineDistanceImageClass(target, closest, scheme);
   //printf("%f %s --- %s\n",closestDist,target.getName().c_str(),closest.getName().c_str());
   for (vector<ImageClass>::const_iterator i = std::next(iClassCandidates.begin()); i != iClassCandidates.end(); i++){
     //Skip self comparation

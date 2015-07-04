@@ -64,7 +64,7 @@ int main(int argc, char* argv[]){
 
   time(&t_init);
   for(vector<ImageClass>::iterator it = imageClasses.begin(); it!=imageClasses.end(); it++){
-    pair<ImageClass,double> closest = (*it).findClosestClassByEucliDist(imageClasses, scheme);
+    pair<ImageClass,double> closest = (*it).findClosestClass(imageClasses, scheme, 1);
     printf("Closest class to %s is %s at distance %f\n",(*it).getName().c_str(),closest.first.getName().c_str(),closest.second);
   }
   time(&t_end);
