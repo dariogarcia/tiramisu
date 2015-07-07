@@ -179,6 +179,7 @@ void IO::loadImagesFromTXTFile(string path, vector<Image> &images, CNNScheme &sc
           Image *currentImage;
           #pragma omp critical (images)
           {
+          printf("IO::loadImagesFromTXTFile::Reading file  %s\n",fullpath.c_str());
             int imageCounter = find(imageIdx.begin(),imageIdx.end(),imageName) - imageIdx.begin();
             //If new image, add it and initialize
             if(imageCounter >= imageIdx.size()) {
@@ -208,8 +209,14 @@ void IO::loadImagesFromTXTFile(string path, vector<Image> &images, CNNScheme &sc
                 istringstream is(line);
                 copy(istream_iterator<string>(is),istream_iterator<string>(),back_inserter<vector<string> >(strs));
                 if(stof(strs[0])>1) {
-                  currentImage->activations[layerCounter].push_back(pair<int,float>(stoi(strs[1]),stof(strs[0])));
-                  currentImage->unsquaredNorm+=(stof(strs[0])*stof(strs[0]));
+                  try{
+                    currentImage->activations[layerCounter].push_back(pair<int,float>(stoi(strs[1]),stof(strs[0])));
+                    currentImage->unsquaredNorm+=(stof(strs[0])*stof(strs[0]));
+                  }
+                  catch(std::exception &ex){
+                    #pragma omp critical (print)
+                    printf("IO::loadImagesFromTXTFile::ERROR %s WHILE READING line %s of file %s\n",ex.what(),line.c_str(),fullpath.c_str());
+                  }
                 }
               }
               infile.close();

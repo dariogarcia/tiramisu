@@ -23,7 +23,7 @@ int main(int argc, char* argv[]){
   time_t t_end;
   time(&t_end);
   double t_diff = difftime (t_end,t_init);
-  printf("Load scheme took %f\n",t_diff);
+  printf("MAIN::Load scheme took %f\n",t_diff);
 
   scheme.printScheme();
 
@@ -38,7 +38,7 @@ int main(int argc, char* argv[]){
   time(&t_init);
   IO::loadImagesFromTXTFile(argv[1], images, scheme);
   time(&t_end);
-  printf("Load images took %f\n",difftime (t_end,t_init));
+  printf("MAIN::Load images took %f\n",difftime (t_end,t_init));
 
   //time(&t_init);
   //for(int i = 0 ; i<images.size();i++) images[i].normalizeActivations();
@@ -48,27 +48,41 @@ int main(int argc, char* argv[]){
   time(&t_init);
   IO::readAndSetImageClasses(argv[2], images);
   time(&t_end);
-  printf("Read & set image classes took %f\n",difftime (t_end,t_init));
+  printf("MAIN::Read & set image classes took %f\n",difftime (t_end,t_init));
   
   time(&t_init);
   vector<ImageClass> imageClasses;
-  Util::computeImageClasses(images, scheme, imageClasses);
+  //Arithmetic mean
+  int meanType = 1;
+  //Harmonic mean
+  //int meanType = 2;
+  if(meanType==1)printf("MAIN::Using arithmetic mean\n");
+  if(meanType==2)printf("MAIN::Using harmonic mean\n");
+  Util::computeImageClasses(images, scheme, imageClasses, meanType);
   time(&t_end);
-  printf("Compute image classes took %f\n",difftime (t_end,t_init));
+  printf("MAIN::Compute image classes took %f\n",difftime (t_end,t_init));
 
-
-//  time(&t_init);
-//  for(int i = 0 ; i<imageClasses.size();i++) imagesClasses[i].normalizeMeanActivations();
-//  time(&t_end);
-//  printf("Normalizing image classes took %f\n",difftime (t_end,t_init));
 
   time(&t_init);
+  for(int i = 0 ; i<imageClasses.size();i++) imageClasses[i].normalizeMeanActivations();
+  time(&t_end);
+  printf("MAIN::Normalizing image classes took %f\n",difftime (t_end,t_init));
+
+  time(&t_init);
+  //Euclidean
+  //int distanceType = 1;
+  //Cosine
+  int distanceType = 2;
+  if(distanceType==1)printf("MAIN::Using euclidean distance\n");
+  if(distanceType==2)printf("MAIN::Using cosine distance\n");
   for(vector<ImageClass>::iterator it = imageClasses.begin(); it!=imageClasses.end(); it++){
-    pair<ImageClass,double> closest = (*it).findClosestClass(imageClasses, scheme, 1);
-    printf("Closest class to %s is %s at distance %f\n",(*it).getName().c_str(),closest.first.getName().c_str(),closest.second);
+    //distanceType = 1 -> euclidean distance
+    //distanceType = 2 -> cosine distance
+    pair<ImageClass,double> closest = (*it).findClosestClass(imageClasses, scheme, distanceType);
+    printf("MAIN::Closest class to %s is %s at distance %f\n",(*it).getName().c_str(),closest.first.getName().c_str(),closest.second);
   }
   time(&t_end);
-  printf("Compute image class distances took %f\n",difftime (t_end,t_init));
+  printf("MAIN::Compute image class distances took %f\n",difftime (t_end,t_init));
 
 
 ///////////////////////////////////////////////////////////

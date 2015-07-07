@@ -109,7 +109,9 @@ double Util::cosineDistanceImageClass(const ImageClass &imgc1, const ImageClass 
 
 //Fills the imageClasses structure with the mean activations of the images belonging to each class found in images
 //According to the topology defined by the CNNScheme
-void Util::computeImageClasses(vector<Image> &images, const CNNScheme &scheme, vector<ImageClass> &imageClasses){
+//meanType == 1 arithmetic mean
+//meanType == 2 harmonic mean
+void Util::computeImageClasses(vector<Image> &images, const CNNScheme &scheme, vector<ImageClass> &imageClasses, int meanType){
   vector<pair<string,vector<pair<string, Image *> > > > imagesByClass;
   //Organize images by their class. For each image...
   for(vector<Image>::iterator it = images.begin(); it!=images.end(); it++){
@@ -143,7 +145,7 @@ void Util::computeImageClasses(vector<Image> &images, const CNNScheme &scheme, v
     }
     #pragma omp critical (printf)
     printf("Util::computeImageClasses::Going to compute meanAct of image class %s based on %u images\n",it->first.c_str(),(unsigned int)it->second.size());
-    currentImageClass.computeMeanActivations(it->second,scheme);
+    currentImageClass.computeMeanActivations(it->second,scheme, meanType);
     #pragma omp critical (imageClasses)
     imageClasses.push_back(currentImageClass);
   }

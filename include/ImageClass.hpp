@@ -22,7 +22,7 @@ class ImageClass {
     vector<vector<pair<int,float> > > meanActivations;
     double norm;
     void normalizeMeanActivations();
-    void computeMeanActivations(vector<pair<string,Image *> > &images, const CNNScheme &scheme);
+    void computeMeanActivations(vector<pair<string,Image *> > &images, const CNNScheme &scheme, int meanType);
     //void computeMeanActivationsThreshold(vector<pair<string,Image *> > &images, const CNNScheme &scheme, const CNNFeatures &cnn);
     //void computeMeanActivations(vector<string> &imageByClass, const map<string,Image> &images, const map<string,CNNLayer> &CNN);
     //void computeMeanActivations(const map<string,Image> &images, const map<string,CNNLayer> &CNN);

@@ -9,7 +9,9 @@ using std::find;
 
 //Computes the mean activations based on a set of images which belong to the imageClass
 //WARNING: Removes any previously stored meanActivations and image names
-void ImageClass::computeMeanActivations(vector<pair<string,Image *> > &images, const CNNScheme &scheme){
+//meanType = 1 arithmetic mean
+//meanType = 2 harmonic mean
+void ImageClass::computeMeanActivations(vector<pair<string,Image *> > &images, const CNNScheme &scheme, int meanType){
   //printf("IN computeMeanActivations for %u images named:\n",images.size());
   meanActivations.clear();
   imageNames.clear();
@@ -39,11 +41,20 @@ void ImageClass::computeMeanActivations(vector<pair<string,Image *> > &images, c
     while(!imagePointers.empty()){
       //Combine values of smallest into mean, store mean
       float combination = 0;
-      for(int smCount = 0 ; smCount< indexSmallests.size(); smCount++) combination+=imagePointers[indexSmallests[smCount]]->second;
-      if(combination > 0) {
-        meanActivations[i].push_back(pair<int,float>(currentSmallestFeature,combination/staticNumImages));
-        norm+=(combination/staticNumImages)*(combination/staticNumImages);
-        //printf("ImageClass::computeMeanActivations:: layer:%u featureId:%u meanActivation:%f\n",i,currentSmallestFeature,combination/staticNumImages); 
+      if(meanType == 1){
+        for(int smCount = 0 ; smCount< indexSmallests.size(); smCount++) combination+=imagePointers[indexSmallests[smCount]]->second;
+        if(combination > 0) {
+          meanActivations[i].push_back(pair<int,float>(currentSmallestFeature,combination/staticNumImages));
+          norm+=(combination/staticNumImages)*(combination/staticNumImages);
+          //printf("ImageClass::computeMeanActivations:: layer:%u featureId:%u meanActivation:%f\n",i,currentSmallestFeature,combination/staticNumImages); 
+        }
+      }
+      if(meanType == 2){
+        for(int smCount = 0 ; smCount< indexSmallests.size(); smCount++) combination+=1.0/imagePointers[indexSmallests[smCount]]->second;
+        if(combination > 0) {
+          meanActivations[i].push_back(pair<int,float>(currentSmallestFeature,staticNumImages/combination));
+          norm+=(staticNumImages/combination)*(staticNumImages/combination);
+        }
       }
       //Advance not done vectors. Then remove the done ones and clear list
       vector<int> pointersDone;
@@ -236,16 +247,22 @@ pair<ImageClass,float> ImageClass::findClosestClass(const vector<ImageClass> &iC
       return pair<ImageClass,float>(target,0.0);
     }
     closest = *next(iClassCandidates.begin());
+    printf("DIST:%s---%s---0\n",target.getName().c_str(),target.getName().c_str());
   }
   else closest = iClassCandidates.front();
   float closestDist = 0.0;
   if(distanceType==1) closestDist = Util::euclideanDistanceImageClass(target, closest, scheme);
   else if(distanceType==2) closestDist = Util::cosineDistanceImageClass(target, closest, scheme);
-  //printf("%f %s --- %s\n",closestDist,target.getName().c_str(),closest.getName().c_str());
   for (vector<ImageClass>::const_iterator i = std::next(iClassCandidates.begin()); i != iClassCandidates.end(); i++){
     //Skip self comparation
-    if((*i).getName().compare(target.getName())==0) continue;
-    float currentDist = Util::euclideanDistanceImageClass(target, *i, scheme);
+    if((*i).getName().compare(target.getName())==0) {
+        printf("DIST:%s---%s---0\n",target.getName().c_str(),target.getName().c_str());
+        continue;
+    }
+    float currentDist = 0.0;
+    if(distanceType==1) currentDist = Util::euclideanDistanceImageClass(target, *i, scheme);
+    else if(distanceType==2) currentDist = Util::cosineDistanceImageClass(target, *i, scheme);
+    printf("DIST:%s---%s---%f\n",target.getName().c_str(),(*i).getName().c_str(),currentDist);
     if(currentDist<closestDist){
       closestDist=currentDist;
       closest = *i;
