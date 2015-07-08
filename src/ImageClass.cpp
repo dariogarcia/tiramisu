@@ -21,6 +21,7 @@ void ImageClass::computeMeanActivations(vector<pair<string,Image *> > &images, c
   for(vector<pair<string,Image *> >::iterator it = images.begin(); it!=images.end();it++) imageNames.push_back(it->first);
   //For each layer
   for(int i = 0; i<scheme.getNumLayers();i++){
+    double layerNorm = 0.0;
     meanActivations.push_back(vector<pair<int,float> > ());
     //Struct to traverse all images concurrently, initialize at begin of each image values
     vector<pair<int,float> *> imagePointers;
@@ -46,6 +47,7 @@ void ImageClass::computeMeanActivations(vector<pair<string,Image *> > &images, c
         if(combination > 0) {
           meanActivations[i].push_back(pair<int,float>(currentSmallestFeature,combination/staticNumImages));
           norm+=(combination/staticNumImages)*(combination/staticNumImages);
+          layerNorm+=(combination/staticNumImages)*(combination/staticNumImages);
           //printf("ImageClass::computeMeanActivations:: layer:%u featureId:%u meanActivation:%f\n",i,currentSmallestFeature,combination/staticNumImages); 
         }
       }
@@ -54,6 +56,7 @@ void ImageClass::computeMeanActivations(vector<pair<string,Image *> > &images, c
         if(combination > 0) {
           meanActivations[i].push_back(pair<int,float>(currentSmallestFeature,staticNumImages/combination));
           norm+=(staticNumImages/combination)*(staticNumImages/combination);
+          layerNorm+=(staticNumImages/combination)*(staticNumImages/combination);
         }
       }
       //Advance not done vectors. Then remove the done ones and clear list
@@ -95,6 +98,7 @@ void ImageClass::computeMeanActivations(vector<pair<string,Image *> > &images, c
       //printf("Looping, smallest:%u for %u elems\n",currentSmallestFeature,indexSmallests.size());
     }
   //printf("-Done with Layer %u\n",i);
+    normByLayer.push_back(sqrt(layerNorm));
   }
   norm = sqrt(norm);
   //printf("OUT computeMeanActivations \n");
@@ -104,11 +108,14 @@ void ImageClass::computeMeanActivations(vector<pair<string,Image *> > &images, c
 }
 
 
-void ImageClass::normalizeMeanActivations(){
+//normType = 1 normalize all vector as a whole
+//normType = 2 normalize vector layer by layer
+void ImageClass::normalizeMeanActivations(int normType){
   for(int i = 0; i<meanActivations.size(); i++){
     vector<pair<int,float> > &currentLayer = meanActivations[i];
     for(vector<pair<int,float> >::iterator it = currentLayer.begin(); it!=currentLayer.end(); it++){
-      (*it).second = (*it).second/norm;
+      if(normType==1)(*it).second = (*it).second/norm;
+      else if(normType==2)(*it).second = (*it).second/normByLayer[i];
     }
   } 
 }

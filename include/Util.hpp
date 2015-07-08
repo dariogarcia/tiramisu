@@ -11,6 +11,8 @@ class Util {
     static double euclideanDistanceImageClass(const ImageClass &imgc1, const ImageClass &imgc2, const CNNScheme &scheme);
     static double cosineDistanceImageClass(const ImageClass &imgc1, const ImageClass &imgc2, const CNNScheme &scheme);
     static void computeImageClasses(vector<Image> &images, const CNNScheme &scheme,  vector<ImageClass> &imageClasses, int meanType);
+    static void substractImageClass(ImageClass &imgc1, ImageClass &imgc2, ImageClass &result, const CNNScheme &scheme);
+
 }; // UTIL
 
 #endif

@@ -179,7 +179,6 @@ void IO::loadImagesFromTXTFile(string path, vector<Image> &images, CNNScheme &sc
           Image *currentImage;
           #pragma omp critical (images)
           {
-          printf("IO::loadImagesFromTXTFile::Reading file  %s\n",fullpath.c_str());
             int imageCounter = find(imageIdx.begin(),imageIdx.end(),imageName) - imageIdx.begin();
             //If new image, add it and initialize
             if(imageCounter >= imageIdx.size()) {

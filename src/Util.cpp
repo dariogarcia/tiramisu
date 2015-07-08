@@ -150,3 +150,43 @@ void Util::computeImageClasses(vector<Image> &images, const CNNScheme &scheme, v
     imageClasses.push_back(currentImageClass);
   }
 }
+
+void Util::substractImageClass(ImageClass &imgc1, ImageClass &imgc2, ImageClass &result, const CNNScheme &scheme){
+  result.setName(imgc1.getName()+" minus " + imgc2.getName());
+  result.meanActivations.clear();
+  result.norm = 0;
+  printf("Substracting %s to %s\n",imgc2.getName().c_str(),imgc1.getName().c_str());
+  //For each layer
+  for(int i = 0; i<scheme.getNumLayers();i++){
+    double layerNorm = 0;
+    result.meanActivations.push_back(vector<pair<int,float> > ());
+    //Struct to traverse all images concurrently, initialize at begin of each image values
+    pair<int,float> * imagePointer1 = &((imgc1.meanActivations[i]).front());
+    pair<int,float> * imagePointer2 = &((imgc2.meanActivations[i]).front());
+    pair<int,float> * imagePointersEnd1 = &((imgc1.meanActivations[i]).back());
+    pair<int,float> * imagePointersEnd2 = &((imgc2.meanActivations[i]).back());
+    //Current smallest index & list of image indices with the smallest index (initialized at '0')
+    int currentSmallestFeature;
+    bool secondSmallest;
+    //While not all pointers are done, iterate
+    while(true){
+      //Get new element
+      currentSmallestFeature = imagePointer1->first;
+      while(imagePointer2->first < imagePointer1->first){
+        if(imagePointer2==imagePointersEnd2) break;
+        imagePointer2++;
+      }
+      float combination = imagePointer1->second;
+      if(imagePointer2->first == imagePointer1->first) combination-=imagePointer2->second;
+      if(combination > 0) {
+        result.meanActivations[i].push_back(pair<int,float>(currentSmallestFeature,combination));
+        result.norm+=combination*combination;
+        layerNorm+=combination*combination;
+      }
+      if(imagePointer1==imagePointersEnd1) break;
+      imagePointer1++;
+    }
+    result.normByLayer.push_back(sqrt(layerNorm));
+  }
+  result.norm = sqrt(result.norm);
+}

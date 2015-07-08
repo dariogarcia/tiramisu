@@ -1,14 +1,15 @@
 #include <dirent.h>
 #include <cstring>
-#include <map>
+#include <set>
 #include <vector>
+#include <algorithm>
 
 #include "../include/IO.hpp"
 #include "../include/Util.hpp"
 #include "../include/CNNScheme.hpp"
 #include "../include/ImageClass.hpp"
 
-using std::map;
+using std::set;
 using std::vector;
 using std::pair;
 
@@ -52,9 +53,7 @@ int main(int argc, char* argv[]){
   
   time(&t_init);
   vector<ImageClass> imageClasses;
-  //Arithmetic mean
   int meanType = 1;
-  //Harmonic mean
   //int meanType = 2;
   if(meanType==1)printf("MAIN::Using arithmetic mean\n");
   if(meanType==2)printf("MAIN::Using harmonic mean\n");
@@ -64,14 +63,16 @@ int main(int argc, char* argv[]){
 
 
   time(&t_init);
-  for(int i = 0 ; i<imageClasses.size();i++) imageClasses[i].normalizeMeanActivations();
+  int normType = 2;
+  if(normType==1)printf("MAIN::Normalizing overall vector\n");
+  if(normType==2)printf("MAIN::Normalizing vector by CNN layer\n");
+  for(int i = 0 ; i<imageClasses.size();i++) imageClasses[i].normalizeMeanActivations(normType);
   time(&t_end);
   printf("MAIN::Normalizing image classes took %f\n",difftime (t_end,t_init));
 
+
   time(&t_init);
-  //Euclidean
   //int distanceType = 1;
-  //Cosine
   int distanceType = 2;
   if(distanceType==1)printf("MAIN::Using euclidean distance\n");
   if(distanceType==2)printf("MAIN::Using cosine distance\n");
@@ -79,10 +80,41 @@ int main(int argc, char* argv[]){
     //distanceType = 1 -> euclidean distance
     //distanceType = 2 -> cosine distance
     pair<ImageClass,double> closest = (*it).findClosestClass(imageClasses, scheme, distanceType);
-    printf("MAIN::Closest class to %s is %s at distance %f\n",(*it).getName().c_str(),closest.first.getName().c_str(),closest.second);
+    printf("CLOSEST::Closest class to %s is %s at distance %f\n",(*it).getName().c_str(),closest.first.getName().c_str(),closest.second);
   }
   time(&t_end);
   printf("MAIN::Compute image class distances took %f\n",difftime (t_end,t_init));
+
+
+  time(&t_init);
+  typedef pair<ImageClass,set<int> > ArithmeticIC;
+  ImageClass teddy;
+  ImageClass bear;
+  ArithmeticIC teddy_minus_bear;
+  for(int i = 0 ; i<imageClasses.size();i++) {
+    if(imageClasses[i].getName().compare("n04399382 teddy, teddy bear")==0) {
+      teddy = imageClasses[i];
+      teddy_minus_bear.second.insert(i);
+    }
+    if(imageClasses[i].getName().compare("n02132136 brown bear, bruin, Ursus arctos")==0) {
+      bear = imageClasses[i];
+      teddy_minus_bear.second.insert(i);
+    }
+  }
+  Util::substractImageClass(teddy,bear,teddy_minus_bear.first,scheme);
+  time(&t_end);
+  printf("MAIN::Compute arithmetics took %f\n",difftime (t_end,t_init));
+
+
+  //The whole ArithmeticImageClass code is not elegant or efficient. Needs work (get rid of sets, for starters)
+  if(distanceType==1)printf("MAIN::Using euclidean distance\n");
+  if(distanceType==2)printf("MAIN::Using cosine distance\n");
+  vector<ImageClass> tempIC = imageClasses;
+  for(int i = teddy_minus_bear.second.size(); i>0 ;i--) tempIC.erase(tempIC.begin()+(*std::next(teddy_minus_bear.second.begin(), i-1)));
+  pair<ImageClass,double> closestIC = teddy_minus_bear.first.findClosestClass(tempIC, scheme, distanceType);
+  printf("CLOSEST::Closest class to %s is %s at distance %f\n",teddy_minus_bear.first.getName().c_str(),closestIC.first.getName().c_str(),closestIC.second);
+  time(&t_end);
+  printf("MAIN::Compute closest classes to arithmetic classes took %f\n",difftime (t_end,t_init));
 
 
 ///////////////////////////////////////////////////////////
