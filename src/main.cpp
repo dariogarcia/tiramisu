@@ -13,6 +13,33 @@ using std::set;
 using std::vector;
 using std::pair;
 
+//An arithmetic ImageClass (.first), result of operating on some imageClasses (.second)
+typedef pair<ImageClass,set<int> > ArithmeticIC;
+
+void substract(ArithmeticIC &result, string id_first, string id_second, CNNScheme & scheme, vector<ImageClass> & imageClasses){
+  ImageClass first;
+  ImageClass second;
+  for(int i = 0 ; i<imageClasses.size();i++) {
+    if(imageClasses[i].getName().compare(id_first)==0) {
+      first = imageClasses[i];
+      result.second.insert(i);
+    }
+    if(imageClasses[i].getName().compare(id_second)==0) {
+      second = imageClasses[i];
+      result.second.insert(i);
+    }
+  }
+  Util::substractImageClass(first,second,result.first,scheme);
+}
+
+pair<ImageClass,double> findClosestArithmeticClass(vector<ImageClass> &imageClasses, ArithmeticIC & arithClass,CNNScheme & scheme, int distanceType){
+  vector<ImageClass> tempIC = imageClasses;
+  for(int i = arithClass.second.size(); i>0 ;i--) tempIC.erase(tempIC.begin()+(*std::next(arithClass.second.begin(), i-1)));
+  pair<ImageClass,double> res = arithClass.first.findClosestClass(tempIC, scheme, distanceType);
+  printf("ARITH_CLOSEST::Closest class to %s is %s at %f\n",arithClass.first.getName().c_str(),res.first.getName().c_str(),res.second);
+  return res;
+} 
+
 int main(int argc, char* argv[]){
   CNNScheme scheme;
   CNNFeatures cnnfeatures;
@@ -87,21 +114,87 @@ int main(int argc, char* argv[]){
 
 
   time(&t_init);
-  typedef pair<ImageClass,set<int> > ArithmeticIC;
-  ImageClass teddy;
-  ImageClass bear;
-  ArithmeticIC teddy_minus_bear;
-  for(int i = 0 ; i<imageClasses.size();i++) {
-    if(imageClasses[i].getName().compare("n04399382 teddy, teddy bear")==0) {
-      teddy = imageClasses[i];
-      teddy_minus_bear.second.insert(i);
-    }
-    if(imageClasses[i].getName().compare("n02132136 brown bear, bruin, Ursus arctos")==0) {
-      bear = imageClasses[i];
-      teddy_minus_bear.second.insert(i);
-    }
-  }
-  Util::substractImageClass(teddy,bear,teddy_minus_bear.first,scheme);
+  vector<ArithmeticIC> ariths;
+  ArithmeticIC whitewolf_minus_timberwolf;
+  substract(whitewolf_minus_timberwolf,"n02114548 white wolf, Arctic wolf, Canis lupus tundrarum", "n02114367 timber wolf, grey wolf, gray wolf, Canis lupus", scheme, imageClasses);
+  ariths.push_back(whitewolf_minus_timberwolf);
+  ArithmeticIC whitewolf_minus_coyote;
+  substract(whitewolf_minus_coyote,"n02114548 white wolf, Arctic wolf, Canis lupus tundrarum", "n02114855 coyote, prairie wolf, brush wolf, Canis latrans", scheme, imageClasses);
+  ariths.push_back(whitewolf_minus_coyote);
+  ArithmeticIC timberwolf_minus_eskimo;
+  substract(timberwolf_minus_eskimo,"n02114367 timber wolf, grey wolf, gray wolf, Canis lupus", "n02109961 Eskimo dog, husky", scheme, imageClasses);
+  ariths.push_back(timberwolf_minus_eskimo);
+  ArithmeticIC whitewolf_minus_eskimo;
+  substract(whitewolf_minus_eskimo,"n02114548 white wolf, Arctic wolf, Canis lupus tundrarum", "n02109961 Eskimo dog, husky", scheme, imageClasses);
+  ariths.push_back(whitewolf_minus_eskimo);
+  ArithmeticIC timberwolf_minus_siberian;
+  substract(timberwolf_minus_siberian,"n02114367 timber wolf, grey wolf, gray wolf, Canis lupus", "n02110185 Siberian husky", scheme, imageClasses);
+  ariths.push_back(timberwolf_minus_siberian);
+  ArithmeticIC whitewolf_minus_siberian;
+  substract(whitewolf_minus_siberian,"n02114548 white wolf, Arctic wolf, Canis lupus tundrarum", "n02110185 Siberian husky", scheme, imageClasses);
+  ariths.push_back(whitewolf_minus_siberian);
+  ArithmeticIC teddy_minus_brownbear;
+  substract(teddy_minus_brownbear,"n04399382 teddy, teddy bear","n02132136 brown bear, bruin, Ursus arctos",scheme, imageClasses);
+  ariths.push_back(teddy_minus_brownbear);
+  ArithmeticIC teddy_minus_blackbear;
+  substract(teddy_minus_blackbear,"n04399382 teddy, teddy bear","n02133161 American black bear, black bear, Ursus americanus, Euarctos americanus",scheme, imageClasses);
+  ariths.push_back(teddy_minus_blackbear);
+  ArithmeticIC slothbear_minus_brownbear;
+  substract(slothbear_minus_brownbear,"n02134418 sloth bear, Melursus ursinus, Ursus ursinus", "n02132136 brown bear, bruin, Ursus arctos", scheme, imageClasses);
+  ariths.push_back(slothbear_minus_brownbear);
+  ArithmeticIC slothbear_minus_blackbear;
+  substract(slothbear_minus_blackbear,"n02134418 sloth bear, Melursus ursinus, Ursus ursinus", "n02133161 American black bear, black bear, Ursus americanus, Euarctos americanus", scheme, imageClasses);
+  ariths.push_back(slothbear_minus_blackbear);
+  ArithmeticIC icebear_minus_brownbear;
+  substract(icebear_minus_brownbear,"n02134084 ice bear, polar bear, Ursus Maritimus, Thalarctos maritimus", "n02132136 brown bear, bruin, Ursus arctos", scheme, imageClasses);
+  ariths.push_back(icebear_minus_brownbear);
+  ArithmeticIC icebear_minus_blackbear;
+  substract(icebear_minus_blackbear,"n02134084 ice bear, polar bear, Ursus Maritimus, Thalarctos maritimus", "n02133161 American black bear, black bear, Ursus americanus, Euarctos americanus", scheme, imageClasses);
+  ariths.push_back(icebear_minus_blackbear);
+  ArithmeticIC panda_minus_brownbear;
+  substract(panda_minus_brownbear,"n02510455 giant panda, panda, panda bear, coon bear, Ailuropoda melanoleuca", "n02132136 brown bear, bruin, Ursus arctos", scheme, imageClasses);
+  ariths.push_back(panda_minus_brownbear);
+  ArithmeticIC panda_minus_blackbear;
+  substract(panda_minus_blackbear,"n02510455 giant panda, panda, panda bear, coon bear, Ailuropoda melanoleuca", "n02133161 American black bear, black bear, Ursus americanus, Euarctos americanus", scheme, imageClasses);
+  ariths.push_back(panda_minus_blackbear);
+  ArithmeticIC seacucumber_minus_cucumber;
+  substract(panda_minus_blackbear,"n02321529 sea cucumber, holothurian", "n07718472 cucumber, cuke", scheme, imageClasses);
+  ariths.push_back(seacucumber_minus_cucumber);
+  ArithmeticIC boar_minus_pig;
+  substract(boar_minus_pig,"n02396427 wild boar, boar, Sus scrofa", "n02395406 hog, pig, grunter, squealer, Sus scrofa", scheme, imageClasses);
+  ariths.push_back(boar_minus_pig);
+  ArithmeticIC church_minus_mosque;
+  substract(church_minus_mosque,"n03028079 church, church building", "n03788195 mosque", scheme, imageClasses);
+  ariths.push_back(church_minus_mosque);
+  ArithmeticIC mosque_minus_church;
+  substract(mosque_minus_church,"n03788195 mosque", "n03028079 church, church building", scheme, imageClasses);
+  ariths.push_back(mosque_minus_church);
+  ArithmeticIC computermous_minus_computer;
+  substract(computermous_minus_computer,"n03793489 mouse, computer mouse", "n03180011 desktop computer", scheme, imageClasses);
+  ariths.push_back(computermous_minus_computer);
+  ArithmeticIC computermouse_minus_laptop;
+  substract(computermouse_minus_laptop,"n03793489 mouse, computer mouse", "n03642806 laptop, laptop computer", scheme, imageClasses);
+  ariths.push_back(computermouse_minus_laptop);
+  ArithmeticIC electric_minus_acoustic;
+  substract(electric_minus_acoustic,"n03272010 electric guitar", "n02676566 acoustic guitar", scheme, imageClasses);
+  ariths.push_back(electric_minus_acoustic);
+  ArithmeticIC sportcar_minus_wheel;
+  substract(sportcar_minus_wheel,"n04285008 sports car, sport car", "n02974003 car wheel", scheme, imageClasses);
+  ariths.push_back(sportcar_minus_wheel);
+  ArithmeticIC platypus_minus_marmot;
+  substract(platypus_minus_marmot,"n01873310 platypus, duckbill, duckbilled platypus, duck-billed platypus, Ornithorhynchus anatinus", "n02361337 marmot", scheme, imageClasses);
+  ariths.push_back(platypus_minus_marmot);
+  ArithmeticIC platypus_minus_beaver;
+  substract(platypus_minus_beaver,"n01873310 platypus, duckbill, duckbilled platypus, duck-billed platypus, Ornithorhynchus anatinus", "n02363005 beaver", scheme, imageClasses);
+  ariths.push_back(platypus_minus_beaver);
+  ArithmeticIC platypus_minus_furcoat;
+  substract(platypus_minus_furcoat,"n01873310 platypus, duckbill, duckbilled platypus, duck-billed platypus, Ornithorhynchus anatinus", "n03404251 fur coat", scheme, imageClasses);
+  ariths.push_back(platypus_minus_furcoat);
+  ArithmeticIC platypus_minus_otter;
+  substract(platypus_minus_otter,"n01873310 platypus, duckbill, duckbilled platypus, duck-billed platypus, Ornithorhynchus anatinus", "n02444819 otter", scheme, imageClasses);
+  ariths.push_back(platypus_minus_otter);
+  
+  
   time(&t_end);
   printf("MAIN::Compute arithmetics took %f\n",difftime (t_end,t_init));
 
@@ -109,10 +202,9 @@ int main(int argc, char* argv[]){
   //The whole ArithmeticImageClass code is not elegant or efficient. Needs work (get rid of sets, for starters)
   if(distanceType==1)printf("MAIN::Using euclidean distance\n");
   if(distanceType==2)printf("MAIN::Using cosine distance\n");
-  vector<ImageClass> tempIC = imageClasses;
-  for(int i = teddy_minus_bear.second.size(); i>0 ;i--) tempIC.erase(tempIC.begin()+(*std::next(teddy_minus_bear.second.begin(), i-1)));
-  pair<ImageClass,double> closestIC = teddy_minus_bear.first.findClosestClass(tempIC, scheme, distanceType);
-  printf("CLOSEST::Closest class to %s is %s at distance %f\n",teddy_minus_bear.first.getName().c_str(),closestIC.first.getName().c_str(),closestIC.second);
+  for(int i = 0 ; i<ariths.size();i++){
+    pair<ImageClass,double> closestIC = findClosestArithmeticClass(imageClasses, ariths[i], scheme, distanceType);
+  }
   time(&t_end);
   printf("MAIN::Compute closest classes to arithmetic classes took %f\n",difftime (t_end,t_init));
 

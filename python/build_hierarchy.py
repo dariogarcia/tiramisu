@@ -18,9 +18,9 @@ for i in range(1000):
   sim.append(onesim)
 
 #Fill with the elements in their right order
-inf2 = open('/tmp/dist_95.out','r')
+inf2 = open('/tmp/dist_208.out','r')
 for line in inf2:
-  words = line.split('--')
+  words = line.split('---')
   word1 = words[0]+'\n'
   word2 = words[1]+'\n'
   word12sim = words[2]
@@ -69,4 +69,4 @@ leaves = leaves_list(z)
 
 #plt.show()
 plt.subplots_adjust(left=0.4)
-plt.savefig('test.pdf', format='pdf')
+plt.savefig('hierarchy_208.pdf', format='pdf')
