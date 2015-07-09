@@ -71,7 +71,7 @@ double Util::euclideanDistanceImageClass(const ImageClass &imgc1, const ImageCla
       if(it2!=imgc2.meanActivations[i].end()) while(it2->first<j && it2!=imgc2.meanActivations[i].end())it2++;
       if(it1!=imgc1.meanActivations[i].end())if(it1->first == j) val1 = it1->second;
       if(it2!=imgc2.meanActivations[i].end())if(it2->first == j) val2 = it2->second;
-      distance+=fabs(val1-val2)*fabs(val1-val2);
+      distance+=(val2-val1)*(val2-val1);
     }
     //printf("-Distance found on layer %u:%f\n",i,distance);
   }  

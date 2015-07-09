@@ -3,6 +3,7 @@
 #include <set>
 #include <vector>
 #include <algorithm>
+#include <cmath>
 
 #include "../include/IO.hpp"
 #include "../include/Util.hpp"
@@ -81,7 +82,6 @@ int main(int argc, char* argv[]){
   time(&t_init);
   vector<ImageClass> imageClasses;
   int meanType = 1;
-  //int meanType = 2;
   if(meanType==1)printf("MAIN::Using arithmetic mean\n");
   if(meanType==2)printf("MAIN::Using harmonic mean\n");
   Util::computeImageClasses(images, scheme, imageClasses, meanType);
@@ -90,7 +90,7 @@ int main(int argc, char* argv[]){
 
 
   time(&t_init);
-  int normType = 2;
+  int normType = 1;
   if(normType==1)printf("MAIN::Normalizing overall vector\n");
   if(normType==2)printf("MAIN::Normalizing vector by CNN layer\n");
   for(int i = 0 ; i<imageClasses.size();i++) imageClasses[i].normalizeMeanActivations(normType);
@@ -99,13 +99,10 @@ int main(int argc, char* argv[]){
 
 
   time(&t_init);
-  //int distanceType = 1;
-  int distanceType = 2;
+  int distanceType = 1;
   if(distanceType==1)printf("MAIN::Using euclidean distance\n");
   if(distanceType==2)printf("MAIN::Using cosine distance\n");
   for(vector<ImageClass>::iterator it = imageClasses.begin(); it!=imageClasses.end(); it++){
-    //distanceType = 1 -> euclidean distance
-    //distanceType = 2 -> cosine distance
     pair<ImageClass,double> closest = (*it).findClosestClass(imageClasses, scheme, distanceType);
     printf("CLOSEST::Closest class to %s is %s at distance %f\n",(*it).getName().c_str(),closest.first.getName().c_str(),closest.second);
   }
