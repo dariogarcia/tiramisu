@@ -58,7 +58,7 @@ double Util::euclideanDistanceImageClass(const ImageClass &imgc1, const ImageCla
   double distance=0.0;
   //printf("Computing distance between %s and %s\n",imgc1.getName().c_str(),imgc2.getName().c_str());
   if(scheme.getNumLayers()!= imgc1.meanActivations.size() || scheme.getNumLayers()!= imgc2.meanActivations.size()){
-    printf("Util::euclideanDistanceImageClass::WARNING mean activations not available for all %u layers %u %u\n",scheme.getNumLayers(),(unsigned int)imgc1.meanActivations.size(),(unsigned int)imgc2.meanActivations.size());
+    printf("Util::euclideanDistanceImageClass::WARNING mean activations not available for all %u layers. Image %s has %u, image %s has %u\n",scheme.getNumLayers(),imgc1.getName().c_str(),(unsigned int)imgc1.meanActivations.size(),imgc2.getName().c_str(),(unsigned int)imgc2.meanActivations.size());
   }
   //For each layer
   for(int i = 0 ; i < scheme.getNumLayers(); i++){
