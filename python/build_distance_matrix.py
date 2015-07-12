@@ -2,6 +2,8 @@ from nltk.corpus import wordnet as wn
 from nltk.corpus import genesis
 from scipy.stats import spearmanr
 import numpy as np
+#import rpy2
+
 
 inf = open('labels.txt', 'r')
 labels = list()
@@ -65,7 +67,7 @@ for i in range(1000):
   sim.append(mysim)
 
 #Fill with the elements in their right order
-inf2 = open('/tmp/dist_459.out','r')
+inf2 = open('/home/dario/dist_459.out','r')
 for line in inf2:
   words = line.split('---')
   word1 = words[0]+'\n'
@@ -75,17 +77,15 @@ for line in inf2:
 print 'done building distance matrix according to results'
 
 pvalues = list()
-total_rho = 0
+total_rho_sci = 0
+#total_rho_rpy = 0
 for i in range(1000):
   #print 'values of ' + str(labels[i]) 
-  rho, pval = spearmanr(sim[i],distances_path[i])
-  #print 'rho'
-  #print rho
-  #print 'pval'
-  #print pval
+  rho_sci, pval = spearmanr(sim[i],distances_path[i])
   pvalues.append(pval)
-  total_rho+=np.absolute(rho)
-  print total_rho
+  total_rho_sci+=np.absolute(rho_sci)
+  #tho_rpy = rpy.r.cor(sim[i],distances_path[i],method="spearman")
+  #total_rho_rpy+=np.absolute(rho_rpy)
 
 print 'min pvalues'
 print np.amin(pvalues)
@@ -95,5 +95,7 @@ print 'mean pvalues'
 print np.mean(pvalues)
 print 'stdDev pvalues'
 print np.std(pvalues)
-print 'total rho'
-print total_rho
+print 'total rho sci'
+print total_rho_sci
+#print 'total rho rpy'
+#print total_rho_rpy
