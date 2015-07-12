@@ -1,9 +1,7 @@
 from nltk.corpus import wordnet as wn
 from nltk.corpus import genesis
-
 from scipy.stats import spearmanr
-
-
+import numpy as np
 
 inf = open('labels.txt', 'r')
 labels = list()
@@ -31,20 +29,16 @@ for i in range(1000):
   sixsim = [0]*1000
   distances_lin.append(sixsim)
 
-
 #Read labels and transform into NLTK compatible
 for line in inf:
   labels.append(line)
   synsets.append((line.split()[0])[1:]+'-n')
   labelsNLTK.append((line.split()[0])[1:]+'-n')
 
-
 #Import IC calculation
-from nltk.corpus import wordnet_ic
-brown_ic = wordnet_ic.ic('ic-brown-resnik-add1.dat')
-bnc_ic = wordnet_ic.ic('ic-bnc-resnik-add1.dat')
-
-print '1'
+#from nltk.corpus import wordnet_ic
+#brown_ic = wordnet_ic.ic('ic-brown-resnik-add1.dat')
+#bnc_ic = wordnet_ic.ic('ic-bnc-resnik-add1.dat')
 
 #For each pair of synsets, compute distance
 for s1 in synsets:
@@ -64,15 +58,6 @@ for s1 in synsets:
 
 print 'done computing wordnet distances'
      
-#Print matrix for testing 
-#counter1 = 0
-#for sub_dist in distances:
-#  counter2 = 0
-#  for dis in sub_dist:
-#    print str(dis) + ' '+ str(counter1) + ' '+ str(counter2)
-#    counter2+=1
-#  counter1+=1
-
 #Build empty list of lists
 sim = list()
 for i in range(1000):
@@ -80,7 +65,7 @@ for i in range(1000):
   sim.append(mysim)
 
 #Fill with the elements in their right order
-inf2 = open('./dist_973.out','r')
+inf2 = open('/tmp/dist_459.out','r')
 for line in inf2:
   words = line.split('---')
   word1 = words[0]+'\n'
@@ -89,6 +74,26 @@ for line in inf2:
   sim[labels.index(word1)][labels.index(word2)] = word12sim
 print 'done building distance matrix according to results'
 
-rho, pval = spearmanr(sim,distances_path)
-print rho
-print pval
+pvalues = list()
+total_rho = 0
+for i in range(1000):
+  #print 'values of ' + str(labels[i]) 
+  rho, pval = spearmanr(sim[i],distances_path[i])
+  #print 'rho'
+  #print rho
+  #print 'pval'
+  #print pval
+  pvalues.append(pval)
+  total_rho+=np.absolute(rho)
+  print total_rho
+
+print 'min pvalues'
+print np.amin(pvalues)
+print 'max pvalues'
+print np.amax(pvalues)
+print 'mean pvalues'
+print np.mean(pvalues)
+print 'stdDev pvalues'
+print np.std(pvalues)
+print 'total rho'
+print total_rho
