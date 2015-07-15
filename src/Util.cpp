@@ -144,7 +144,7 @@ void Util::computeImageClasses(vector<Image> &images, const CNNScheme &scheme, v
       currentImageClass.addImageName(it2->first);
     }
     #pragma omp critical (printf)
-    printf("Util::computeImageClasses::Going to compute meanAct of image class %s based on %u images\n",it->first.c_str(),(unsigned int)it->second.size());
+    printf("Util::computeImageClasses::%u images to compute meanAct of image class %s\n",(unsigned int)it->second.size(),it->first.c_str());
     currentImageClass.computeMeanActivations(it->second,scheme, meanType);
     #pragma omp critical (imageClasses)
     imageClasses.push_back(currentImageClass);
@@ -167,7 +167,6 @@ void Util::substractImageClass(ImageClass &imgc1, ImageClass &imgc2, ImageClass 
     pair<int,float> * imagePointersEnd2 = &((imgc2.meanActivations[i]).back());
     //Current smallest index & list of image indices with the smallest index (initialized at '0')
     int currentSmallestFeature;
-    bool secondSmallest;
     //While not all pointers are done, iterate
     while(true){
       //Get new element
@@ -185,6 +184,87 @@ void Util::substractImageClass(ImageClass &imgc1, ImageClass &imgc2, ImageClass 
       }
       if(imagePointer1==imagePointersEnd1) break;
       imagePointer1++;
+    }
+    result.normByLayer.push_back(sqrt(layerNorm));
+  }
+  result.norm = sqrt(result.norm);
+}
+
+
+void Util::addImageClass(ImageClass &imgc1, ImageClass &imgc2, ImageClass &result, const CNNScheme &scheme){
+  result.setName(imgc1.getName()+" plus " + imgc2.getName());
+  result.meanActivations.clear();
+  result.norm = 0;
+  printf("Adding %s to %s\n",imgc2.getName().c_str(),imgc1.getName().c_str());
+  //For each layer
+  for(int i = 0; i<scheme.getNumLayers();i++){
+    printf("Layer %s\n",scheme.layerIdx[i].c_str());
+    double layerNorm = 0;
+    result.meanActivations.push_back(vector<pair<int,float> > ());
+    //Struct to traverse all images concurrently, initialize at begin of each image values
+    pair<int,float> * imagePointer1 = &((imgc1.meanActivations[i]).front());
+    pair<int,float> * imagePointer2 = &((imgc2.meanActivations[i]).front());
+    pair<int,float> * imagePointersEnd1 = &((imgc1.meanActivations[i]).back());
+    pair<int,float> * imagePointersEnd2 = &((imgc2.meanActivations[i]).back());
+    //Current smallest index & list of image indices with the smallest index (initialized at '0')
+    int currentSmallestFeature;
+    bool firstSmallest = false;
+    bool firstDone = false;
+    bool secondSmallest = false;
+    bool secondDone = false;
+    //While not all pointers are done, iterate
+    while(true){
+      //Get new element
+      float combination = 0;
+      if(!firstDone && !secondDone){
+        if(imagePointer1->first < imagePointer2->first){
+          firstSmallest = true;
+          secondSmallest = false;
+          currentSmallestFeature = imagePointer1->first;
+          combination = imagePointer1->second;
+        }
+        if(imagePointer1->first > imagePointer2->first){
+          firstSmallest = false;
+          secondSmallest = true;
+          currentSmallestFeature = imagePointer2->first;
+          combination = imagePointer2->second;
+        }
+        if(imagePointer1->first == imagePointer2->first){
+          firstSmallest = true;
+          secondSmallest = true;
+          currentSmallestFeature = imagePointer1->first;
+          combination = imagePointer1->second + imagePointer2->second;
+        }
+      }
+      else if(!firstDone && secondDone){
+          firstSmallest = true;
+          secondSmallest = false;
+          currentSmallestFeature = imagePointer1->first;
+          combination = imagePointer1->second;
+      }
+      else if(firstDone && !secondDone){
+          firstSmallest = false;
+          secondSmallest = true;
+          currentSmallestFeature = imagePointer2->first;
+          combination = imagePointer2->second;
+      }
+      if(combination > 0) {
+        result.meanActivations[i].push_back(pair<int,float>(currentSmallestFeature,combination));
+        result.norm+=combination*combination;
+        layerNorm+=combination*combination;
+      }
+      printf("%u %d %d %f\n",currentSmallestFeature, firstSmallest,secondSmallest,combination);
+      if(imagePointer1==imagePointersEnd1) firstDone = true;
+      if(imagePointer2==imagePointersEnd2) secondDone = true;
+      if(firstDone && secondDone)break;
+      if(firstSmallest && imagePointer1!=imagePointersEnd1){
+        printf("inc1\n");
+        imagePointer1++;
+      }
+      if(secondSmallest && imagePointer2!=imagePointersEnd2){
+        printf("inc2\n");
+        imagePointer2++;
+      }
     }
     result.normByLayer.push_back(sqrt(layerNorm));
   }

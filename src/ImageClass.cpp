@@ -240,7 +240,7 @@ void ImageClass::normalizeMeanActivations(int normType){
 
 //distanceType = 1 -> euclidean distance
 //distanceType = 2 -> cosine distance
-pair<ImageClass,float> ImageClass::findClosestClass(const vector<ImageClass> &iClassCandidates, const CNNScheme &scheme, int distanceType){
+pair<ImageClass,float> ImageClass::findClosestClass(const vector<ImageClass> &iClassCandidates, const CNNScheme &scheme, int distanceType, bool verbose){
   const ImageClass &target = *this;
   if(iClassCandidates.size()<1){
     printf("ImageClass::findClosestClass::ERROR empty vector of candidates to compare. Returning self.\n");
@@ -254,7 +254,7 @@ pair<ImageClass,float> ImageClass::findClosestClass(const vector<ImageClass> &iC
       return pair<ImageClass,float>(target,0.0);
     }
     closest = *next(iClassCandidates.begin());
-    printf("DIST:%s---%s---0\n",target.getName().c_str(),target.getName().c_str());
+    if(verbose)printf("DIST:%s---%s---0\n",target.getName().c_str(),target.getName().c_str());
   }
   else closest = iClassCandidates.front();
   float closestDist = 0.0;
@@ -263,13 +263,13 @@ pair<ImageClass,float> ImageClass::findClosestClass(const vector<ImageClass> &iC
   for (vector<ImageClass>::const_iterator i = std::next(iClassCandidates.begin()); i != iClassCandidates.end(); i++){
     //Skip self comparation
     if((*i).getName().compare(target.getName())==0) {
-        printf("DIST:%s---%s---0\n",target.getName().c_str(),target.getName().c_str());
+        if(verbose)printf("DIST:%s---%s---0\n",target.getName().c_str(),target.getName().c_str());
         continue;
     }
     float currentDist = 0.0;
     if(distanceType==1) currentDist = Util::euclideanDistanceImageClass(target, *i, scheme);
     else if(distanceType==2) currentDist = Util::cosineDistanceImageClass(target, *i, scheme);
-    printf("DIST:%s---%s---%f\n",target.getName().c_str(),(*i).getName().c_str(),currentDist);
+    if(verbose)printf("DIST:%s---%s---%f\n",target.getName().c_str(),(*i).getName().c_str(),currentDist);
     if(currentDist<closestDist){
       closestDist=currentDist;
       closest = *i;

@@ -28,7 +28,7 @@ class ImageClass {
     //void computeMeanActivations(vector<string> &imageByClass, const map<string,Image> &images, const map<string,CNNLayer> &CNN);
     //void computeMeanActivations(const map<string,Image> &images, const map<string,CNNLayer> &CNN);
     //void computeMeanActivations(vector<string> &imageByClass, const map<string,Image> &images, const map<string,CNNLayer> &CNN);
-    pair<ImageClass,float> findClosestClass(const vector<ImageClass> &iClassCandidates, const CNNScheme &scheme, int distanceType);
+    pair<ImageClass,float> findClosestClass(const vector<ImageClass> &iClassCandidates, const CNNScheme &scheme, int distanceType, bool verbose);
     //pair<ImageClass,float> findClosestClassByEucliDist(const map<string,ImageClass> &iClassCandidates, const map<string,CNNLayer> &layers);
     //void printAccumulatedMeanAct();
 

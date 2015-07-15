@@ -104,7 +104,7 @@ print 'done computing wordnet distances'
 #plt.figure()
 fig, axes = plt.subplots(nrows=3, ncols=3)
 ax0, ax1, ax2, ax3, ax4, ax5, ax6, ax7, ax8 = axes.flat
-bins = [-1,-0.9,-0.8,-0.7,-0.6,-0.5,-0.4,-0.2,-0.2,-0.1,0,0.1,0.2,0.2,0.4,0.5,0.6,0.7,0.8,0.9,1]
+bins = [-1,-0.9,-0.8,-0.7,-0.6,-0.5,-0.4,-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1]
 
 
 print "Values path"
@@ -117,8 +117,6 @@ for i in range(1000):
   pvalues.append(pval)
   total_rho_sci+=rho_sci
   rhos.append(rho_sci)
-  if rho_sci < 0.2:
-    print 'Small Rho path:' + labels(i) + str(rho_sci)
 #hist, bin_edges = np.histogram(rhos,bins=[-1,-0.5,0, 0.2, 0.4,0.5, 0.6, 0.7,1])
 #print hist
 n, bins, patches = ax0.hist(rhos, bins, normed=1, histtype='stepfilled')
@@ -148,8 +146,6 @@ for i in range(1000):
   pvalues.append(pval)
   total_rho_sci+=rho_sci
   rhos.append(rho_sci)
-  if rho_sci < 0.2:
-    print 'Small Rho lch:' + labels(i) + str(rho_sci)
 n, bins, patches = ax1.hist(rhos, bins, normed=1, histtype='stepfilled')
 ax1.set_title('LCh')
 print 'min pvalues'
@@ -176,8 +172,6 @@ for i in range(1000):
   pvalues.append(pval)
   total_rho_sci+=rho_sci
   rhos.append(rho_sci)
-  if rho_sci < 0.2:
-    print 'Small Rho wup:' + labels(i) + str(rho_sci)
 n, bins, patches = ax2.hist(rhos, bins, normed=1, histtype='stepfilled')
 ax2.set_title('WuP')
 print 'min pvalues'
@@ -204,8 +198,6 @@ for i in range(1000):
   pvalues.append(pval)
   total_rho_sci+=rho_sci
   rhos.append(rho_sci)
-  if rho_sci < 0.2:
-    print 'Small Rho res brown:' + labels(i) + str(rho_sci)
 n, bins, patches = ax3.hist(rhos, bins, normed=1, histtype='stepfilled')
 ax3.set_title('Res brown')
 print 'min pvalues'
@@ -232,8 +224,6 @@ for i in range(1000):
   pvalues.append(pval)
   total_rho_sci+=rho_sci
   rhos.append(rho_sci)
-  if rho_sci < 0.2:
-    print 'Small Rho jcn brown:' + labels(i) + str(rho_sci)
 n, bins, patches = ax4.hist(rhos, bins, normed=1, histtype='stepfilled')
 ax4.set_title('JCn brown')
 print 'min pvalues'
@@ -260,8 +250,6 @@ for i in range(1000):
   pvalues.append(pval)
   total_rho_sci+=rho_sci
   rhos.append(rho_sci)
-  if rho_sci < 0.2:
-    print 'Small Rho lin brown:' + labels(i) + str(rho_sci)
 n, bins, patches = ax5.hist(rhos, bins, normed=1, histtype='stepfilled')
 ax5.set_title('Lin brown')
 print 'min pvalues'
@@ -288,8 +276,6 @@ for i in range(1000):
   pvalues.append(pval)
   total_rho_sci+=rho_sci
   rhos.append(rho_sci)
-  if rho_sci < 0.2:
-    print 'Small Rho res bnc:' + labels(i) + str(rho_sci)
 n, bins, patches = ax6.hist(rhos, bins, normed=1, histtype='stepfilled')
 ax6.set_title('Res bnc')
 print 'min pvalues'
@@ -316,8 +302,6 @@ for i in range(1000):
   pvalues.append(pval)
   total_rho_sci+=rho_sci
   rhos.append(rho_sci)
-  if rho_sci < 0.2:
-    print 'Small Rho jcn bnc:' + labels(i) + str(rho_sci)
 n, bins, patches = ax7.hist(rhos, bins, normed=1, histtype='stepfilled')
 ax7.set_title('JCn bnc')
 print 'min pvalues'
@@ -346,8 +330,6 @@ for i in range(1000):
   pvalues.append(pval)
   total_rho_sci+=rho_sci
   rhos.append(rho_sci)
-  if rho_sci < 0.2:
-    print 'Small Rho lin bnc:' + labels(i) + str(rho_sci)
 n, bins, patches = ax8.hist(rhos, bins, normed=1, histtype='stepfilled')
 ax8.set_title('Lin bnc')
 print 'min pvalues'
