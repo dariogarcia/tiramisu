@@ -21,8 +21,9 @@ class Image {
     inline void setImageName(string n) {imageName=n;}
     inline void setClassName(string n) {className=n;}
     inline void setPath(string p) {path=p;}
-    void normalizeActivations();
+    void normalizeActivations(int normType);
     vector< vector<pair<int,float> > > activations;
+    vector<double> normByLayer;
     double unsquaredNorm;
     //void addActivations(const string path, const string layerName);
     //void exploreImage() ;

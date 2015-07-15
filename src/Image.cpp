@@ -14,14 +14,14 @@ using std::istringstream;
 using std::istream_iterator;
 using std::back_inserter;
 
-void Image::normalizeActivations(){
+void Image::normalizeActivations(int normType){
   for(int i = 0; i<activations.size(); i++){
     vector<pair<int,float> > &currentLayer = activations[i];
     for(vector<pair<int,float> >::iterator it = currentLayer.begin(); it!=currentLayer.end(); it++){
-      (*it).second = (*it).second/sqrt(unsquaredNorm);
+      if(normType==1)(*it).second = (*it).second/sqrt(unsquaredNorm);
+      else if(normType==2)(*it).second = (*it).second/normByLayer[i];
     }
   } 
-
 }
 
 ////Method to explore and print contents of a set of images

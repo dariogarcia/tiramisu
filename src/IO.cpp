@@ -190,14 +190,17 @@ void IO::loadImagesFromTXTFile(string path, vector<Image> &images, CNNScheme &sc
               for(int i=0;i<scheme.getNumLayers();i++){
                 vector<pair<int,float> > vec;
                 newImage.activations.push_back(vec);
+                double d = 0;
+                newImage.normByLayer.push_back(d);
               }
-                images.push_back(newImage);
-                imageIdx.push_back(imageName);
+              images.push_back(newImage);
+              imageIdx.push_back(imageName);
             }
             currentImage = &images[imageCounter];
           }
           //Find index of layer
           int layerCounter = find(scheme.layerIdx.begin(),scheme.layerIdx.end(),layerName) - scheme.layerIdx.begin();
+          double layerUnsquaredNorm = 0; 
           if(layerCounter <=scheme.layerIdx.size()){
             //Add features values
             ifstream infile(fullpath.c_str());
@@ -211,6 +214,7 @@ void IO::loadImagesFromTXTFile(string path, vector<Image> &images, CNNScheme &sc
                   try{
                     currentImage->activations[layerCounter].push_back(pair<int,float>(stoi(strs[1]),stof(strs[0])));
                     currentImage->unsquaredNorm+=(stof(strs[0])*stof(strs[0]));
+                    layerUnsquaredNorm+=(stof(strs[0])*stof(strs[0]));
                   }
                   catch(std::exception &ex){
                     #pragma omp critical (print)
@@ -224,6 +228,8 @@ void IO::loadImagesFromTXTFile(string path, vector<Image> &images, CNNScheme &sc
               #pragma omp critical (print)
               printf("IO::loadImagesFromTXTFile:: Unable to open file\n");
             }
+            #pragma omp critical (layerNorm)
+            currentImage->normByLayer[layerCounter] = sqrt(layerUnsquaredNorm);
           }
           else {
             #pragma omp critical (print)
