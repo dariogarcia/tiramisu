@@ -18,7 +18,7 @@ for i in range(1000):
   sim.append(onesim)
 
 #Fill with the elements in their right order
-inf2 = open('/tmp/dist_208.out','r')
+inf2 = open('/home/dariog/gits/data-tiramisu/harm_layer_distances.dat','r')
 for line in inf2:
   words = line.split('---')
   word1 = words[0]+'\n'
@@ -69,4 +69,4 @@ leaves = leaves_list(z)
 
 #plt.show()
 plt.subplots_adjust(left=0.4)
-plt.savefig('hierarchy_208.pdf', format='pdf')
+plt.savefig('harm_layer_tree.pdf', format='pdf')
