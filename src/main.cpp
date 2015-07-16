@@ -61,7 +61,7 @@ pair<ImageClass,double> findClosestArithmeticClass(vector<ImageClass> &imageClas
 int main(int argc, char* argv[]){
   CNNScheme scheme;
   CNNFeatures cnnfeatures;
-  vector<Image> images;
+  vector<ImageClass> imageClasses;
   
   time_t t_init;
   time(&t_init);
@@ -80,41 +80,42 @@ int main(int argc, char* argv[]){
   //time(&t_end);
   //printf("Load features took %f\n",difftime (t_end,t_init));
 
-  
-  time(&t_init);
-  IO::loadImagesFromTXTFile(argv[1], images, scheme);
-  time(&t_end);
-  printf("MAIN::Load images took %f\n",difftime (t_end,t_init));
+  if(true){ 
+    vector<Image> images;
+    time(&t_init);
+    IO::loadImagesFromTXTFile(argv[1], images, scheme);
+    time(&t_end);
+    printf("MAIN::Load images took %f\n",difftime (t_end,t_init));
 
-  //time(&t_init);
-  //for(int i = 0 ; i<images.size();i++) images[i].normalizeActivations();
-  //time(&t_end);
-  //printf("Normalizing images took %f\n",difftime (t_end,t_init));
+    //time(&t_init);
+    //int normImgType = 1;
+    //if(normImgType==1)printf("MAIN::Normalizing Image overall vector\n");
+    //if(normImgType==2)printf("MAIN::Normalizing Image vector by CNN layer\n");
+    //for(int i = 0 ; i<images.size();i++) images[i].normalizeActivations(normImgType);
+    //time(&t_end);
+    //printf("Normalizing images took %f\n",difftime (t_end,t_init));
  
-  time(&t_init);
-  IO::readAndSetImageClasses(argv[2], images);
-  time(&t_end);
-  printf("MAIN::Read & set image classes took %f\n",difftime (t_end,t_init));
-  
-  time(&t_init);
-  vector<ImageClass> imageClasses;
-  int meanType = 1;
-  if(meanType==1)printf("MAIN::Using arithmetic mean\n");
-  if(meanType==2)printf("MAIN::Using harmonic mean\n");
-  Util::computeImageClasses(images, scheme, imageClasses, meanType);
-  printf("predel\n");
-  //WARNING IMAGES VECTOR IS DESTROYED
-  images.clear();
-  //images.~vector<Image>();
-  printf("postdel\n");
-  time(&t_end);
-  printf("MAIN::Compute image classes took %f\n",difftime (t_end,t_init));
-
+    time(&t_init);
+    IO::readAndSetImageClasses(argv[2], images);
+    time(&t_end);
+    printf("MAIN::Read & set image classes took %f\n",difftime (t_end,t_init));
+    
+    time(&t_init);
+    int meanType = 1;
+    if(meanType==1)printf("MAIN::Using arithmetic mean\n");
+    if(meanType==2)printf("MAIN::Using harmonic mean\n");
+    Util::computeImageClasses(images, scheme, imageClasses, meanType);
+    //WARNING IMAGES VECTOR IS DESTROYED
+    images.clear();
+    //images.~vector<Image>();
+    time(&t_end);
+    printf("MAIN::Compute image classes took %f\n",difftime (t_end,t_init));
+  }
 
   time(&t_init);
   int normType = 1;
-  if(normType==1)printf("MAIN::Normalizing overall vector\n");
-  if(normType==2)printf("MAIN::Normalizing vector by CNN layer\n");
+  if(normType==1)printf("MAIN::Normalizing class overall vector\n");
+  if(normType==2)printf("MAIN::Normalizing class vector by CNN layer\n");
   for(int i = 0 ; i<imageClasses.size();i++) imageClasses[i].normalizeMeanActivations(normType);
   time(&t_end);
   printf("MAIN::Normalizing image classes took %f\n",difftime (t_end,t_init));
