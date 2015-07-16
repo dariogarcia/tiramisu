@@ -155,7 +155,7 @@ void Util::substractImageClass(ImageClass &imgc1, ImageClass &imgc2, ImageClass 
   result.setName(imgc1.getName()+" minus " + imgc2.getName());
   result.meanActivations.clear();
   result.norm = 0;
-  printf("Substracting %s to %s\n",imgc2.getName().c_str(),imgc1.getName().c_str());
+  printf("Util::substractImageClass::Substracting %s to %s\n",imgc2.getName().c_str(),imgc1.getName().c_str());
   //For each layer
   for(int i = 0; i<scheme.getNumLayers();i++){
     double layerNorm = 0;
@@ -195,10 +195,9 @@ void Util::addImageClass(ImageClass &imgc1, ImageClass &imgc2, ImageClass &resul
   result.setName(imgc1.getName()+" plus " + imgc2.getName());
   result.meanActivations.clear();
   result.norm = 0;
-  printf("Adding %s to %s\n",imgc2.getName().c_str(),imgc1.getName().c_str());
+  printf("Util::addImageClass::Adding %s to %s\n",imgc2.getName().c_str(),imgc1.getName().c_str());
   //For each layer
   for(int i = 0; i<scheme.getNumLayers();i++){
-    printf("Layer %s\n",scheme.layerIdx[i].c_str());
     double layerNorm = 0;
     result.meanActivations.push_back(vector<pair<int,float> > ());
     //Struct to traverse all images concurrently, initialize at begin of each image values
@@ -253,18 +252,11 @@ void Util::addImageClass(ImageClass &imgc1, ImageClass &imgc2, ImageClass &resul
         result.norm+=combination*combination;
         layerNorm+=combination*combination;
       }
-      printf("%u %d %d %f\n",currentSmallestFeature, firstSmallest,secondSmallest,combination);
       if(imagePointer1==imagePointersEnd1) firstDone = true;
       if(imagePointer2==imagePointersEnd2) secondDone = true;
       if(firstDone && secondDone)break;
-      if(firstSmallest && imagePointer1!=imagePointersEnd1){
-        printf("inc1\n");
-        imagePointer1++;
-      }
-      if(secondSmallest && imagePointer2!=imagePointersEnd2){
-        printf("inc2\n");
-        imagePointer2++;
-      }
+      if(firstSmallest && imagePointer1!=imagePointersEnd1) imagePointer1++;
+      if(secondSmallest && imagePointer2!=imagePointersEnd2) imagePointer2++;
     }
     result.normByLayer.push_back(sqrt(layerNorm));
   }
