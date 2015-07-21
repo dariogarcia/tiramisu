@@ -248,19 +248,20 @@ pair<ImageClass,float> ImageClass::findClosestClass(const vector<ImageClass> &iC
   }
   ImageClass closest;
   //Initialize closest distance to distance to first, unless its self, skip
+  float closestDist = 0.0;
   if(iClassCandidates.front().getName().compare(target.getName())==0){
     if(next(iClassCandidates.begin())==iClassCandidates.end()){
       printf("ImageClass::findClosestClass::ERROR one one class to compare and it is self. Returning self.\n");
       return pair<ImageClass,float>(target,0.0);
     }
-    closest = *next(iClassCandidates.begin());
-    if(verbose)printf("DIST:%s---%s---0\n",target.getName().c_str(),target.getName().c_str());
+    else closest = *next(iClassCandidates.begin());
   }
-  else closest = iClassCandidates.front();
-  float closestDist = 0.0;
+  else {
+    closest = iClassCandidates.front();
+  }
   if(distanceType==1) closestDist = Util::euclideanDistanceImageClass(target, closest, scheme);
   else if(distanceType==2) closestDist = Util::cosineDistanceImageClass(target, closest, scheme);
-  for (vector<ImageClass>::const_iterator i = std::next(iClassCandidates.begin()); i != iClassCandidates.end(); i++){
+  for (vector<ImageClass>::const_iterator i = iClassCandidates.begin(); i != iClassCandidates.end(); i++){
     //Skip self comparation
     if((*i).getName().compare(target.getName())==0) {
         if(verbose)printf("DIST:%s---%s---0\n",target.getName().c_str(),target.getName().c_str());

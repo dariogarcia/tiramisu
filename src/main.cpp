@@ -86,13 +86,13 @@ int main(int argc, char* argv[]){
     time(&t_end);
     printf("MAIN::Load images took %f\n",difftime (t_end,t_init));
 
-    time(&t_init);
-    int normImgType = 1;
-    if(normImgType==1)printf("MAIN::Normalizing Image overall vector\n");
-    if(normImgType==2)printf("MAIN::Normalizing Image vector by CNN layer\n");
-    for(int i = 0 ; i<images.size();i++) images[i].normalizeActivations(normImgType);
-    time(&t_end);
-    printf("Normalizing images took %f\n",difftime (t_end,t_init));
+    //time(&t_init);
+    //int normImgType = 1;
+    //if(normImgType==1)printf("MAIN::Normalizing Image overall vector\n");
+    //if(normImgType==2)printf("MAIN::Normalizing Image vector by CNN layer\n");
+    //for(int i = 0 ; i<images.size();i++) images[i].normalizeActivations(normImgType);
+    //time(&t_end);
+    //printf("Normalizing images took %f\n",difftime (t_end,t_init));
  
     time(&t_init);
     IO::readAndSetImageClasses(argv[2], images);
@@ -111,17 +111,17 @@ int main(int argc, char* argv[]){
     printf("MAIN::Compute image classes took %f\n",difftime (t_end,t_init));
   }
 
-  //time(&t_init);
-  //int normType = 1;
-  //if(normType==1)printf("MAIN::Normalizing class overall vector\n");
-  //if(normType==2)printf("MAIN::Normalizing class vector by CNN layer\n");
-  //for(int i = 0 ; i<imageClasses.size();i++) imageClasses[i].normalizeMeanActivations(normType);
-  //time(&t_end);
-  //printf("MAIN::Normalizing image classes took %f\n",difftime (t_end,t_init));
+  time(&t_init);
+  int normType = 2;
+  if(normType==1)printf("MAIN::Normalizing class overall vector\n");
+  if(normType==2)printf("MAIN::Normalizing class vector by CNN layer\n");
+  for(int i = 0 ; i<imageClasses.size();i++) imageClasses[i].normalizeMeanActivations(normType);
+  time(&t_end);
+  printf("MAIN::Normalizing image classes took %f\n",difftime (t_end,t_init));
 
 
   time(&t_init);
-  int distanceType = 1;
+  int distanceType = 2;
   if(distanceType==1)printf("MAIN::Using euclidean distance\n");
   if(distanceType==2)printf("MAIN::Using cosine distance\n");
   for(vector<ImageClass>::iterator it = imageClasses.begin(); it!=imageClasses.end(); it++){
