@@ -3,6 +3,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from scipy.cluster.hierarchy import linkage, dendrogram, leaves_list
 import numpy as np
+import pylab
 
 inf = open('labels.txt', 'r')
 labels = list()
@@ -18,7 +19,7 @@ for i in range(1000):
   sim.append(onesim)
 
 #Fill with the elements in their right order
-inf2 = open('/home/dariog/gits/data-tiramisu/harm_layer_distances.dat','r')
+inf2 = open('/home/dariog/gits/data-tiramisu/arith_cosine_classlayer_distances.dat','r')
 for line in inf2:
   words = line.split('---')
   word1 = words[0]+'\n'
@@ -69,4 +70,17 @@ leaves = leaves_list(z)
 
 #plt.show()
 plt.subplots_adjust(left=0.4)
-plt.savefig('harm_layer_tree.pdf', format='pdf')
+plt.savefig('/home/dariog/gits/data-tiramisu/arith_cosine_classlayer_tree.pdf', format='pdf')
+
+
+#fig = pylab.figure(figsize=(8,8))
+#axmatrix = fig.add_axes([0.3,0.1,0.6,0.6])
+#idx1 = Z1['leaves']
+#idx2 = Z2['leaves']
+#D = D[idx1,:]
+#D = D[:,idx2]
+#im = axmatrix.matshow(D, aspect='auto', origin='lower', cmap=pylab.cm.YlGnBu)
+#axmatrix.set_xticks([])
+#axmatrix.set_yticks([])
+#fig.show()
+#fig.savefig('/home/dariog/gits/data-tiramisu/arith_cosine_classlayer_matrix.pdf',format='pdf')

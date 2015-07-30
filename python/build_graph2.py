@@ -22,7 +22,7 @@ for i in range(1000):
   sim.append(onesim)
 
 #Fill with the elements in their right order
-inf2 = open('/media/dario/823D-2FFA/data_tiramisu/arith_cosine_classlayer_distances.dat','r')
+inf2 = open('/tmp/data/arith_cosine_classlayer2_distances.dat','r')
 for line in inf2:
   words = line.split('---')
   word1 = words[0]+'\n'
@@ -105,6 +105,21 @@ for r in r_s:
   reptiles.append(r)
 #print "Num reptiles "+ str(len(reptiles))
 
+o_s = wn.synset('organism.n.01').closure(lambda s:s.hyponyms())
+organisms = []
+for o in o_s:
+  organisms.append(o)
+
+liv_s = wn.synset('living_thing.n.01').closure(lambda s:s.hyponyms())
+livings = []
+for liv in liv_s:
+  livings.append(liv)
+
+b_s = wn.synset('building.n.01').closure(lambda s:s.hyponyms())
+buildings = []
+for b in b_s:
+  buildings.append(b)
+
 vertebrates_nobird_nomarine_noreptile = list(vertebrates)
 for b in birds:
   vertebrates_nobird_nomarine_noreptile.remove(b)
@@ -134,6 +149,7 @@ amax = np.amax(l)
 adist /= amax
 
 colors = []
+count = 0
 for lab in labels:
   labelNLTK = (lab.split()[0])[1:]+'-n'
   syn = wn.of2ss(labelNLTK)
@@ -157,11 +173,24 @@ for lab in labels:
 #  else:
 #    colors.append("w")
 
-  if syn in animals:
-    colors.append("y")
+#  if syn in animals:
+#    colors.append("y")
+#  else:
+#    colors.append("0.9")
+
+##  if syn in buildings:
+##    colors.append("k")
+##    count+=1
+##  else:
+##    colors.append("0.9")
+##print count
+
+  if syn in organisms:
+    colors.append("k")
+    count+=1
   else:
     colors.append("0.9")
-
+#print count
 #  if syn in dogs:
 #    colors.append("k")
 #  elif syn in wheeled:
@@ -181,17 +210,17 @@ plt.scatter(
     coords[:, 0], coords[:, 1], marker = 'o', s=3000, c=colors
     )
 #plt.gray()
-for label, x, y in zip(labels, coords[:, 0], coords[:, 1]):
-  labelNLTK = (label.split()[0])[1:]+'-n'
-  syn = wn.of2ss(labelNLTK)
-  if syn not in animals:
-    plt.annotate(
-      label,
-      xy = (x, y), xytext = (-10, 10),
-      textcoords = 'offset points', ha = 'right', va = 'bottom',
-      bbox = dict(boxstyle = 'round,pad=0.5', fc = 'yellow', alpha = 0.5),
-      arrowprops = dict(arrowstyle = '->', connectionstyle = 'arc3,rad=0'))
+#for label, x, y in zip(labels, coords[:, 0], coords[:, 1]):
+#  labelNLTK = (label.split()[0])[1:]+'-n'
+#  syn = wn.of2ss(labelNLTK)
+#  if syn in buildings:
+#    plt.annotate(
+#      label,
+#      xy = (x, y), xytext = (-10, 10),
+#      textcoords = 'offset points', ha = 'right', va = 'bottom',
+#      bbox = dict(boxstyle = 'round,pad=0.5', fc = 'yellow', alpha = 0.5),
+#      arrowprops = dict(arrowstyle = '->', connectionstyle = 'arc3,rad=0'))
 
-plt.show()
-plt.savefig('/media/dario/823D-2FFA/data_tiramisu/arith_cosine_classlayer_graph_tmp.pdf', format='pdf')
+#plt.show()
+plt.savefig('/tmp/data/arith_cosine_classlayer2_graph_organisms.pdf', format='pdf')
 

@@ -27,7 +27,7 @@ for i in range(1000):
   sim.append(mysim)
 
 #Fill with the elements in their right order
-inf2 = open('/home/dariog/gits/data-tiramisu/arith_cosine_class_distances.dat','r')
+inf2 = open('/tmp/data/arith_cosine_classlayer2_distances.dat','r')
 for line in inf2:
   words = line.split('---')
   word1 = words[0]+'\n'
@@ -345,11 +345,11 @@ print total_rho_sci
 print "\n"
 print "\n"
 
-
-
+#ax9[-1, -1].axis('off')
+#plt.figure(figsize=(100, 100))
 plt.tight_layout()
 plt.show()
-plt.savefig('../../data-tiramisu/arith_cosine_class_histogram.pdf', format='pdf')
+plt.savefig('/tmp/data/arith_cosine_classlayer2_histogram.pdf', format='pdf')
 #plt.tight_layout()
 #plt.show()
 #plt.savefig('arith_layer_histogram.pdf', format='pdf')
