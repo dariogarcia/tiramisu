@@ -14,7 +14,7 @@ using std::pair;
 
 class IO {
   public:
-    static void loadSchemeFromTXTFile(string path, CNNScheme &scheme);
+    static void loadSchemeFromTXTFile(string path, CNNScheme &scheme, string pattern);
     static void loadFeaturesFromTXTFile(string path, CNNFeatures &features, CNNScheme &scheme);
     //static void loadImagesAndLayersFromTXTFile(string path, map<string,Image> &images, map<string,CNNLayer> &layers);
     static void loadImagesFromTXTFile(string path, vector<Image> &images, CNNScheme &scheme, string pattern);
