@@ -4,6 +4,8 @@ List of todo things in tiramisu project
 
 ## PRIORITARY todos, in priority order
 
+- [x] Try different layers inhibition
+
 - [x] Modify the output method of the caffe branch, to write a binary file. Addapt the tiramisu input code to binary format.
 - [ ] Test cosine distance similarities and differences of the raw activations of a set of images X
 - [ ] Build class image representations. Test cosine distance similarities and differences on those
