@@ -17,7 +17,7 @@ class IO {
     static void loadSchemeFromTXTFile(string path, CNNScheme &scheme);
     static void loadFeaturesFromTXTFile(string path, CNNFeatures &features, CNNScheme &scheme);
     //static void loadImagesAndLayersFromTXTFile(string path, map<string,Image> &images, map<string,CNNLayer> &layers);
-    static void loadImagesFromTXTFile(string path, vector<Image> &images, CNNScheme &scheme);
+    static void loadImagesFromTXTFile(string path, vector<Image> &images, CNNScheme &scheme, string pattern);
     static void readAndSetImageClasses(string path, vector<Image> &images);
     //static string writeImagesVerticesToTXTFile(string filename, const map<string,Image> &images);
     //static string writeLayersVerticesToTXTFile(string filename, const map<string,CNNLayer> &layers);

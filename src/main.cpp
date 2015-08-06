@@ -33,6 +33,18 @@ void substract(ArithmeticIC &result, string id_first, string id_second, CNNSchem
   Util::substractImageClass(first,second,result.first,scheme);
 }
 
+void substract(ArithmeticIC &result, string id_first, ArithmeticIC secondIC, CNNScheme & scheme, vector<ImageClass> & imageClasses){
+  ImageClass first;
+  ImageClass second = secondIC.first;
+  for(int i = 0 ; i<imageClasses.size();i++) {
+    if(imageClasses[i].getName().compare(id_first)==0) {
+      first = imageClasses[i];
+      result.second.insert(i);
+    }
+  }
+  Util::substractImageClass(first,second,result.first,scheme);
+}
+
 void add(ArithmeticIC &result, string id_first, string id_second, CNNScheme & scheme, vector<ImageClass> & imageClasses){
   ImageClass first;
   ImageClass second;
@@ -52,7 +64,7 @@ void add(ArithmeticIC &result, string id_first, string id_second, CNNScheme & sc
 pair<ImageClass,double> findClosestArithmeticClass(vector<ImageClass> &imageClasses, ArithmeticIC & arithClass,CNNScheme & scheme, int distanceType){
   vector<ImageClass> tempIC = imageClasses;
   for(int i = arithClass.second.size(); i>0 ;i--) tempIC.erase(tempIC.begin()+(*std::next(arithClass.second.begin(), i-1)));
-  pair<ImageClass,double> res = arithClass.first.findClosestClass(tempIC, scheme, distanceType,false);
+  pair<ImageClass,double> res = arithClass.first.findClosestClass(tempIC, scheme, distanceType,true);
   printf("ARITH_CLOSEST::Closest class to %s is %s at %f\n",arithClass.first.getName().c_str(),res.first.getName().c_str(),res.second);
   return res;
 } 
@@ -82,7 +94,7 @@ int main(int argc, char* argv[]){
   if(true){ 
     vector<Image> images;
     time(&t_init);
-    IO::loadImagesFromTXTFile(argv[1], images, scheme);
+    IO::loadImagesFromTXTFile(argv[1], images, scheme, "5");
     time(&t_end);
     printf("MAIN::Load images took %f\n",difftime (t_end,t_init));
 
@@ -132,8 +144,8 @@ int main(int argc, char* argv[]){
   printf("MAIN::Compute image class distances took %f\n",difftime (t_end,t_init));
 
 
-  //time(&t_init);
-  //vector<ArithmeticIC> ariths;
+  time(&t_init);
+  vector<ArithmeticIC> ariths;
   //ArithmeticIC whitewolf_minus_timberwolf;
   //substract(whitewolf_minus_timberwolf,"n02114548 white wolf, Arctic wolf, Canis lupus tundrarum", "n02114367 timber wolf, grey wolf, gray wolf, Canis lupus", scheme, imageClasses);
   //ariths.push_back(whitewolf_minus_timberwolf);
@@ -164,15 +176,15 @@ int main(int argc, char* argv[]){
   //ArithmeticIC slothbear_minus_blackbear;
   //substract(slothbear_minus_blackbear,"n02134418 sloth bear, Melursus ursinus, Ursus ursinus", "n02133161 American black bear, black bear, Ursus americanus, Euarctos americanus", scheme, imageClasses);
   //ariths.push_back(slothbear_minus_blackbear);
-  //ArithmeticIC icebear_minus_brownbear;
-  //substract(icebear_minus_brownbear,"n02134084 ice bear, polar bear, Ursus Maritimus, Thalarctos maritimus", "n02132136 brown bear, bruin, Ursus arctos", scheme, imageClasses);
-  //ariths.push_back(icebear_minus_brownbear);
+  ArithmeticIC icebear_minus_brownbear;
+  substract(icebear_minus_brownbear,"n02134084 ice bear, polar bear, Ursus Maritimus, Thalarctos maritimus", "n02132136 brown bear, bruin, Ursus arctos", scheme, imageClasses);
+  ariths.push_back(icebear_minus_brownbear);
   //ArithmeticIC icebear_minus_blackbear;
   //substract(icebear_minus_blackbear,"n02134084 ice bear, polar bear, Ursus Maritimus, Thalarctos maritimus", "n02133161 American black bear, black bear, Ursus americanus, Euarctos americanus", scheme, imageClasses);
   //ariths.push_back(icebear_minus_blackbear);
-  //ArithmeticIC panda_minus_brownbear;
-  //substract(panda_minus_brownbear,"n02510455 giant panda, panda, panda bear, coon bear, Ailuropoda melanoleuca", "n02132136 brown bear, bruin, Ursus arctos", scheme, imageClasses);
-  //ariths.push_back(panda_minus_brownbear);
+  ArithmeticIC panda_minus_brownbear;
+  substract(panda_minus_brownbear,"n02510455 giant panda, panda, panda bear, coon bear, Ailuropoda melanoleuca", "n02132136 brown bear, bruin, Ursus arctos", scheme, imageClasses);
+  ariths.push_back(panda_minus_brownbear);
   //ArithmeticIC panda_minus_blackbear;
   //substract(panda_minus_blackbear,"n02510455 giant panda, panda, panda bear, coon bear, Ailuropoda melanoleuca", "n02133161 American black bear, black bear, Ursus americanus, Euarctos americanus", scheme, imageClasses);
   //ariths.push_back(panda_minus_blackbear);
@@ -277,21 +289,40 @@ int main(int argc, char* argv[]){
   //ariths.push_back(turtle2_minus_cuirass);
 
 
+  ArithmeticIC black_white;
+  substract(black_white,"n02510455 giant panda, panda, panda bear, coon bear, Ailuropoda melanoleuca", "n02132136 brown bear, bruin, Ursus arctos", scheme, imageClasses);
+  ariths.push_back(black_white);
+
+  ArithmeticIC skunk_minu_black_white;
+  substract(skunk_minu_black_white,"n02445715 skunk, polecat, wood pussy", black_white, scheme, imageClasses);
+  ariths.push_back(skunk_minu_black_white);
+
+  ArithmeticIC angora_black_white;
+  substract(angora_black_white,"n02328150 Angora, Angora rabbit", black_white, scheme, imageClasses);
+  ariths.push_back(angora_black_white);
+
+  ArithmeticIC soccer_black_white;
+  substract(soccer_black_white,"n04254680 soccer ball", black_white, scheme, imageClasses);
+  ariths.push_back(soccer_black_white);
+
+  ArithmeticIC indri_black_white;
+  substract(indri_black_white,"n02500267 indri, indris, Indri indri, Indri brevicaudatus", black_white, scheme, imageClasses);
+  ariths.push_back(indri_black_white);
 
   
-  //time(&t_end);
-  //printf("MAIN::Compute arithmetics took %f\n",difftime (t_end,t_init));
+  time(&t_end);
+  printf("MAIN::Compute arithmetics took %f\n",difftime (t_end,t_init));
 
 
-  ////The whole ArithmeticImageClass code is not elegant or efficient. Needs work (get rid of sets, for starters)
-  //if(distanceType==1)printf("MAIN::Using euclidean distance\n");
-  //if(distanceType==2)printf("MAIN::Using cosine distance\n");
-  //for(int i = 0 ; i<ariths.size();i++){
-  //  printf("iessim %u has name %s\n",i,ariths[i].first.getName().c_str());
-  //  pair<ImageClass,double> closestIC = findClosestArithmeticClass(imageClasses, ariths[i], scheme, distanceType);
-  //}
-  //time(&t_end);
-  //printf("MAIN::Compute closest classes to arithmetic classes took %f\n",difftime (t_end,t_init));
+  //The whole ArithmeticImageClass code is not elegant or efficient. Needs work (get rid of sets, for starters)
+  if(distanceType==1)printf("MAIN::Using euclidean distance\n");
+  if(distanceType==2)printf("MAIN::Using cosine distance\n");
+  for(int i = 0 ; i<ariths.size();i++){
+    printf("iessim %u has name %s\n",i,ariths[i].first.getName().c_str());
+    pair<ImageClass,double> closestIC = findClosestArithmeticClass(imageClasses, ariths[i], scheme, distanceType);
+  }
+  time(&t_end);
+  printf("MAIN::Compute closest classes to arithmetic classes took %f\n",difftime (t_end,t_init));
 
 
   

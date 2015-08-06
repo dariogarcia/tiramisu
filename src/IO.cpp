@@ -145,7 +145,7 @@ void IO::loadSchemeFromTXTFile(string path, CNNScheme &scheme){
 //Loads a directory containing directories of one or more images.
 //It builds the images data structures and statistics
 //WARNING: previous image information is lost
-void IO::loadImagesFromTXTFile(string path, vector<Image> &images, CNNScheme &scheme){
+void IO::loadImagesFromTXTFile(string path, vector<Image> &images, CNNScheme &scheme, string pattern){
   struct dirent *pDirent;
   DIR *pDir;
   pDir = opendir(path.c_str());
@@ -166,6 +166,7 @@ void IO::loadImagesFromTXTFile(string path, vector<Image> &images, CNNScheme &sc
         printf ("IO::loadImagesFromTXTFile::Cannot open sub-directory '%s'\n", (path+string("/")+string(pDirent->d_name)).c_str());
         continue;
     }
+    if(string(pDirent->d_name).find(pattern) == string::npos) continue;
     //Read each file
     #pragma omp parallel
     while ((pDirent2 = readdir(pDir2)) != NULL) {
