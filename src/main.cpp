@@ -132,6 +132,8 @@ int main(int argc, char* argv[]){
   printf("MAIN::Compute image class distances took %f\n",difftime (t_end,t_init));
 
 
+  IO::writeImageClassToIVF("testfile", imageClasses[0],scheme);
+
   //time(&t_init);
   //vector<ArithmeticIC> ariths;
   //ArithmeticIC whitewolf_minus_timberwolf;

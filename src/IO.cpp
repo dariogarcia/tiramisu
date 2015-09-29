@@ -370,6 +370,21 @@ void IO::readAndSetImageClasses(string path, vector<Image> &images){
   else printf("IO::readImageClasses::ERROR Unable to open file%s\n",path.c_str());
 }
 
+void IO::writeImageClassToIVF(string const filename, ImageClass const &imageC, const CNNScheme &scheme){
+  ofstream output_file;
+  output_file.open(filename);
+  int layer_count = 0;
+  int layer_base = 0;
+  for(vector<vector<pair<int,float> > >::const_iterator it = imageC.meanActivations.begin(); it!=imageC.meanActivations.end();it++){
+    for(vector<pair<int,float> >::const_iterator it2 = (*it).begin(); it2!=(*it).end(); it2++){
+      output_file<<it2->second<<" "<<it2->first+layer_base<<"\n";
+    }
+    layer_base+=scheme.layerSize[layer_count];
+    layer_count++;
+  }
+}
+
+
 
 ////Store in an output file the list of vertices defined by images
 //string IO::writeImagesVerticesToTXTFile(string filename, const map<string,Image> &images){

@@ -7,6 +7,7 @@
 #include "CNNScheme.hpp"
 #include "CNNFeatures.hpp"
 #include "Image.hpp"
+#include "ImageClass.hpp"
 
 using std::string;
 using std::vector;
@@ -27,6 +28,7 @@ class IO {
     //static void writeLayersToBinaryFile(string const filename, map<string,CNNLayer> const &layers);
     //static void loadLayersFromBinaryFile(string const filename, map<string,CNNLayer> &layers);
     //static void writeImageClassToBinaryFile(string const filename, ImageClass const &imageC);
+    static void writeImageClassToIVF(string const filename, ImageClass const &imageC, const CNNScheme &scheme);
 
   protected:
 
