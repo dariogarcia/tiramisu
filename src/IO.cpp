@@ -387,6 +387,25 @@ void IO::writeImageClassToIVF(string const filename, ImageClass const &imageC, c
 }
 
 
+void IO::writeImagesOfClassToIVF(vector<Image> const &images, string const className, const CNNScheme &scheme){
+  ofstream output_file;
+  int layer_count = 0;
+  int layer_base = 0;
+  for(vector<Image>::const_iterator it_images = images.begin(); it_images!=images.end(); it_images++){
+    if((*it_images).getClassName().compare(className)==0){
+      Image image = *it_images;
+      output_file.open(image.getImageName()+".ivf");
+      for(vector<vector<pair<int,float> > >::const_iterator it = image.activations.begin(); it!=image.activations.end();it++){
+        for(vector<pair<int,float> >::const_iterator it2 = (*it).begin(); it2!=(*it).end(); it2++){
+          output_file<<it2->second<<" "<<it2->first+layer_base<<"\n";
+        }
+        layer_base+=scheme.layerSize[layer_count];
+        layer_count++;
+      }
+    }
+  }
+}
+
 
 ////Store in an output file the list of vertices defined by images
 //string IO::writeImagesVerticesToTXTFile(string filename, const map<string,Image> &images){

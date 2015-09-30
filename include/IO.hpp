@@ -29,6 +29,8 @@ class IO {
     //static void loadLayersFromBinaryFile(string const filename, map<string,CNNLayer> &layers);
     //static void writeImageClassToBinaryFile(string const filename, ImageClass const &imageC);
     static void writeImageClassToIVF(string const filename, ImageClass const &imageC, const CNNScheme &scheme);
+    static void writeImagesOfClassToIVF(vector<Image> const &images, string const className, const CNNScheme &scheme);
+
 
   protected:
 

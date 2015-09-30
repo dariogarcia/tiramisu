@@ -31,6 +31,9 @@ void substract(ArithmeticIC &result, string id_first, string id_second, CNNSchem
     }
   }
   Util::substractImageClass(first,second,result.first,scheme);
+  IO::writeImageClassToIVF(first.getName()+".ivf", first,scheme);
+  IO::writeImageClassToIVF(second.getName()+".ivf", second,scheme);
+  IO::writeImageClassToIVF(result.first.getName()+".ivf", result.first,scheme);
 }
 
 void substract(ArithmeticIC &result, string id_first, ArithmeticIC secondIC, CNNScheme & scheme, vector<ImageClass> & imageClasses){
@@ -43,6 +46,9 @@ void substract(ArithmeticIC &result, string id_first, ArithmeticIC secondIC, CNN
     }
   }
   Util::substractImageClass(first,second,result.first,scheme);
+  IO::writeImageClassToIVF(first.getName()+".ivf", first,scheme);
+  IO::writeImageClassToIVF(second.getName()+".ivf", second,scheme);
+  IO::writeImageClassToIVF(result.first.getName()+".ivf", result.first,scheme);
 }
 
 void add(ArithmeticIC &result, string id_first, string id_second, CNNScheme & scheme, vector<ImageClass> & imageClasses){
@@ -59,6 +65,9 @@ void add(ArithmeticIC &result, string id_first, string id_second, CNNScheme & sc
     }
   }
   Util::addImageClass(first,second,result.first,scheme);
+  IO::writeImageClassToIVF(first.getName()+".ivf", first,scheme);
+  IO::writeImageClassToIVF(second.getName()+".ivf", second,scheme);
+  IO::writeImageClassToIVF(result.first.getName()+".ivf", result.first,scheme);
 }
 
 pair<ImageClass,double> findClosestArithmeticClass(vector<ImageClass> &imageClasses, ArithmeticIC & arithClass,CNNScheme & scheme, int distanceType){
@@ -76,7 +85,7 @@ int main(int argc, char* argv[]){
   
   time_t t_init;
   time(&t_init);
-  IO::loadSchemeFromTXTFile(argv[1], scheme, "tion-5");
+  IO::loadSchemeFromTXTFile(argv[1], scheme, "");
   time_t t_end;
   time(&t_end);
   double t_diff = difftime (t_end,t_init);
@@ -94,7 +103,7 @@ int main(int argc, char* argv[]){
   if(true){ 
     vector<Image> images;
     time(&t_init);
-    IO::loadImagesFromTXTFile(argv[1], images, scheme, "tion-5");
+    IO::loadImagesFromTXTFile(argv[1], images, scheme, "");
     time(&t_end);
     printf("MAIN::Load images took %f\n",difftime (t_end,t_init));
 
@@ -111,6 +120,16 @@ int main(int argc, char* argv[]){
     time(&t_end);
     printf("MAIN::Read & set image classes took %f\n",difftime (t_end,t_init));
     
+    IO::writeImagesOfClassToIVF(images, "n02134084 ice bear, polar bear, Ursus Maritimus, Thalarctos maritimus", scheme);
+    IO::writeImagesOfClassToIVF(images, "n02132136 brown bear, bruin, Ursus arctos", scheme);
+    IO::writeImagesOfClassToIVF(images, "n02510455 giant panda, panda, panda bear, coon bear, Ailuropoda melanoleuca", scheme);
+    IO::writeImagesOfClassToIVF(images, "n03028079 church, church building", scheme);
+    IO::writeImagesOfClassToIVF(images, "n03788195 mosque", scheme);
+    IO::writeImagesOfClassToIVF(images, "n02825657 bell cote, bell cot", scheme);
+    IO::writeImagesOfClassToIVF(images, "n02389026 sorrel", scheme);
+    IO::writeImagesOfClassToIVF(images, "n03538406 horse cart, horse-cart", scheme);
+    IO::writeImagesOfClassToIVF(images, "n03599486 jinrikisha, ricksha, rickshaw", scheme);
+
     time(&t_init);
     int meanType = 1;
     if(meanType==1)printf("MAIN::Using arithmetic mean\n");
@@ -143,11 +162,11 @@ int main(int argc, char* argv[]){
   time(&t_end);
   printf("MAIN::Compute image class distances took %f\n",difftime (t_end,t_init));
 
-
-  IO::writeImageClassToIVF("testfile", imageClasses[0],scheme);
-
   time(&t_init);
   vector<ArithmeticIC> ariths;
+  ArithmeticIC sorrel_minus_cart;
+  substract(sorrel_minus_cart,"n03538406 horse cart, horse-cart", "n02389026 sorrel", scheme, imageClasses);
+  ariths.push_back(sorrel_minus_cart);
   //ArithmeticIC whitewolf_minus_timberwolf;
   //substract(whitewolf_minus_timberwolf,"n02114548 white wolf, Arctic wolf, Canis lupus tundrarum", "n02114367 timber wolf, grey wolf, gray wolf, Canis lupus", scheme, imageClasses);
   //ariths.push_back(whitewolf_minus_timberwolf);
@@ -291,25 +310,25 @@ int main(int argc, char* argv[]){
   //ariths.push_back(turtle2_minus_cuirass);
 
 
-  ArithmeticIC black_white;
-  substract(black_white,"n02510455 giant panda, panda, panda bear, coon bear, Ailuropoda melanoleuca", "n02132136 brown bear, bruin, Ursus arctos", scheme, imageClasses);
-  ariths.push_back(black_white);
+  //ArithmeticIC black_white;
+  //substract(black_white,"n02510455 giant panda, panda, panda bear, coon bear, Ailuropoda melanoleuca", "n02132136 brown bear, bruin, Ursus arctos", scheme, imageClasses);
+  //ariths.push_back(black_white);
 
-  ArithmeticIC skunk_minu_black_white;
-  substract(skunk_minu_black_white,"n02445715 skunk, polecat, wood pussy", black_white, scheme, imageClasses);
-  ariths.push_back(skunk_minu_black_white);
+  //ArithmeticIC skunk_minu_black_white;
+  //substract(skunk_minu_black_white,"n02445715 skunk, polecat, wood pussy", black_white, scheme, imageClasses);
+  //ariths.push_back(skunk_minu_black_white);
 
-  ArithmeticIC angora_black_white;
-  substract(angora_black_white,"n02328150 Angora, Angora rabbit", black_white, scheme, imageClasses);
-  ariths.push_back(angora_black_white);
+  //ArithmeticIC angora_black_white;
+  //substract(angora_black_white,"n02328150 Angora, Angora rabbit", black_white, scheme, imageClasses);
+  //ariths.push_back(angora_black_white);
 
-  ArithmeticIC soccer_black_white;
-  substract(soccer_black_white,"n04254680 soccer ball", black_white, scheme, imageClasses);
-  ariths.push_back(soccer_black_white);
+  //ArithmeticIC soccer_black_white;
+  //substract(soccer_black_white,"n04254680 soccer ball", black_white, scheme, imageClasses);
+  //ariths.push_back(soccer_black_white);
 
-  ArithmeticIC indri_black_white;
-  substract(indri_black_white,"n02500267 indri, indris, Indri indri, Indri brevicaudatus", black_white, scheme, imageClasses);
-  ariths.push_back(indri_black_white);
+  //ArithmeticIC indri_black_white;
+  //substract(indri_black_white,"n02500267 indri, indris, Indri indri, Indri brevicaudatus", black_white, scheme, imageClasses);
+  //ariths.push_back(indri_black_white);
 
   
   time(&t_end);
