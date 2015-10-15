@@ -85,7 +85,7 @@ int main(int argc, char* argv[]){
   
   time_t t_init;
   time(&t_init);
-  IO::loadSchemeFromTXTFile(argv[1], scheme, "");
+  IO::loadSchemeFromCFGFile(argv[1], scheme, "");
   time_t t_end;
   time(&t_end);
   double t_diff = difftime (t_end,t_init);
@@ -103,7 +103,8 @@ int main(int argc, char* argv[]){
   if(true){ 
     vector<Image> images;
     time(&t_init);
-    IO::loadImagesFromTXTFile(argv[1], images, scheme, "");
+    //IO::loadImagesFromTXTFile(argv[1], images, scheme, "");
+    IO::loadImagesFromIVFFile(argv[1], images, scheme);
     time(&t_end);
     printf("MAIN::Load images took %f\n",difftime (t_end,t_init));
 

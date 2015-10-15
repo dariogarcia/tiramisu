@@ -74,6 +74,50 @@ void IO::loadSchemeFromTXTFile(string path, CNNScheme &scheme, string pattern){
   printf ("IO::loadSchemeFromTXTFile::Done read CNNScheme\n");
 }
 
+
+//Loads a directory containing directories of one or more images.
+//It builds the scheme of layers and features 
+void IO::loadSchemeFromCFGFile(string path, CNNScheme &scheme, string pattern){
+  struct dirent *pDirent;
+  DIR *pDir;
+  //Open first directory
+  pDir = opendir(path.c_str());
+  if (pDir == NULL) {
+    printf ("IO::loadSchemeFromCFGFile::Cannot open directory '%s'\n", path.c_str());
+    return;
+  }
+  //Get the first file with .cfg extension
+  bool found = false;
+  while ((pDirent = readdir(pDir)) != NULL) { 
+    if(string(pDirent->d_name).find(".cfg")== string::npos) continue;
+    //Open file
+    string file_fullpath = (path+"/"+string(pDirent->d_name)).c_str();
+    printf ("IO::loadSchemeFromCFGFile::Trying to read file '%s'\n", file_fullpath.c_str());
+    ifstream infile(file_fullpath.c_str());
+    int layerCounter = 0;
+    string line;
+    if(infile.is_open()){
+      while(getline(infile,line)){
+        vector<std::string> strs;
+        istringstream is(line);
+        copy(istream_iterator<string>(is),istream_iterator<string>(),back_inserter<vector<string> >(strs));
+        //Insert index and num features
+        scheme.layerIdx.push_back(strs[0]);
+        scheme.layerSize.push_back(stoi(strs[1]));
+        layerCounter++;
+      }
+      infile.close();
+      scheme.setNumLayers(layerCounter);
+      found = true;
+      break;
+    }
+    else printf("IO::loadSchemeFromCFGFile::ERROR Unable to open file%s\n",file_fullpath.c_str());
+    closedir(pDir);
+  }
+  if(!found)  printf("IO::loadSchemeFromCFGFile::ERROR Unable to fine a cfg file in %s\n",path.c_str());
+  printf ("IO::loadSchemeFromCFGFile::Done read CNNScheme\n");
+}
+
 ////Reads a directory containing sub-directories/images,
 //// and loads the data of each sub-directory/image.
 ////Feature activation data is stored per layers/files,
@@ -141,6 +185,77 @@ void IO::loadSchemeFromTXTFile(string path, CNNScheme &scheme, string pattern){
 //  }
 //  printf ("IO::loadImagesAndLayersFromTXTFile::Done computing all layer statistics\n");
 //}
+
+
+
+//Loads a directory containing directories of one or more images.
+//It builds the images data structures and statistics
+//WARNING: previous image information is lost
+void IO::loadImagesFromIVFFile(string path, vector<Image> &images, CNNScheme &scheme){
+  struct dirent *pDirent;
+  DIR *pDir;
+  pDir = opendir(path.c_str());
+  if (pDir == NULL) {
+    printf ("IO::loadImagesFromIVFFile::Cannot open directory '%s'\n", path.c_str());
+    return;
+  }
+  //Structure to keep order of images and clear activations
+  vector<string> imageIdx;
+  int imageCounter = 0;
+  images.clear();
+  //Read every cfg file in the input path
+  while ((pDirent = readdir(pDir)) != NULL) {
+    //Read every ivf file
+    if(string(pDirent->d_name).find(".ivf")== string::npos) continue;
+    string fullpath = (path+"/"+string(pDirent->d_name)).c_str();
+    string imageName = string(pDirent->d_name);
+    printf ("IO::loadSchemeFromIVFFile::Trying to read file '%s'\n", fullpath.c_str());
+    Image newImage;
+    newImage.setImageName(imageName);
+    newImage.setPath(path);
+    newImage.activations.resize(scheme.getNumLayers());
+    newImage.unsquaredNorm = 0;
+    for(int i=0;i<scheme.getNumLayers();i++){
+      vector<pair<int,float> > vec;
+      newImage.activations.push_back(vec);
+      double d = 0;
+      newImage.normByLayer.push_back(d);
+    }
+    ifstream infile(fullpath.c_str());
+    string line;
+    int layerCounter = 0;
+    int currentLayerSize = scheme.layerSize[layerCounter];
+    int currentAccumulatedLayerSize = currentLayerSize;
+    int previousAccumulatedLayerSize = currentLayerSize;
+    float layerUnsquaredNorm = 0;
+    if(infile.is_open()){
+      while(getline(infile,line)){
+        vector<std::string> strs;
+        istringstream is(line);
+        copy(istream_iterator<string>(is),istream_iterator<string>(),back_inserter<vector<string> >(strs));
+        //Insert index and num features
+        float value = stof(strs[0]);
+        int absoluteFeatureIdx = stoi(strs[1]);
+        if(absoluteFeatureIdx > currentAccumulatedLayerSize){
+          newImage.normByLayer[layerCounter] = sqrt(layerUnsquaredNorm);
+          layerUnsquaredNorm = 0;
+          layerCounter++;
+          previousAccumulatedLayerSize += currentLayerSize;
+          currentLayerSize = scheme.layerSize[layerCounter];
+          currentAccumulatedLayerSize += currentLayerSize;
+        }
+        newImage.activations[layerCounter].push_back(pair<int,float>(absoluteFeatureIdx - previousAccumulatedLayerSize,value));
+        newImage.unsquaredNorm+=(value*value);
+        layerUnsquaredNorm+=(value*value);
+      }  
+      images.push_back(newImage);
+      imageIdx.push_back(imageName);
+      imageCounter++;
+    }
+  }
+  closedir (pDir);
+  printf ("IO::loadImagesFromIVFFile::Total loaded images: '%u'\n", (unsigned int)images.size());
+}
 
 
 //Loads a directory containing directories of one or more images.
